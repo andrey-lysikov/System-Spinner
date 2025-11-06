@@ -180,6 +180,7 @@
 				en,
 				Base,
 				ru,
+				ja,
 			);
 			mainGroup = 7FB9089E2B67B9A400E9EE24;
 			packageReferences = (
