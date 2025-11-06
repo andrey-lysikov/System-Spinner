@@ -4,6 +4,12 @@
     "About" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System Spinnerについて"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15,6 +21,12 @@
     "Activity Monitor" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクティビティモニタ"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26,6 +38,12 @@
     "Allow" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "許可する"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -36,6 +54,12 @@
     },
     "An new version %@ is available. Would you like download to update?" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@の新しいバージョンがあります。アップデートのためにダウンロードしますか？"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -46,6 +70,12 @@
     },
     "Automatic Dark/White mode" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動ダーク/ホワイトモード"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -56,6 +86,12 @@
     },
     "Black opage 80%" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "黒 80%不透明"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -67,6 +103,12 @@
     "Close" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閉じる"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -77,6 +119,12 @@
     },
     "CPU Temp %@°С" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CPU 温度 %@°С"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -87,6 +135,12 @@
     },
     "CPU Usage %lld%%" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CPU使用率 %lld%%"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -98,6 +152,12 @@
     "Data update every" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データアップデート頻度"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -108,6 +168,12 @@
     },
     "Donate" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "寄付"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -119,6 +185,12 @@
     "Download" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ダウンロード"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -129,6 +201,12 @@
     },
     "Enable Autostart" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動スタートを有効にする"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -140,6 +218,12 @@
     "fan is stoped" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ファン停止中"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -151,6 +235,12 @@
     "For complite work you need to allow System Spinner to use special privileges for keydoard mapping." : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完全に動作させるには、キーボードマッピングのためにSystem Spinnerが特別な権限を使うことを許可する必要があります。"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -162,6 +252,12 @@
     "GB/s" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GB/秒"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -173,6 +269,12 @@
     "Goto site" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サイトへ移動"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -184,6 +286,12 @@
     "HDMI/DVI DDC enabled" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HDMI/DVI DDCを有効にする"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -194,6 +302,12 @@
     },
     "Invert rotation" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回転を反転"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -205,6 +319,12 @@
     "KB/s" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KB/秒"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -216,6 +336,12 @@
     "MB/s" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MB/秒"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -226,6 +352,12 @@
     },
     "Memory Usage %lld%%" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモリ使用率 %lld%%"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -237,6 +369,12 @@
     "no ip found" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ipが見つかりません"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -247,6 +385,12 @@
     },
     "Original" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オリジナル"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -257,6 +401,12 @@
     },
     "Pressure %lld%%" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "負荷 %lld%%"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -268,6 +418,12 @@
     "Quit" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終了"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -278,6 +434,12 @@
     },
     "Second" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "秒"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -289,6 +451,12 @@
     "Show CPU usage in menu" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CPU使用率をメニューに表示"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -300,6 +468,12 @@
     "Spinners" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スピナー"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -310,6 +484,12 @@
     },
     "Spinners Effects" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スピナーエフェクト"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -321,6 +501,12 @@
     "System Spinner has updated" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System Spinnerがアップデートされました"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -332,6 +518,12 @@
     "System Spinner need special privileges" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System Spinnerは特別な権限を必要としています"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -343,6 +535,12 @@
     "System Spinner provides macOS system information in status bar. Minimal, small and light" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System SpinnerはmacOSのシステム情報をステータスバーに表示します。ミニマルで小さく、そして軽量です。"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -354,6 +552,12 @@
     "TB/s" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TB/秒"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -366,6 +570,12 @@
       "comment" : "Text displayed in an alert when they donate.",
       "isCommentAutoGenerated" : true,
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ありがとう！"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -377,6 +587,12 @@
     "Use system language" : {
       "extractionState" : "manual",
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "システムの言語を使用"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -387,6 +603,12 @@
     },
     "White opage 80%" : {
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "白 80%不透明"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -399,6 +621,12 @@
       "comment" : "Text displayed in an alert when the user chooses to donate. It includes a QR code image.",
       "isCommentAutoGenerated" : true,
       "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QRコードから寄付できます。"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
