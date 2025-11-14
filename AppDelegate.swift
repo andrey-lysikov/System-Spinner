@@ -31,24 +31,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let popover = NSPopover()
     private var updateIntervalName = ["0.5", "1.0", "1.5", "2.0"]
     private var spinnersEffect: [String:Int] = [:]
-    private let spinners: [String: [Int]] =  [ // [name: [item count, can use effect?]]
-        "Blue Ball" : [19, 1],
-        "Cat" : [5, 1],
-        "Circles Two" : [9, 1],
-        "Cirrcles" : [8, 0],
-        "Color Balls" : [17, 1],
-        "Color Well" : [20, 0],
-        "Dots" : [12, 0],
-        "Delay" : [17, 1],
-        "Grey Loader" : [18, 0],
-        "Loader" : [8, 0],
-        "Pie" : [6, 0],
-        "Pikachu" : [4, 1],
-        "Rainbow Pie" : [15, 0],
-        "Recharges" : [ 8, 1],
-        "Rotation Color Well" : [24, 0],
-        "Sun" : [23, 1],
-        "Waves" : [17, 1]
+    private let spinners: [String: [Int]] =  [ // [name: [item count, can use effect?, speed coefficient]]
+        "Blue Ball" : [19, 1, 1],
+        "Cat" : [5, 1, 2],
+        "Circles Two" : [9, 1, 1],
+        "Cirrcles" : [8, 0, 1],
+        "Color Balls" : [17, 1, 1],
+        "Color Well" : [20, 0, 1],
+        "Dots" : [12, 0, 1],
+        "Delay" : [17, 1, 1],
+        "Grey Loader" : [18, 0, 1],
+        "Loader" : [8, 0, 1],
+        "Pie" : [6, 0, 1],
+        "Pikachu" : [4, 1, 2],
+        "Rainbow Pie" : [15, 0, 1],
+        "Recharges" : [ 8, 1, 1],
+        "Rotation Color Well" : [24, 0, 2],
+        "Sun" : [23, 1, 1],
+        "Waves" : [17, 1, 1]
     ]
     
     @objc private func aboutWindow(sender: NSStatusItem) {
@@ -193,8 +193,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             statusItem.button?.title = ""
         }
-        
-        let interval = 0.25 / max(1.0, min(100.0, ActivityData.cpuPercentage / Double(maxFrame)))
+        let interval = 0.25 / max(1.0, min(100.0, ActivityData.cpuPercentage / Double(maxFrame))) * Double(spinners[spinnerActive]![2])
         spinnerTimer?.invalidate()
         spinnerTimer = Timer(timeInterval: interval, repeats: true, block: { [weak self] _ in
             self!.curFrame = self!.curFrame + (spinnersRotationInvert ? -1 : 1)
