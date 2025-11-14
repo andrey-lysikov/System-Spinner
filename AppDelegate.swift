@@ -43,6 +43,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         "Grey Loader" : [18, 0],
         "Loader" : [8, 0],
         "Pie" : [6, 0],
+        "Pikachu" : [4, 1],
         "Rainbow Pie" : [15, 0],
         "Recharges" : [ 8, 1],
         "Rotation Color Well" : [24, 0],
