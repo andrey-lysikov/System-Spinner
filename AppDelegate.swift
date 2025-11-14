@@ -47,6 +47,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         "Rainbow Pie" : [15, 0],
         "Recharges" : [ 8, 1],
         "Rotation Color Well" : [24, 0],
+        "Sun" : [23, 1],
         "Waves" : [17, 1]
     ]
     
