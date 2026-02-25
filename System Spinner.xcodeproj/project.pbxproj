@@ -51,7 +51,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				main_window.jpg,
-				spin_menu.jpg,
 			);
 			target = 7FB908A62B67B9A400E9EE24 /* System Spinner */;
 		};

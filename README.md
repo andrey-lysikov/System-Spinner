@@ -19,6 +19,8 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 - Spinner overlay effects
 - Localization (English, Japanese, Russian)
 
+*WARNING: The application is not officially signed, you will need to allow it to run in "Settings" -> "Security" when you first launch it.*
+
 ## Screenshots
 ![spin_menu](Pictures/spin_menu.jpg)
 
