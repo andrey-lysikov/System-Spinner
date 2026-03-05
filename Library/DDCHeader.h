@@ -20,6 +20,3 @@ extern int DisplayServicesGetLinearBrightness(CGDirectDisplayID display, float *
 extern int DisplayServicesSetLinearBrightness(CGDirectDisplayID display, float brightness);
 
 extern void CGSServiceForDisplayNumber(CGDirectDisplayID display, io_service_t* service);
-
-bool CGSIsHDREnabled(CGDirectDisplayID display) __attribute__((weak_import));
-bool CGSIsHDRSupported(CGDirectDisplayID display) __attribute__((weak_import));
