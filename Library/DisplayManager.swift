@@ -3,6 +3,7 @@
 
 import CoreGraphics
 import Foundation
+import AppKit
 
 enum Command: UInt8 {
     case none = 0
@@ -33,6 +34,15 @@ class Display: Equatable {
         } else {
             return false
         }
+    }
+    
+    public func isHDR() -> Bool {
+        if let mainScreen = NSScreen.main {
+            if mainScreen.maximumPotentialExtendedDynamicRangeColorComponentValue > 1.0 {
+                return true
+            }
+        }
+        return false
     }
     
     public func setDirectBrightness(valueBrightness: Float) {
@@ -179,8 +189,7 @@ class DisplayManager {
     
     public func hasBrightnessControll() -> Bool {
         var brightness = false
-        
-        for display in DisplayManager.shared.displays where !display.isBuiltIn() {
+        for display in DisplayManager.shared.displays where !display.isBuiltIn() && !display.isHDR() {
             brightness = true
         }
         
