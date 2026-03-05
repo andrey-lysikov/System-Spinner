@@ -297,6 +297,6 @@ class AppleDisplay: Display {
     
     override func setDirectBrightness(valueBrightness: Float) {
         self.setAppleBrightness(value: valueBrightness/100)
-        OSDUtils.showOsd(displayID: self.identifier, command: .brightness, value: valueBrightness, maxValue: Float(100))
+        osdWindow.showOSD(value: Float(valueBrightness),isDisplay: true, autoHide: true)
     }
 }

@@ -1,4 +1,4 @@
-//  Copyright 2025 Andrey Lysikov
+//  Copyright 2026 Andrey Lysikov
 //  SPDX-License-Identifier: Apache-2.0
 
 import Cocoa
@@ -14,6 +14,7 @@ var spinnersEffectSelected : Int = 1
 var spinnersRotationInvert: Bool = false
 let ActivityData = AKservice()
 let simplyCA = SimplyCoreAudio()
+let osdWindow = OSD()
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -512,6 +513,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ aNotification: Notification) {
         stopRunning()
         saveParams()
+        osdWindow.stop()
     }
     
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {

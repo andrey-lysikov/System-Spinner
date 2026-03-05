@@ -23,26 +23,3 @@ extern void CGSServiceForDisplayNumber(CGDirectDisplayID display, io_service_t* 
 
 bool CGSIsHDREnabled(CGDirectDisplayID display) __attribute__((weak_import));
 bool CGSIsHDRSupported(CGDirectDisplayID display) __attribute__((weak_import));
-
-@class NSString;
-
-@protocol OSDUIHelperProtocol
-- (void)showImage:(long long)arg1 onDisplayID:(unsigned int)arg2 priority:(unsigned int)arg3 msecUntilFade:(unsigned int)arg4 filledChiclets:(unsigned int)arg5 totalChiclets:(unsigned int)arg6;
-- (void)showImage:(long long)arg1 onDisplayID:(unsigned int)arg2 priority:(unsigned int)arg3 msecUntilFade:(unsigned int)arg4 withText:(NSString *)arg5;
-@end
-
-@class NSXPCConnection;
-
-@interface OSDManager : NSObject <OSDUIHelperProtocol>
-{
-    id <OSDUIHelperProtocol> _proxyObject;
-    NSXPCConnection *connection;
-}
-
-+ (id)sharedManager;
-@property(retain) NSXPCConnection *connection; 
-- (void)showImage:(long long)arg1 onDisplayID:(unsigned int)arg2 priority:(unsigned int)arg3 msecUntilFade:(unsigned int)arg4 filledChiclets:(unsigned int)arg5 totalChiclets:(unsigned int)arg6;
-- (void)showImage:(long long)arg1 onDisplayID:(unsigned int)arg2 priority:(unsigned int)arg3 msecUntilFade:(unsigned int)arg4 withText:(id)arg5;
-@property(readonly) id <OSDUIHelperProtocol> remoteObjectProxy; // @dynamic remoteObjectProxy;
-
-@end
