@@ -1,4 +1,4 @@
-//  Copyright 2026 Andrey Lysikov
+//  Copyright © Andrey Lysikov
 //  SPDX-License-Identifier: Apache-2.0
 
 import Foundation

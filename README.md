@@ -27,10 +27,10 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 ![menu](Pictures/main_window.jpg)
   
 ## Tech
-Written in Swift 5, Apple Silicon Only for MacOS 26 Tahoe, MacOS 15.6 Sequoia.
+Written in Swift 5, Apple Silicon Only for MacOS 26 Tahoe
 
 
 Thanks for language translate:
 - Japanese by [@1024jp](https://github.com/1024jp)
 
-Based on: [menubar_runcat](https://github.com/Kyome22/menubar_runcat), [stats](https://github.com/exelban/stats), [ActivityKit](https://github.com/Kyome22/ActivityKit), [MonitorControl](https://github.com/MonitorControl/MonitorControl), [MediaKeyTap](https://github.com/the0neyouseek/MediaKeyTap), [SimplyCoreAudio](https://github.com/rnine/SimplyCoreAudio), [swift-atomics](https://github.com/apple/swift-atomics)
+Based on: [menubar_runcat](https://github.com/Kyome22/menubar_runcat), [stats](https://github.com/exelban/stats), [ActivityKit](https://github.com/Kyome22/ActivityKit), [MonitorControl](https://github.com/MonitorControl/MonitorControl), [MediaKeyTap](https://github.com/the0neyouseek/MediaKeyTap), [SimplyCoreAudio](https://github.com/rnine/SimplyCoreAudio), [swift-atomics](https://github.com/apple/swift-atomics), [better-osd](https://github.com/zmlabs/better-osd)

@@ -1,6 +1,5 @@
-//  Copyright 2026 zmlabs, Andrey Lysikov
+//  Copyright © zmlabs, Andrey Lysikov
 //  SPDX-License-Identifier: Apache-2.0
-//
 
 import SwiftUI
 import Combine
