@@ -21,8 +21,7 @@ struct valueState: Equatable {
                 return "sun.max"
             }
         } else {
-            if value == 0 { return "speaker.fill" }
-            if value < 1 { return "speaker.slash.fill" }
+            if value <= 0 { return "speaker.slash.fill" }
             if value < 33 { return "speaker.wave.1.fill" }
             if value < 66 { return "speaker.wave.2.fill" }
         }
