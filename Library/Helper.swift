@@ -1,17 +1,15 @@
 //  Copyright © Andrey Lysikov
 //  SPDX-License-Identifier: Apache-2.0
 
-import Foundation
-import ServiceManagement
 import AppKit
+import ServiceManagement
 import UserNotifications
 
 class Helper: NSObject, UNUserNotificationCenterDelegate {
-    // Autoupdate links
-    public let appApiUrl = "https://api.github.com/repos/andrey-boomer/System-Spinner/releases/latest"
-    public let appLastestUrl = "https://github.com/andrey-boomer/System-Spinner/releases/latest"
-    public let appAboutUrl = "https://github.com/andrey-boomer/System-Spinner"
-    private var lastCheckNewVersion: TimeInterval = 0
+    private var checkNewVersionInProgress: Bool = false
+    public let appApiUrl = "https://api.github.com/repos/andrey-lysikov/System-Spinner/releases/latest"
+    public let appLastestUrl = "https://github.com/andrey-lysikov/System-Spinner/releases/latest"
+    public let appAboutUrl = "https://github.com/andrey-lysikov/System-Spinner"
     
     public var isAutoLaunch: Bool {
         get { SMAppService.mainApp.status == .enabled }
@@ -43,7 +41,7 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
     }
     
     public func checkPrivileges() -> Bool {
-      let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: false]
+        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: false]
         if !AXIsProcessTrustedWithOptions(options) { sendSystemNotification(title: localizedString("System Spinner need special privileges"),
                                                                             body: localizedString("For complite work you need to allow System Spinner to use special privileges for keydoard mapping."),
                                                                             action: localizedString("Allow"))
@@ -72,7 +70,7 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         }
         notificationCenter.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
     }
-        
+    
     public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         if  response.actionIdentifier == localizedString("Download") {
             guard let url = URL(string: appLastestUrl) else {
@@ -88,7 +86,7 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         completionHandler()
     }
     
-    public func hasNewVersion() {
+    public func hasNewVersion(checkNow: Bool = false) {
         struct versionEntry: Codable {
             let id: Int
             var tagName: String
@@ -106,9 +104,12 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         guard let url = URL(string: appApiUrl) else {
             return
         }
-        if lastCheckNewVersion < Date().timeIntervalSince1970 - 86400  { // only once in 1 day
-            // start check new version after 10 minuts from execute function
-            DispatchQueue.main.asyncAfter(deadline: .now() + 600) {
+        
+        if let lastCheckUpdate: Date = UserDefaults.standard.object(forKey: "group.lastCheckVersion") as? Date, (!Calendar.current.isDateInToday(lastCheckUpdate) || checkNow) && !checkNewVersionInProgress {
+            checkNewVersionInProgress = true
+            var startAfter: DispatchTime = .now() + 600
+            if checkNow {startAfter = .now()}
+            DispatchQueue.main.asyncAfter(deadline: startAfter) {
                 URLSession.shared.dataTask(with: url) { (data, res, err) in
                     guard let data = data else {
                         return
@@ -124,11 +125,15 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
                                                         body: localizedString("An new version \(versionString) is available. Would you like download to update?"),
                                                         action: localizedString("Download"))
                         }
+                        UserDefaults.standard.set(Date(), forKey: "group.lastCheckVersion")
+                        self.checkNewVersionInProgress = false
                     } catch {
                         return
                     }
                 }.resume()
             }
+        } else {
+            UserDefaults.standard.set(Date(), forKey: "group.lastCheckVersion")
         }
     }
 

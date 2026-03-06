@@ -59,9 +59,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         anAbout.informativeText = localizedString("System Spinner provides macOS system information in status bar. Minimal, small and light")
         anAbout.alertStyle = .informational
         anAbout.addButton(withTitle: localizedString("Goto site"))
+        anAbout.addButton(withTitle: localizedString("Check new version"))
         anAbout.addButton(withTitle: localizedString("Close"))
-        if anAbout.runModal() == .alertFirstButtonReturn {
+        let response = anAbout.runModal()
+        switch response {
+        case .alertFirstButtonReturn:
             NSWorkspace.shared.open(URL(string: sHelper.appAboutUrl)!)
+        case .alertSecondButtonReturn:
+            sHelper.hasNewVersion(checkNow: true)
+        default:
+            anAbout.window.close()
         }
     }
     
