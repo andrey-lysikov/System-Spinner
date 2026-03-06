@@ -106,12 +106,16 @@ class DisplayManager {
     }
     
     private static func isAppleDisplay(displayID: CGDirectDisplayID) -> Bool {
-        var brightness: Float = -1
-        let ret = DisplayServicesGetBrightness(displayID, &brightness)
-        if ret == 0, brightness >= 0 { // If brightness read appears to be successful using DisplayServices then it should be an Apple display
-            return true
+        if CGDisplayVendorNumber(displayID) != 1552 {
+            return CGDisplayIsBuiltin(displayID) != 0
+        } else {
+            var brightness: Float = -1
+            let ret = DisplayServicesGetBrightness(displayID, &brightness)
+            if ret == 0, brightness >= 0 { // If brightness read appears to be successful using DisplayServices then it should be an Apple display
+                return true
+            }
         }
-        return CGDisplayIsBuiltin(displayID) != 0 // If built-in display, it should be Apple
+        return CGDisplayIsBuiltin(displayID) != 0
     }
     
     private func updateArm64AVServices() {

@@ -1,4 +1,4 @@
-//  Copyright © zmlabs, Andrey Lysikov
+//  Copyright © (yu) zmlabs, Andrey Lysikov
 //  SPDX-License-Identifier: Apache-2.0
 
 import SwiftUI

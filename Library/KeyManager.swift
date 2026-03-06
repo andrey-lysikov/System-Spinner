@@ -87,6 +87,7 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
         var disengageVolume = true
         for display in DisplayManager.shared.displays {
             if display.name == device?.name {
+                
                 disengageVolume = false
             }
         }
