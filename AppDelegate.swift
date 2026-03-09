@@ -4,6 +4,7 @@
 import Cocoa
 import Foundation
 import SimplyCoreAudio
+import UserNotifications
 
 var spinnerActive: String!
 var enableStatusText: Bool = false
@@ -515,6 +516,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // change monitor device?
         CGDisplayRegisterReconfigurationCallback({ displayID, flags, userInfo in AppDelegate.doChangeDevice()}, nil)
+        
+        UNUserNotificationCenter.current().delegate = self
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {
@@ -525,5 +528,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
         return true
+    }
+}
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        if response.actionIdentifier == localizedString("Allow")  {
+            let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
+            AXIsProcessTrustedWithOptions(options)
+        } else if response.actionIdentifier == localizedString("Quit") {
+            exit(0)
+        } else if response.actionIdentifier == localizedString("Download") {
+            NSWorkspace.shared.open(URL(string: sHelper.appLastestUrl)!)
+        }
+        completionHandler()
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound, .list])
     }
 }

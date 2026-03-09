@@ -60,30 +60,16 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         
         content.title = title
         content.body = body
+        content.sound = UNNotificationSound.default
         content.categoryIdentifier = "ACTION"
         notificationCenter.setNotificationCategories([category])
         notificationCenter.removeAllPendingNotificationRequests()
-        notificationCenter.requestAuthorization(options: [.alert,.sound]) { (granted, error) in
+        notificationCenter.requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
             if !granted {
                 print("Notifications is not allowed")
             }
         }
         notificationCenter.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
-    }
-    
-    public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        if  response.actionIdentifier == localizedString("Download") {
-            guard let url = URL(string: appLastestUrl) else {
-                return
-            }
-            NSWorkspace.shared.open(url)
-        } else if response.actionIdentifier == localizedString("Allow") {
-            let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
-            AXIsProcessTrustedWithOptions(options)
-        } else if response.actionIdentifier == localizedString("Quit") {
-            exit(0)
-        }
-        completionHandler()
     }
     
     public func hasNewVersion(checkNow: Bool = false) {
@@ -104,7 +90,6 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         guard let url = URL(string: appApiUrl) else {
             return
         }
-        
         if let lastCheckUpdate: Date = UserDefaults.standard.object(forKey: "group.lastCheckVersion") as? Date, (!Calendar.current.isDateInToday(lastCheckUpdate) || checkNow) && !checkNewVersionInProgress {
             checkNewVersionInProgress = true
             var startAfter: DispatchTime = .now() + 600
