@@ -27,4 +27,6 @@ npx create-dmg "$BUILD_DIR/System Spinner.app" "$BUILD_DIR" --overwrite --no-cod
 
 echo "==> Done!"
 echo "DMG created at: $BUILD_DIR/"
-ls -la "$BUILD_DIR"/*.dmg
+mv  "$BUILD_DIR"/*.dmg ~/Downloads
+rm -rf "$BUILD_DIR"
+echo "DMG moved to Downloads!"
