@@ -11,6 +11,7 @@ var enableStatusText: Bool = false
 var updateInterval: Double = 1.0
 var isDeviceChanged: Bool = true // update display menu on application start
 var useLocalization: Bool = true
+var alwaysUseCustomOSD: Bool = false
 var spinnersEffectSelected : Int = 1
 var spinnersRotationInvert: Bool = false
 let ActivityData = AKservice()
@@ -303,6 +304,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         changeSpinner(spinnerName: spinnerActive)
     }
     
+    @objc private func changeAlwaysUseCustomOSDClick(sender: NSMenuItem) {
+        if alwaysUseCustomOSD {
+            sender.state = .off
+            alwaysUseCustomOSD = false
+        } else {
+            sender.state = .on
+            alwaysUseCustomOSD = true
+        }
+        saveParams()
+        displayDeviceChanged()
+    }
+    
     @objc private func displayDeviceChanged() {
         var displayMenuItem: NSMenuItem = NSMenuItem()
         let displaySubMenu = NSMenu()
@@ -358,7 +371,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.set(useLocalization, forKey: "group.useLocalization")
         UserDefaults.standard.set(spinnersEffectSelected, forKey: "group.spinnersEffectSelected")
         UserDefaults.standard.set(spinnersRotationInvert, forKey: "group.spinnersRotationInvert")
-        
+        UserDefaults.standard.set(alwaysUseCustomOSD, forKey: "group.alwaysUseCustomOSD")
         DisplayManager.shared.saveBrightnessVolumeValue()
     }
     
@@ -401,8 +414,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         localizeItem.image = NSImage(systemSymbolName: "translate", accessibilityDescription: localizedString("Use system language"))
         statusItemMenu.addItem(localizeItem)
-        statusItemMenu.addItem(NSMenuItem.separator())
         
+        // Custom OSD use for all device
+        let customOSDItem = NSMenuItem(title: localizedString("Always use custom OSD"), action: #selector(changeAlwaysUseCustomOSDClick(sender:)), keyEquivalent: "")
+        if alwaysUseCustomOSD {
+            customOSDItem.state = .on
+        }
+        customOSDItem.image = NSImage(systemSymbolName: "dot.scope.display", accessibilityDescription: localizedString("Always use custom OSD"))
+        statusItemMenu.addItem(customOSDItem)
+        statusItemMenu.addItem(NSMenuItem.separator())
+                
         // ---------------------------- Spinner Section ----------------------------
         let spinnersSubMenu = NSMenu()
         let spinnersMenu = NSMenuItem(title: localizedString("Spinners"), action: nil, keyEquivalent: "")
@@ -482,7 +503,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         useLocalization = Bool(UserDefaults.standard.bool(forKey: "group.useLocalization"))
         spinnersEffectSelected = Int(UserDefaults.standard.string(forKey: "group.spinnersEffectSelected") ?? String(spinnersEffectSelected))!
         spinnersRotationInvert = Bool(UserDefaults.standard.bool(forKey: "group.spinnersRotationInvert"))
-
+        alwaysUseCustomOSD = Bool(UserDefaults.standard.bool(forKey: "group.alwaysUseCustomOSD"))
+        
+        
         if let button = statusItem.button {
             button.action = #selector(togglePopover(sender:))
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])

@@ -74,28 +74,27 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
     }
     
     public func updateMediaKeyTap() {
-        let device = simplyCA.defaultOutputDevice
         let keysAudio: [MediaKey] = [.volumeUp, .volumeDown, .mute]
         let keysBrightness: [MediaKey] = [.brightnessUp, .brightnessDown]
         var keys: [MediaKey] = keysAudio + keysBrightness
         
         mediaKeyTap?.stop()
-        if !DisplayManager.shared.hasBrightnessControll() {
+        
+        if !DisplayManager.shared.hasBrightnessControll() && !alwaysUseCustomOSD {
             keys.removeAll { keysBrightness.contains($0) }
         }
-        
+
         var disengageVolume = true
         for display in DisplayManager.shared.displays {
-            if display.name == device?.name {
-                
+            if display.name == simplyCA.defaultOutputDevice?.name {
                 disengageVolume = false
             }
         }
         
-        if disengageVolume {
+        if disengageVolume && !alwaysUseCustomOSD {
             keys.removeAll { keysAudio.contains($0) }
         }
-        
+
         if keys.count > 0 {
             self.mediaKeyTap = MediaKeyTap(delegate: self, on: KeyPressMode.keyDownAndUp, for: keys, observeBuiltIn: true)
             self.mediaKeyTap?.start()

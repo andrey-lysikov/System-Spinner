@@ -296,7 +296,22 @@ class AppleDisplay: Display {
     }
     
     override func setDirectBrightness(valueBrightness: Float) {
-        self.setAppleBrightness(value: valueBrightness/100)
+        self.setAppleBrightness(value: valueBrightness / 100)
         osdWindow.showOSD(value: Float(valueBrightness),isDisplay: true, autoHide: true)
+    }
+    
+    override func setDirectVolume(valueVolume: Float) {
+        guard let outputDevice = simplyCA.defaultOutputDevice else {
+            return
+        }
+        
+        if let isMuted = outputDevice.isMainChannelMuted(scope: .output), isMuted && valueVolume > 0 {
+            outputDevice.setMute(false, channel: 0, scope: .output)
+        } else if valueVolume <= 0 {
+            outputDevice.setMute(true, channel: 0, scope: .output)
+        }
+        
+        outputDevice.setVirtualMainVolume(valueVolume / 100, scope: .output)
+        osdWindow.showOSD(value: Float(valueVolume),isDisplay: false, autoHide: true)
     }
 }

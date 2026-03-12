@@ -52,6 +52,22 @@
         }
       }
     },
+    "Always use custom OSD" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "常にカスタムOSDを使用する"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Всегда использовать свой OSD"
+          }
+        }
+      }
+    },
     "An new version %@ is available. Would you like download to update?" : {
       "localizations" : {
         "ja" : {
