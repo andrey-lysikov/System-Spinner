@@ -4,11 +4,9 @@
 import Cocoa
 import Foundation
 import MediaKeyTap
-import SimplyCoreAudio
 
 class MediaKeyTapManager: MediaKeyTapDelegate {
     public static let shared = MediaKeyTapManager()
-    private let simplyCA = SimplyCoreAudio()
     var mediaKeyTap: MediaKeyTap?
     var keyRepeatTimers: [MediaKey: Timer] = [:]
     
@@ -88,7 +86,7 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
 
         var disengageVolume = true
         for display in DisplayManager.shared.displays {
-            if display.name == simplyCA.defaultOutputDevice?.name {
+            if String(display.name) == display.getVolumeDeviceName() {
                 disengageVolume = false
             }
         }

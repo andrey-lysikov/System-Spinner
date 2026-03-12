@@ -3,7 +3,6 @@
 
 import IOKit
 import Foundation
-import SimplyCoreAudio
 
 let ARM64_DDC_7BIT_ADDRESS: UInt8 = 0x37 // This works with DisplayPort devices
 let ARM64_DDC_DATA_ADDRESS: UInt8 = 0x51
@@ -278,8 +277,6 @@ class Arm64DDC: NSObject {
 
 class AppleDisplay: Display {
     private var displayQueue: DispatchQueue
-    private let simplyCA = SimplyCoreAudio()
-    private let osd = OSD()
     
     override init(_ identifier: CGDirectDisplayID, name: String) {
         self.displayQueue = DispatchQueue(label: String("displayQueue-\(identifier)"))
@@ -289,7 +286,7 @@ class AppleDisplay: Display {
     override func getCurrentBrightness() -> Float {
         var brightness: Float = 0
         DisplayServicesGetBrightness(self.identifier, &brightness)
-        return brightness
+        return brightness * 100
     }
     
     public func setAppleBrightness(value: Float) {
@@ -300,21 +297,5 @@ class AppleDisplay: Display {
     
     override func setDirectBrightness(valueBrightness: Float) {
         self.setAppleBrightness(value: valueBrightness / 100)
-        osd.showOSD(value: Float(valueBrightness),isDisplay: true, autoHide: true)
-    }
-    
-    override func setDirectVolume(valueVolume: Float) {
-        guard let outputDevice = simplyCA.defaultOutputDevice else {
-            return
-        }
-        
-        if let isMuted = outputDevice.isMainChannelMuted(scope: .output), isMuted && valueVolume > 0 {
-            outputDevice.setMute(false, channel: 0, scope: .output)
-        } else if valueVolume <= 0 {
-            outputDevice.setMute(true, channel: 0, scope: .output)
-        }
-        
-        outputDevice.setVirtualMainVolume(valueVolume / 100, scope: .output)
-        osd.showOSD(value: Float(valueVolume),isDisplay: false, autoHide: true)
     }
 }
