@@ -236,6 +236,7 @@ class OtherDisplay: Display {
     var arm64avService: IOAVService?
     var isDiscouraged: Bool = false
     let writeDDCQueue = DispatchQueue(label: "Local write DDC queue")
+    private let osd = OSD()
     var writeDDCNextValue: [Command: UInt16] = [:]
     var writeDDCLastSavedValue: [Command: UInt16] = [:]
     
@@ -257,12 +258,12 @@ class OtherDisplay: Display {
     
     override func setDirectBrightness(valueBrightness: Float) {
         self.writeDDCValues(command: .brightness, value: UInt16(valueBrightness))
-        osdWindow.showOSD(value: Float(valueBrightness),isDisplay: true, autoHide: true)
+        osd.showOSD(value: Float(valueBrightness),isDisplay: true, autoHide: true)
     }
     
     override func setDirectVolume(valueVolume: Float) {
         self.writeDDCValues(command: .audioSpeakerVolume, value: UInt16(valueVolume))
-        osdWindow.showOSD(value: Float(valueVolume),isDisplay: false, autoHide: true)
+        osd.showOSD(value: Float(valueVolume),isDisplay: false, autoHide: true)
     }
     
     func asyncPerformWriteDDCValues(command: Command) {

@@ -17,6 +17,7 @@ enum Command: UInt8 {
 class Display: Equatable {
     public let identifier: CGDirectDisplayID
     public var name: String
+    public var savedVolume: Float = 0
     public var displays: [Display] = []
     
     public static func == (lhs: Display, rhs: Display) -> Bool {
@@ -45,12 +46,26 @@ class Display: Equatable {
         return false
     }
     
+    public func getCurrentBrightness() -> Float {
+        if let brightness = Float(UserDefaults.standard.string(forKey: "brightness." + self.name) ?? "") {
+            return brightness
+        }
+        return 100 // default full
+    }
+    
+    public func getCurrentVolume() -> Float {
+        if let volume = Float(UserDefaults.standard.string(forKey: "volume." + self.name) ?? "") {
+            return volume
+        }
+        return 0 // default zero
+    }
+    
     public func setDirectBrightness(valueBrightness: Float) {
-        // null
+        UserDefaults.standard.set(valueBrightness, forKey: "brightness." + self.name)
     }
     
     public func setDirectVolume(valueVolume: Float) {
-        // null
+        UserDefaults.standard.set(valueVolume, forKey: "volume." + self.name)
     }
 }
 
@@ -59,10 +74,7 @@ class DisplayManager {
     public var displays: [Display] = []
     public let globalDDCQueue = DispatchQueue(label: "Global DDC queue")
     private var audioControlTargetDisplays: [OtherDisplay] = []
-    private var savedVolume: Double = 0
-    private let correctionValue: Double = 6.25
-    private var brightnessValue: Double = 50.0
-    private var volumeValue: Double = 50.0
+    private let correctionValue: Float = 6.25
     
     static func getDisplayNameByID(displayID: CGDirectDisplayID) -> String {
         if let dictionary = (CoreDisplay_DisplayCreateInfoDictionary(displayID)?.takeRetainedValue() as NSDictionary?), let nameList = dictionary["DisplayProductName"] as? [String: String], var name = nameList[Locale.current.identifier] ?? nameList["en_US"] ?? nameList.first?.value {
@@ -196,56 +208,54 @@ class DisplayManager {
     }
     
     public func toggleMute() {
-        if volumeValue == 0 {
-            volumeValue = savedVolume
-        } else {
-            savedVolume = volumeValue
-            volumeValue = 0
-        }
-        
         for display in displays {
+            var volumeValue = display.getCurrentVolume()
+                if volumeValue == 0 {
+                    volumeValue = display.savedVolume
+                } else {
+                    display.savedVolume = volumeValue
+                    volumeValue = 0
+                }
             display.setDirectVolume(valueVolume: Float(volumeValue))
         }
     }
     
     public func setVolume(isUp: Bool) {
-        if isUp && volumeValue < correctionValue {
-            if volumeValue == 0 {
-                volumeValue = correctionValue / 8
-            } else {
-                volumeValue = volumeValue * 2
-            }
-        } else if !isUp && volumeValue <= correctionValue && volumeValue > correctionValue / 8 {
-            volumeValue = volumeValue / 2
-        } else {
-            volumeValue = volumeValue + (isUp ? correctionValue : -correctionValue)
-        }
-        
-        if volumeValue < 0 {
-            volumeValue = 0
-        } else if volumeValue > 100 {
-            volumeValue = 100
-        }
-         
         for display in displays {
+            var volumeValue = display.getCurrentVolume()
+            if isUp && volumeValue < correctionValue {
+                if volumeValue == 0 {
+                        volumeValue = correctionValue / 8
+                    } else {
+                        volumeValue = volumeValue * 2
+                }
+            } else if !isUp && volumeValue <= correctionValue && volumeValue > correctionValue / 8 {
+                    volumeValue = volumeValue / 2
+                } else {
+                    volumeValue = volumeValue + (isUp ? correctionValue : -correctionValue)
+                }
+
+            if volumeValue < 0 {
+                volumeValue = 0
+            } else if volumeValue > 100 {
+                volumeValue = 100
+            }
             display.setDirectVolume(valueVolume: Float(volumeValue))
         }
     }
     
     public func setBrightness(isUp: Bool) {
-        brightnessValue = brightnessValue + (isUp ? correctionValue : -correctionValue)
-        if brightnessValue < 0 {
-            brightnessValue = 0
-        } else if brightnessValue > 100 {
-            brightnessValue = 100
-        }
-        
         for display in displays {
+            var brightnessValue = display.getCurrentBrightness() + (isUp ? correctionValue : -correctionValue)
+            if brightnessValue < 0 {
+                brightnessValue = 0
+            } else if brightnessValue > 100 {
+                brightnessValue = 100
+            }
             display.setDirectBrightness(valueBrightness: Float(brightnessValue))
         }
     }
 
-    
     public static func engageMirror() -> Bool {
         var onlineDisplayIDs = [CGDirectDisplayID](repeating: 0, count: 16)
         var displayCount: UInt32 = 0
@@ -284,31 +294,5 @@ class DisplayManager {
         }
         CGCompleteDisplayConfiguration(displayConfigRef, CGConfigureOption.permanently)
         return true
-    }
-    
-    // Save Brightness and Volume
-    public func saveBrightnessVolumeValue() {
-        for display in DisplayManager.shared.displays where !display.isBuiltIn() {
-            UserDefaults.standard.set(brightnessValue, forKey: "group.brightness_" + display.name)
-            UserDefaults.standard.set(volumeValue, forKey: "group.volume_" + simplyCA.defaultOutputDevice!.name)
-        }
-    }
-    
-    // Load Brightness and Volume from saved value
-    public func loadBrightnessVolumeValue() {
-        for display in DisplayManager.shared.displays where !display.isBuiltIn() {
-            let brightnessValue_new = Double(UserDefaults.standard.string(forKey: "group.brightness_" + display.name) ?? String(brightnessValue))!
-            if brightnessValue_new != brightnessValue {
-                brightnessValue = brightnessValue_new
-                display.setDirectBrightness(valueBrightness: Float(brightnessValue))
-            }
-            
-            let volumeValue_new = Double(UserDefaults.standard.string(forKey: "group.volume_" + simplyCA.defaultOutputDevice!.name) ?? String(volumeValue))!
-            if volumeValue_new != volumeValue {
-                volumeValue = volumeValue_new
-                display.setDirectVolume(valueVolume: Float(volumeValue))
-            }
-            
-        }
     }
 }

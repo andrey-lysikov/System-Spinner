@@ -3,7 +3,6 @@
 
 import Cocoa
 import Foundation
-import SimplyCoreAudio
 import UserNotifications
 
 var spinnerActive: String!
@@ -15,8 +14,6 @@ var alwaysUseCustomOSD: Bool = false
 var spinnersEffectSelected : Int = 1
 var spinnersRotationInvert: Bool = false
 let ActivityData = AKservice()
-let simplyCA = SimplyCoreAudio()
-let osdWindow = OSD()
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -320,7 +317,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         var displayMenuItem: NSMenuItem = NSMenuItem()
         let displaySubMenu = NSMenu()
         
-        DisplayManager.shared.saveBrightnessVolumeValue()
         DisplayManager.shared.configureDisplays()
         
         // let find menu intem
@@ -346,9 +342,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             MediaKeyTapManager.shared.updateMediaKeyTap()
         }
         
-        // Load saved values
-        DisplayManager.shared.loadBrightnessVolumeValue()
-        
         // Check new version?
         sHelper.hasNewVersion()
     }
@@ -365,14 +358,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func saveParams() {
-        UserDefaults.standard.set(spinnerActive, forKey: "group.spinnerActive")
-        UserDefaults.standard.set(updateInterval, forKey: "group.spinnerUpdateInterval")
-        UserDefaults.standard.set(enableStatusText, forKey: "group.enableStatusText")
-        UserDefaults.standard.set(useLocalization, forKey: "group.useLocalization")
-        UserDefaults.standard.set(spinnersEffectSelected, forKey: "group.spinnersEffectSelected")
-        UserDefaults.standard.set(spinnersRotationInvert, forKey: "group.spinnersRotationInvert")
-        UserDefaults.standard.set(alwaysUseCustomOSD, forKey: "group.alwaysUseCustomOSD")
-        DisplayManager.shared.saveBrightnessVolumeValue()
+        UserDefaults.standard.set(spinnerActive, forKey: "spinnerActive")
+        UserDefaults.standard.set(updateInterval, forKey: "spinnerUpdateInterval")
+        UserDefaults.standard.set(enableStatusText, forKey: "enableStatusText")
+        UserDefaults.standard.set(useLocalization, forKey: "useLocalization")
+        UserDefaults.standard.set(spinnersEffectSelected, forKey: "spinnersEffectSelected")
+        UserDefaults.standard.set(spinnersRotationInvert, forKey: "spinnersRotationInvert")
+        UserDefaults.standard.set(alwaysUseCustomOSD, forKey: "alwaysUseCustomOSD")
     }
     
     private func updateStatusMenu() {
@@ -497,13 +489,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        spinnerActive = UserDefaults.standard.string(forKey: "group.spinnerActive") ?? "Loader"
-        updateInterval = Double(UserDefaults.standard.string(forKey: "group.spinnerUpdateInterval") ?? String(updateInterval))!
-        enableStatusText = Bool(UserDefaults.standard.bool(forKey: "group.enableStatusText"))
-        useLocalization = Bool(UserDefaults.standard.bool(forKey: "group.useLocalization"))
-        spinnersEffectSelected = Int(UserDefaults.standard.string(forKey: "group.spinnersEffectSelected") ?? String(spinnersEffectSelected))!
-        spinnersRotationInvert = Bool(UserDefaults.standard.bool(forKey: "group.spinnersRotationInvert"))
-        alwaysUseCustomOSD = Bool(UserDefaults.standard.bool(forKey: "group.alwaysUseCustomOSD"))
+        spinnerActive = UserDefaults.standard.string(forKey: "spinnerActive") ?? "Loader"
+        updateInterval = Double(UserDefaults.standard.string(forKey: "spinnerUpdateInterval") ?? String(updateInterval))!
+        enableStatusText = Bool(UserDefaults.standard.bool(forKey: "enableStatusText"))
+        useLocalization = Bool(UserDefaults.standard.bool(forKey: "useLocalization"))
+        spinnersEffectSelected = Int(UserDefaults.standard.string(forKey: "spinnersEffectSelected") ?? String(spinnersEffectSelected))!
+        spinnersRotationInvert = Bool(UserDefaults.standard.bool(forKey: "spinnersRotationInvert"))
+        alwaysUseCustomOSD = Bool(UserDefaults.standard.bool(forKey: "alwaysUseCustomOSD"))
         
         
         if let button = statusItem.button {
@@ -546,7 +538,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ aNotification: Notification) {
         stopRunning()
         saveParams()
-        osdWindow.stop()
     }
     
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {

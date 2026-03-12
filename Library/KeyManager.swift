@@ -1,12 +1,14 @@
 //  Copyright © MonitorControl. @JoniVR, @theOneyouseek, @waydabber and others, Andrey Lysikov
 //  SPDX-License-Identifier: Apache-2.0
 
-import Foundation
 import Cocoa
+import Foundation
 import MediaKeyTap
+import SimplyCoreAudio
 
 class MediaKeyTapManager: MediaKeyTapDelegate {
     public static let shared = MediaKeyTapManager()
+    private let simplyCA = SimplyCoreAudio()
     var mediaKeyTap: MediaKeyTap?
     var keyRepeatTimers: [MediaKey: Timer] = [:]
     

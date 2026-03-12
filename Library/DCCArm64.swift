@@ -1,8 +1,9 @@
 //  Copyright © MonitorControl. @JoniVR, @theOneyouseek, @waydabber and others, Andrey Lysikov
 //  SPDX-License-Identifier: Apache-2.0
 
-import Foundation
 import IOKit
+import Foundation
+import SimplyCoreAudio
 
 let ARM64_DDC_7BIT_ADDRESS: UInt8 = 0x37 // This works with DisplayPort devices
 let ARM64_DDC_DATA_ADDRESS: UInt8 = 0x51
@@ -277,13 +278,15 @@ class Arm64DDC: NSObject {
 
 class AppleDisplay: Display {
     private var displayQueue: DispatchQueue
+    private let simplyCA = SimplyCoreAudio()
+    private let osd = OSD()
     
     override init(_ identifier: CGDirectDisplayID, name: String) {
         self.displayQueue = DispatchQueue(label: String("displayQueue-\(identifier)"))
         super.init(identifier, name: name)
     }
     
-    public func getAppleBrightness() -> Float {
+    override func getCurrentBrightness() -> Float {
         var brightness: Float = 0
         DisplayServicesGetBrightness(self.identifier, &brightness)
         return brightness
@@ -297,7 +300,7 @@ class AppleDisplay: Display {
     
     override func setDirectBrightness(valueBrightness: Float) {
         self.setAppleBrightness(value: valueBrightness / 100)
-        osdWindow.showOSD(value: Float(valueBrightness),isDisplay: true, autoHide: true)
+        osd.showOSD(value: Float(valueBrightness),isDisplay: true, autoHide: true)
     }
     
     override func setDirectVolume(valueVolume: Float) {
@@ -312,6 +315,6 @@ class AppleDisplay: Display {
         }
         
         outputDevice.setVirtualMainVolume(valueVolume / 100, scope: .output)
-        osdWindow.showOSD(value: Float(valueVolume),isDisplay: false, autoHide: true)
+        osd.showOSD(value: Float(valueVolume),isDisplay: false, autoHide: true)
     }
 }
