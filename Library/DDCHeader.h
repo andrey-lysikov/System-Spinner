@@ -13,10 +13,6 @@ extern IOAVService IOAVServiceCreateWithService(CFAllocatorRef allocator, io_ser
 extern IOReturn IOAVServiceReadI2C(IOAVService service, uint32_t chipAddress, uint32_t offset, void* outputBuffer, uint32_t outputBufferSize);
 extern IOReturn IOAVServiceWriteI2C(IOAVService service, uint32_t chipAddress, uint32_t dataAddress, void* inputBuffer, uint32_t inputBufferSize);
 extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID);
-
 extern int DisplayServicesGetBrightness(CGDirectDisplayID display, float *brightness);
 extern int DisplayServicesSetBrightness(CGDirectDisplayID display, float brightness);
-extern int DisplayServicesGetLinearBrightness(CGDirectDisplayID display, float *brightness);
-extern int DisplayServicesSetLinearBrightness(CGDirectDisplayID display, float brightness);
-
 extern void CGSServiceForDisplayNumber(CGDirectDisplayID display, io_service_t* service);
