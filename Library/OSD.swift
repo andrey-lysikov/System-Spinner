@@ -172,10 +172,6 @@ class OSDWindow: NSPanel {
     }
     
     @objc(_hasActiveAppearance) dynamic func _hasActiveAppearance() -> Bool { true }
-    @objc(_hasActiveAppearanceIgnoringKeyFocus) dynamic func _hasActiveAppearanceIgnoringKeyFocus() -> Bool { true }
-    @objc(_hasActiveControls) dynamic func _hasActiveControls() -> Bool { true }
-    @objc(_hasKeyAppearance) dynamic func _hasKeyAppearance() -> Bool { true }
-    @objc(_hasMainAppearance) dynamic func _hasMainAppearance() -> Bool { true }
     
     init() {
         let contentView = OSDFactoryView()
