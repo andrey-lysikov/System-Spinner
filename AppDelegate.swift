@@ -488,6 +488,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         isDeviceChanged = true
     }
     
+    func doOldSettings() { // remove in future relise
+        let tmpStr = UserDefaults.standard.string(forKey: "group.spinnerActive") ?? ""
+        if !String(tmpStr).isEmpty {
+            // load old values
+            spinnerActive = UserDefaults.standard.string(forKey: "group.spinnerActive") ?? "Loader"
+            updateInterval = Double(UserDefaults.standard.string(forKey: "group.spinnerUpdateInterval") ?? String(updateInterval))!
+            enableStatusText = Bool(UserDefaults.standard.bool(forKey: "group.enableStatusText"))
+            useLocalization = Bool(UserDefaults.standard.bool(forKey: "group.useLocalization"))
+            spinnersEffectSelected = Int(UserDefaults.standard.string(forKey: "group.spinnersEffectSelected") ?? String(spinnersEffectSelected))!
+            spinnersRotationInvert = Bool(UserDefaults.standard.bool(forKey: "group.spinnersRotationInvert"))
+            alwaysUseCustomOSD = Bool(UserDefaults.standard.bool(forKey: "group.alwaysUseCustomOSD"))
+            
+            // remove all data
+            UserDefaults.standard.dictionaryRepresentation().keys.forEach { key in
+                UserDefaults.standard.removeObject(forKey: key)
+            }
+            
+            // save new data
+            saveParams()
+        }
+    }
+    
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         spinnerActive = UserDefaults.standard.string(forKey: "spinnerActive") ?? "Loader"
         updateInterval = Double(UserDefaults.standard.string(forKey: "spinnerUpdateInterval") ?? String(updateInterval))!
@@ -497,6 +519,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         spinnersRotationInvert = Bool(UserDefaults.standard.bool(forKey: "spinnersRotationInvert"))
         alwaysUseCustomOSD = Bool(UserDefaults.standard.bool(forKey: "alwaysUseCustomOSD"))
         
+        doOldSettings()
         
         if let button = statusItem.button {
             button.action = #selector(togglePopover(sender:))
