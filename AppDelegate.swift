@@ -11,6 +11,7 @@ var updateInterval: Double = 1.0
 var isDeviceChanged: Bool = true // update display menu on application start
 var useLocalization: Bool = true
 var alwaysUseCustomOSD: Bool = false
+var adjSteps: Int = 16
 var spinnersEffectSelected : Int = 1
 var spinnersRotationInvert: Bool = false
 let ActivityData = AKservice()
@@ -29,7 +30,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var curFrame: Int = 0
     private var maxFrame: Int = 0
     private let popover = NSPopover()
-    private var updateIntervalName = ["0.5", "1.0", "1.5", "2.0"]
+    private var updateIntervalName:[Double] = [0.5, 1.0, 1.5, 2.0]
+    private var adjStepsInterval:[Int] = [8, 16, 24, 32]
     private var spinnersEffect: [String:Int] = [:]
     private let spinners: [String: [Int]] =  [ // [name: [item count, can use effect?, speed coefficient]]
         "Blue Ball" : [19, 1, 1],
@@ -243,7 +245,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         updateInterval = Double(sender.title.replacingOccurrences(of: localizedString("Second"), with: ""))!
         sender.state = .on
         startRunning()
+        saveParams()
     }
+    
+    @objc private func changeAdjustmentStepsClick(sender: NSMenuItem) {
+        for menuItem in statusItemMenu.items { // set all submenu state off
+            if menuItem.hasSubmenu && menuItem.title == sender.parent?.title {
+                for subMenuItem in menuItem.submenu!.items {
+                    subMenuItem.state = .off
+                }
+            }
+        }
+        adjSteps = Int(sender.title) ?? adjSteps
+        sender.state = .on
+        saveParams()
+    }
+    
+    
     
     @objc private func changeSpinnerEffectClick(sender: NSMenuItem) {
         stopRunning()
@@ -264,6 +282,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
         sender.state = .on
         changeSpinner(spinnerName: spinnerActive)
+        saveParams()
     }
     
     @objc private func changeLaunchAtLogin(sender: NSMenuItem) {
@@ -365,6 +384,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.set(spinnersEffectSelected, forKey: "spinnersEffectSelected")
         UserDefaults.standard.set(spinnersRotationInvert, forKey: "spinnersRotationInvert")
         UserDefaults.standard.set(alwaysUseCustomOSD, forKey: "alwaysUseCustomOSD")
+        UserDefaults.standard.set(adjSteps, forKey: "adjSteps")
     }
     
     private func updateStatusMenu() {
@@ -399,13 +419,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.addItem(displayItem)
         statusItemMenu.setSubmenu(NSMenu(), for: displayItem)
         
-        // Localize Item
-        let localizeItem = NSMenuItem(title: localizedString("Use system language"), action: #selector(changelocalizeClick(sender:)), keyEquivalent: "")
-        if useLocalization {
-            localizeItem.state = .on
+        // OSD number of adjustment steps
+        let separatorSubMenu = NSMenu()
+        let separatorMenu = NSMenuItem(title: localizedString("Adjustment steps"), action: nil, keyEquivalent: "")
+        
+        for updateItem in adjStepsInterval {
+            let newItem = NSMenuItem(title: String(updateItem), action: #selector(changeAdjustmentStepsClick(sender:)), keyEquivalent: "")
+            if updateItem == adjSteps {
+                newItem.state = .on
+            } else {
+                newItem.state = .off
+            }
+            separatorSubMenu.addItem(newItem)
         }
-        localizeItem.image = NSImage(systemSymbolName: "translate", accessibilityDescription: localizedString("Use system language"))
-        statusItemMenu.addItem(localizeItem)
+        separatorMenu.image = NSImage(systemSymbolName: "display.and.screwdriver", accessibilityDescription: localizedString("Adjustment steps"))
+        statusItemMenu.addItem(separatorMenu)
+        statusItemMenu.setSubmenu(separatorSubMenu, for: separatorMenu)
+        
         
         // Custom OSD use for all device
         let customOSDItem = NSMenuItem(title: localizedString("Always use custom OSD"), action: #selector(changeAlwaysUseCustomOSDClick(sender:)), keyEquivalent: "")
@@ -414,6 +444,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         customOSDItem.image = NSImage(systemSymbolName: "dot.scope.display", accessibilityDescription: localizedString("Always use custom OSD"))
         statusItemMenu.addItem(customOSDItem)
+        
+        // Localize Item
+        let localizeItem = NSMenuItem(title: localizedString("Use system language"), action: #selector(changelocalizeClick(sender:)), keyEquivalent: "")
+        if useLocalization {
+            localizeItem.state = .on
+        }
+        localizeItem.image = NSImage(systemSymbolName: "translate", accessibilityDescription: localizedString("Use system language"))
+        statusItemMenu.addItem(localizeItem)
         statusItemMenu.addItem(NSMenuItem.separator())
                 
         // ---------------------------- Spinner Section ----------------------------
@@ -435,8 +473,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let updateMenu = NSMenuItem(title: localizedString("Data update every"), action: nil, keyEquivalent: "")
         
         for updateItem in updateIntervalName {
-            let newItem = NSMenuItem(title: updateItem + " " + localizedString("Second"), action: #selector(changeUpdateSpeedClick(sender:)), keyEquivalent: "")
-            if updateItem == String(updateInterval) {
+            let newItem = NSMenuItem(title: String(updateItem) + " " + localizedString("Second"), action: #selector(changeUpdateSpeedClick(sender:)), keyEquivalent: "")
+            if updateItem == updateInterval {
                 newItem.state = .on
             } else {
                 newItem.state = .off
@@ -518,7 +556,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         spinnersEffectSelected = Int(UserDefaults.standard.string(forKey: "spinnersEffectSelected") ?? String(spinnersEffectSelected))!
         spinnersRotationInvert = Bool(UserDefaults.standard.bool(forKey: "spinnersRotationInvert"))
         alwaysUseCustomOSD = Bool(UserDefaults.standard.bool(forKey: "alwaysUseCustomOSD"))
-        
+        adjSteps = Int(UserDefaults.standard.string(forKey: "adjSteps") ?? String(adjSteps))!
+ 
         doOldSettings()
         
         if let button = statusItem.button {

@@ -35,6 +35,22 @@
         }
       }
     },
+    "Adjustment steps" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "調整ステップ数"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Количество шагов регулировки"
+          }
+        }
+      }
+    },
     "Allow" : {
       "extractionState" : "manual",
       "localizations" : {

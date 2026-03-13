@@ -7,10 +7,12 @@ import Combine
 struct valueState: Equatable {
     var value: Float
     var isDisplay: Bool
+    var separatorSteps: Int
 
-    init(value: Float = 0.0, isDisplay: Bool = false ) {
+    init(value: Float = 0.0, isDisplay: Bool = false, separatorSteps: Int = 16 ) {
         self.value = max(0.0, min(100.0, value))
         self.isDisplay = isDisplay
+        self.separatorSteps = separatorSteps
     }
     
     var iconName: String {
@@ -109,9 +111,8 @@ class OSDWindow: NSPanel {
     private let window_width: Double = 376
     
     struct HUDView: View {
-        let standardSteps = 16
         let valueState: valueState
-        
+    
         var body: some View {
             let content = HStack(spacing: 16) {
                 Image(systemName: valueState.iconName)
@@ -133,15 +134,25 @@ class OSDWindow: NSPanel {
                     .frame(height: 4)
                     
                     HStack(spacing: 0) {
-                        ForEach(0 ... standardSteps, id: \.self) { index in
+                        ForEach(0 ... valueState.separatorSteps, id: \.self) { index in
                             VStack {
                                 Spacer()
                                 Rectangle()
                                     .fill(.primary.opacity(0.8))
-                                    .frame(width: 1, height: index % 4 == 0 ? 6 : 4)
+                                    .frame(width: 1, height: index % 4 == 0 ? 6 : 3)
                             }
-                            if index < standardSteps {
-                                Spacer()
+                            if index < valueState.separatorSteps {
+                                if valueState.separatorSteps == 32 {
+                                    Spacer().frame(width: 5.1)
+                                } else if valueState.separatorSteps == 24 {
+                                    Spacer().frame(width: 7.1)
+                                } else if valueState.separatorSteps == 16 {
+                                    Spacer().frame(width: 11.125)
+                                } else if valueState.separatorSteps == 8 {
+                                    Spacer().frame(width: 23.25)
+                                } else {
+                                    Spacer()
+                                }
                             }
                         }
                     }
@@ -242,10 +253,11 @@ final class OSD {
     static let shared = OSD()
     let valueChangePublisher = PassthroughSubject<valueState, Never>()
     
-    func showOSD(value:Float, isDisplay:Bool, autoHide:Bool) {
+    func showOSD(value:Float, isDisplay:Bool, separators:Int = 16, autoHide:Bool = true) {
         let newState = valueState(
             value: value,
-            isDisplay: isDisplay
+            isDisplay: isDisplay,
+            separatorSteps: separators
         )
         currentValueState = newState
         OSD.shared.valueChangePublisher.send(currentValueState)

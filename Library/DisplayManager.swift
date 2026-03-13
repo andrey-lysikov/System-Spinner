@@ -101,7 +101,6 @@ class DisplayManager {
     public let simplyCA = SimplyCoreAudio()
     public let globalDDCQueue = DispatchQueue(label: "Global DDC queue")
     private var audioControlTargetDisplays: [OtherDisplay] = []
-    private let correctionValue: Float = 6.25
     private let osd = OSD()
     
     static func getDisplayNameByID(displayID: CGDirectDisplayID) -> String {
@@ -179,6 +178,10 @@ class DisplayManager {
         }
     }
     
+    private func adjustToSteps() {
+        
+    }
+    
     public func configureDisplays() {
         self.displays = []
         CGDisplayRestoreColorSyncSettings()
@@ -245,7 +248,7 @@ class DisplayManager {
                 volumeValue = 0
             }
             
-            osd.showOSD(value: Float(volumeValue),isDisplay: false, autoHide: true)
+            osd.showOSD(value: Float(volumeValue),isDisplay: false, separators: adjSteps)
             
             if display.name == simplyCA.defaultOutputDevice?.name {
                 display.setDirectVolume(valueVolume: Float(volumeValue))
@@ -257,16 +260,17 @@ class DisplayManager {
     }
     
     public func setVolume(isUp: Bool) {
+        let step:Float = 100 / Float(adjSteps)
+
         for display in displays {
-            var volumeValue = display.getCurrentVolume() + (isUp ? correctionValue : -correctionValue)
+            var volumeValue = (display.getCurrentVolume()/step).rounded() * step + (isUp ? step : -step)
             
             if volumeValue < 0 {
                 volumeValue = 0
             } else if volumeValue > 100 {
                 volumeValue = 100
             }
-            
-            osd.showOSD(value: Float(volumeValue),isDisplay: false, autoHide: true)
+            osd.showOSD(value: Float(volumeValue),isDisplay: false, separators: adjSteps)
             
             if display.name == simplyCA.defaultOutputDevice?.name {
                 display.setDirectVolume(valueVolume: Float(volumeValue))
@@ -278,15 +282,17 @@ class DisplayManager {
     }
     
     public func setBrightness(isUp: Bool) {
+        let step:Float = 100 / Float(adjSteps)
+        
         for display in displays {
-            var brightnessValue = display.getCurrentBrightness() + (isUp ? correctionValue : -correctionValue)
+               var brightnessValue = (display.getCurrentBrightness()/step).rounded() * step + (isUp ? step : -step)
             if brightnessValue < 0 {
                 brightnessValue = 0
             } else if brightnessValue > 100 {
                 brightnessValue = 100
             }
             
-            osd.showOSD(value: Float(brightnessValue),isDisplay: true, autoHide: true)
+            osd.showOSD(value: Float(brightnessValue),isDisplay: true, separators: adjSteps)
             display.setDirectBrightness(valueBrightness: Float(brightnessValue))
         }
     }
