@@ -11,6 +11,8 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 
 - Show CPU usage in system bar
 - Audio and brightness external monitor contol (over HDMI/DVI/USB-C with standart keys)
+- Custom OSD for MacOs Tahoe for volume and brightness control
+- Custom choice for adjustments (more accurate volume and brightness control)
 - Top CPU/MEM process in popup window
 - Memory statistics performance
 - Network utilisation and ip address
