@@ -1,4 +1,4 @@
-//  Copyright © Andrey Lysikov
+//  Copyright © AndreyLysikov
 //  SPDX-License-Identifier: Apache-2.0
 
 import AppKit

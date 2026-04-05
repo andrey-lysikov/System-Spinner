@@ -1,4 +1,4 @@
-//  Copyright © MonitorControl. @JoniVR, @theOneyouseek, @waydabber, @AndreyLysikov and others
+//  Copyright © MonitorControl. JoniVR, theOneyouseek, waydabber, AndreyLysikov and others
 //  SPDX-License-Identifier: Apache-2.0
 
 #pragma once

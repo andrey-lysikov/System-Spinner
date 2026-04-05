@@ -1,4 +1,4 @@
-//  Copyright © Takuto Nakamura, Andrey Lysikov
+//  Copyright © Takuto Nakamura, AndreyLysikov
 //  SPDX-License-Identifier: Apache-2.0
 
 import Foundation
