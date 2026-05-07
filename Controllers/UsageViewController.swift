@@ -120,7 +120,7 @@ class UsageViewController: NSViewController {
         ActivityData.updateAll()
         
         // CPU data
-        cpuLabel.stringValue = localizedString("CPU Usage \(Int(ActivityData.cpuPercentage))%")
+        cpuLabel.stringValue = localizedString("CPU Usage") + " " + Int(ActivityData.cpuPercentage).formatted(.percent)
         cpuLevel.doubleValue = ActivityData.cpuPercentage / 5
         
         // power data
@@ -152,15 +152,15 @@ class UsageViewController: NSViewController {
         // if presentSMC
         if ioService.presentSMC {
             // temp data
-            cpuTempLabel.stringValue = localizedString("CPU Temp \(String(Int(round(ioService.cpuTemp))))°С")
+            cpuTempLabel.stringValue = localizedString("CPU Temp") + " " + String(round(ioService.cpuTemp)) + "°С"
             tempLevel.doubleValue = ioService.cpuTemp / 5
         }
         
         // memory data
-        memPercentage.stringValue =  localizedString("Memory Usage \(Int(round(ActivityData.memPercentage)))%")
+        memPercentage.stringValue =  localizedString("Memory Usage") + " " + Int(ActivityData.memPercentage).formatted(.percent)
         memLevel.doubleValue = ActivityData.memPercentage / 5
         
-        memPressure.stringValue = localizedString("Pressure \(Int(round(ActivityData.memPressure)))%")
+        memPressure.stringValue = localizedString("Pressure") + " " + Int(ActivityData.memPressure).formatted(.percent)
         pressureLevel.doubleValue = ActivityData.memPressure / 5
         
         memApp.stringValue = String(Int(round(ActivityData.memApp))) + "% (App)"

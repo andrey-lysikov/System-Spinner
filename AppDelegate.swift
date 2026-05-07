@@ -490,8 +490,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         spinnersEffect = [
             localizedString("Original")  : 1,
-            localizedString("White opage 80%") : 2,
-            localizedString("Black opage 80%") : 3,
+            localizedString("White shaded") : 2,
+            localizedString("Black shaded") : 3,
             localizedString("Automatic Dark/White mode") : 4
         ]
         
