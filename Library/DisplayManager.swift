@@ -49,7 +49,7 @@ class Display: Equatable {
     
     public func getVolumeDeviceName() -> String {
         let currentOutputDevice: AudioDeviceID =  AudioManager.getDefaultOutputDevice()
-        return AudioManager.getDeviceName(deviceID: currentOutputDevice)
+        return AudioManager.getDeviceName(deviceID: currentOutputDevice)!
     }
     
     public func getCurrentBrightness() -> Float {
