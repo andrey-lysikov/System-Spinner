@@ -63,18 +63,34 @@ public class AudioManager {
         return deviceID
     }
     
-    public static func getDeviceName(deviceID: AudioDeviceID) -> String {
-        var propertySize = UInt32(MemoryLayout<CFString>.size)
-        
-        var propertyAddress = AudioObjectPropertyAddress(
-            mSelector: AudioObjectPropertySelector(kAudioDevicePropertyDeviceNameCFString),
-            mScope: AudioObjectPropertyScope(kAudioObjectPropertyScopeGlobal),
-            mElement: AudioObjectPropertyElement(kAudioObjectPropertyElementMain))
-        
-        var result: CFString = "" as CFString
-        AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &propertySize, &result)
-        
-        return result as String
-    }
     
+    public static func getDeviceName(deviceID: AudioDeviceID) -> String? {
+        var propertyAddress = AudioObjectPropertyAddress(
+            mSelector: kAudioDevicePropertyDeviceNameCFString,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+
+        var propertySize = UInt32(MemoryLayout<CFString>.size)
+        var name: CFString? = nil
+        let status = withUnsafeMutablePointer(
+            to: &name,
+            { name in
+                let status = AudioObjectGetPropertyData(
+                    deviceID,
+                    &propertyAddress,
+                    0,
+                    nil,
+                    &propertySize,
+                    name
+                )
+                return status
+            }
+        )
+        if status == noErr, let deviceNameCF = name as String? {
+            return deviceNameCF as String
+        }
+
+        return nil
+    }
 }
