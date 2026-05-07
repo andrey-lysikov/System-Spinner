@@ -8,11 +8,6 @@ let ARM64_DDC_7BIT_ADDRESS: UInt8 = 0x37 // This works with DisplayPort devices
 let ARM64_DDC_DATA_ADDRESS: UInt8 = 0x51
 
 class Arm64DDC: NSObject {
-#if arch(arm64)
-    public static let isArm64: Bool = true
-#else
-    public static let isArm64: Bool = false
-#endif
     static let MAX_MATCH_SCORE: Int = 20
     
     struct IOregService {

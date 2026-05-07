@@ -232,7 +232,6 @@ public class IntelDDC {
 
 class OtherDisplay: Display {
     var ddc: IntelDDC?
-    var arm64ddc: Bool = false
     var arm64avService: IOAVService?
     var isDiscouraged: Bool = false
     let writeDDCQueue = DispatchQueue(label: "Local write DDC queue")
@@ -241,9 +240,6 @@ class OtherDisplay: Display {
     
     override init(_ identifier: CGDirectDisplayID, name: String)  {
         super.init(identifier, name: name)
-        if !Arm64DDC.isArm64 {
-            self.ddc = IntelDDC(for: identifier)
-        }
     }
     
     public func writeDDCValues(command: Command, value: UInt16) {
@@ -278,12 +274,8 @@ class OtherDisplay: Display {
         self.writeDDCQueue.async(flags: .barrier) {
             self.writeDDCLastSavedValue[command] = value
         }
-        if Arm64DDC.isArm64 {
-            if self.arm64ddc {
-                _ = Arm64DDC.write(service: self.arm64avService, command: command.rawValue, value: value)
-            }
-        } else {
-            _ = self.ddc?.write(command: command.rawValue, value: value, errorRecoveryWaitTime: 2000) ?? false
-        }
+
+        _ = Arm64DDC.write(service: self.arm64avService, command: command.rawValue, value: value)
+
     }
 }
