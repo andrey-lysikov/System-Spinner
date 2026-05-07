@@ -4,7 +4,7 @@
 import AppKit
 import Foundation
 import CoreGraphics
-import SimplyCoreAudio
+import CoreAudio
 
 enum Command: UInt8 {
     case none = 0
@@ -16,7 +16,6 @@ enum Command: UInt8 {
 }
 
 class Display: Equatable {
-    private let simplyCA = SimplyCoreAudio()
     public let identifier: CGDirectDisplayID
     public var name: String
     public var savedVolume: Float = 0
@@ -49,10 +48,8 @@ class Display: Equatable {
     }
     
     public func getVolumeDeviceName() -> String {
-        guard let outputDevice = simplyCA.defaultOutputDevice else {
-            return "Unknown"
-        }
-        return outputDevice.name
+        let currentOutputDevice: AudioDeviceID =  AudioManager.getDefaultOutputDevice()
+        return AudioManager.getDeviceName(deviceID: currentOutputDevice)
     }
     
     public func getCurrentBrightness() -> Float {
@@ -63,27 +60,21 @@ class Display: Equatable {
     }
     
     public func getCurrentVolume() -> Float {
-        guard let outputDevice = simplyCA.defaultOutputDevice, self.name != outputDevice.name else {
+        let currentOutputDevice: AudioDeviceID =  AudioManager.getDefaultOutputDevice()
+        
+        if self.name != AudioManager.getDeviceName(deviceID: currentOutputDevice) {
+            return AudioManager.getDeviceVolume(deviceID: currentOutputDevice) * 100
+        } else {
             if let volume = Float(UserDefaults.standard.string(forKey: "volume." + self.name) ?? "") {
                 return volume
             }
             return 0
         }
-        return (outputDevice.virtualMainVolume(scope: .output) ?? 0) * 100
     }
     
     public func setVolume(valueVolume: Float) {
-        guard let outputDevice = simplyCA.defaultOutputDevice else {
-            return
-        }
-        
-        if let isMuted = outputDevice.isMainChannelMuted(scope: .output), isMuted && valueVolume > 0 {
-            outputDevice.setMute(false, channel: 0, scope: .output)
-        } else if valueVolume <= 0 {
-            outputDevice.setMute(true, channel: 0, scope: .output)
-        }
-        
-        outputDevice.setVirtualMainVolume(valueVolume / 100, scope: .output)
+        let currentOutputDevice: AudioDeviceID =  AudioManager.getDefaultOutputDevice()
+        AudioManager.setDeviceVolume(deviceID: currentOutputDevice, volumeLevel: valueVolume / 100)
     }
     
     public func setDirectBrightness(valueBrightness: Float) {
@@ -98,7 +89,6 @@ class Display: Equatable {
 class DisplayManager {
     public static let shared = DisplayManager()
     public var displays: [Display] = []
-    public let simplyCA = SimplyCoreAudio()
     public let globalDDCQueue = DispatchQueue(label: "Global DDC queue")
     private var audioControlTargetDisplays: [OtherDisplay] = []
     private let osd = OSD()
@@ -158,7 +148,6 @@ class DisplayManager {
     }
     
     private func updateArm64AVServices() {
-        if Arm64DDC.isArm64 {
             var displayIDs: [CGDirectDisplayID] = []
             for otherDisplay in self.getOtherDisplays() {
                 displayIDs.append(otherDisplay.identifier)
@@ -170,16 +159,9 @@ class DisplayManager {
                         otherDisplay.isDiscouraged = true
                     } else if serviceMatch.dummy {
                         otherDisplay.isDiscouraged = true
-                    } else {
-                        otherDisplay.arm64ddc = true
                     }
                 }
             }
-        }
-    }
-    
-    private func adjustToSteps() {
-        
     }
     
     public func configureDisplays() {
@@ -250,11 +232,10 @@ class DisplayManager {
             
             osd.showOSD(value: Float(volumeValue),isDisplay: false, separators: adjSteps)
             
-            if display.name == simplyCA.defaultOutputDevice?.name {
+            if display.name == display.getVolumeDeviceName() {
                 display.setDirectVolume(valueVolume: Float(volumeValue))
             } else {
                 display.setVolume(valueVolume: Float(volumeValue))
-                return
             }
         }
     }
@@ -271,12 +252,11 @@ class DisplayManager {
                 volumeValue = 100
             }
             osd.showOSD(value: Float(volumeValue),isDisplay: false, separators: adjSteps)
-            
-            if display.name == simplyCA.defaultOutputDevice?.name {
+
+            if display.name == display.getVolumeDeviceName() {
                 display.setDirectVolume(valueVolume: Float(volumeValue))
             } else {
                 display.setVolume(valueVolume: Float(volumeValue))
-                return
             }
         }
     }

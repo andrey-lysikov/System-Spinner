@@ -588,9 +588,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             closePopoverMenu(sender: self)
         })
         
-        // change audio device?
-        NotificationCenter.default.addObserver(self, selector: #selector(WakeNotification), name: Notification.Name.defaultOutputDeviceChanged, object: nil)
-        
         // change monitor device?
         CGDisplayRegisterReconfigurationCallback({ displayID, flags, userInfo in AppDelegate.doChangeDevice()}, nil)
         
