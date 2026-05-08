@@ -1,103 +1,176 @@
-//  Copyright © MonitorControl. JoniVR, theOneyouseek, waydabber, AndreyLysikov
+//  Copyright © (yu) zmlabs, AndreyLysikov
 //  SPDX-License-Identifier: Apache-2.0
 
-import Cocoa
-import Foundation
-import MediaKeyTap
+import AppKit
+import ApplicationServices
 
-class MediaKeyTapManager: MediaKeyTapDelegate {
-    public static let shared = MediaKeyTapManager()
-    var mediaKeyTap: MediaKeyTap?
-    var keyRepeatTimers: [MediaKey: Timer] = [:]
-    
-    public func handle(mediaKey: MediaKey, event: KeyEvent?, modifiers: NSEvent.ModifierFlags?) {
-        let isPressed = event?.keyPressed ?? true
-        let isRepeat = event?.keyRepeat ?? false
-        let isControl = modifiers?.isSuperset(of: NSEvent.ModifierFlags([.control])) ?? false
-        let isCommand = modifiers?.isSuperset(of: NSEvent.ModifierFlags([.command])) ?? false
-        if isPressed, isCommand, !isControl, mediaKey == .brightnessDown, DisplayManager.engageMirror() {
-            return
-        }
-        let oppositeKey: MediaKey? = self.oppositeMediaKey(mediaKey: mediaKey)
-        
-        if let oppositeKey = oppositeKey, let oppositeKeyTimer = self.keyRepeatTimers[oppositeKey], oppositeKeyTimer.isValid {
-            oppositeKeyTimer.invalidate()
-        } else if let mediaKeyTimer = self.keyRepeatTimers[mediaKey], mediaKeyTimer.isValid {
-            if isRepeat {
-                return
-            }
-            mediaKeyTimer.invalidate()
-        }
-        self.sendDisplayCommand(mediaKey: mediaKey, isRepeat: isRepeat, isPressed: isPressed)
+enum MediaKeyHandlingResult: Equatable {
+    case passThrough
+    case consumed(didChange: Bool)
+}
+
+protocol BrightnessKeyHandling: AnyObject {
+    func handle(_ key: MediaKeyMonitor.MediaKey, fineStep: Bool) -> MediaKeyHandlingResult
+}
+
+final class MediaKeyMonitor {
+    enum MediaKey: Int {
+        case soundUp = 0
+        case soundDown = 1
+        case brightnessUp = 2
+        case brightnessDown = 3
+        case mute = 7
     }
-    
-    private func sendDisplayCommand(mediaKey: MediaKey, isRepeat: Bool, isPressed: Bool) {
-        guard [.brightnessUp, .brightnessDown, .volumeUp, .volumeDown, .mute].contains(mediaKey), isPressed else {
-            return
+
+    static let shared = MediaKeyMonitor()
+
+    private var eventTap: CFMachPort?
+    private var eventTapSource: CFRunLoopSource?
+    private var eventTapRunLoop: CFRunLoop?
+
+    private static let brightnessUpKeyCode: Int64 = 144
+    private static let brightnessDownKeyCode: Int64 = 145
+
+    @discardableResult
+    func start(promptAccessibility: Bool = false) -> Bool {
+        if eventTap != nil {
+            return true
         }
 
-        switch mediaKey {
-        case .brightnessUp:
-            DisplayManager.shared.setBrightness(isUp: true)
-        case .brightnessDown:
-            DisplayManager.shared.setBrightness(isUp: false)
-        default :
-            break
+        let mask = CGEventMask(
+            (1 << CGEventType.keyDown.rawValue) |
+                (1 << UInt64(NSEvent.EventType.systemDefined.rawValue))
+        )
+        let refcon = Unmanaged.passUnretained(self).toOpaque()
+
+        guard let tap = CGEvent.tapCreate(
+            tap: .cghidEventTap,
+            place: .headInsertEventTap,
+            options: .defaultTap,
+            eventsOfInterest: mask,
+            callback: Self.eventTapCallback,
+            userInfo: refcon
+        ) else {
+            return false
         }
-        
-        switch mediaKey {
-        case .mute:
-            if !isRepeat, isPressed {
-                DisplayManager.shared.toggleMute()
-            }
-        case .volumeUp, .volumeDown:
-            if isPressed {
-                DisplayManager.shared.setVolume(isUp: mediaKey == .volumeUp)
-            }
-        default :
-            break
-        }
-        
+
+        let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
+        let runLoop = CFRunLoopGetMain()
+        CFRunLoopAddSource(runLoop, source, .commonModes)
+        CGEvent.tapEnable(tap: tap, enable: true)
+
+        eventTap = tap
+        eventTapSource = source
+        eventTapRunLoop = runLoop
+
+        return true
     }
-    
-    private func oppositeMediaKey(mediaKey: MediaKey) -> MediaKey? {
-        if mediaKey == .brightnessUp {
-            return .brightnessDown
-        } else if mediaKey == .brightnessDown {
-            return .brightnessUp
-        } else if mediaKey == .volumeUp {
-            return .volumeDown
-        } else if mediaKey == .volumeDown {
-            return .volumeUp
+
+    func stop() {
+        let source = eventTapSource
+        let runLoop = eventTapRunLoop
+        let tap = eventTap
+        eventTap = nil
+        eventTapSource = nil
+        eventTapRunLoop = nil
+
+        if let source, let runLoop {
+            CFRunLoopRemoveSource(runLoop, source, .commonModes)
+            CFRunLoopSourceInvalidate(source)
         }
-        return nil
+        if let tap {
+            CFMachPortInvalidate(tap)
+        }
     }
-    
-    public func updateMediaKeyTap() {
-        let keysAudio: [MediaKey] = [.volumeUp, .volumeDown, .mute]
-        let keysBrightness: [MediaKey] = [.brightnessUp, .brightnessDown]
-        var keys: [MediaKey] = keysAudio + keysBrightness
-        
-        mediaKeyTap?.stop()
-        
-        if !DisplayManager.shared.hasBrightnessControll() && !alwaysUseCustomOSD {
-            keys.removeAll { keysBrightness.contains($0) }
+
+    private func enableEventTap() {
+        guard let tap = eventTap else { return }
+        CGEvent.tapEnable(tap: tap, enable: true)
+    }
+
+    private static let eventTapCallback: CGEventTapCallBack = { _, type, event, refcon in
+        guard let refcon else {
+            return Unmanaged.passUnretained(event)
         }
 
-        var disengageVolume = true
-        for display in DisplayManager.shared.displays {
-            if String(display.name) == display.getVolumeDeviceName() {
-                disengageVolume = false
-            }
-        }
-        
-        if disengageVolume && !alwaysUseCustomOSD {
-            keys.removeAll { keysAudio.contains($0) }
+        let monitor = Unmanaged<MediaKeyMonitor>.fromOpaque(refcon).takeUnretainedValue()
+
+        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+            monitor.enableEventTap()
+            return Unmanaged.passUnretained(event)
         }
 
-        if keys.count > 0 {
-            self.mediaKeyTap = MediaKeyTap(delegate: self, on: KeyPressMode.keyDownAndUp, for: keys, observeBuiltIn: true)
-            self.mediaKeyTap?.start()
+        return monitor.handle(event)
+    }
+
+    private func handle(_ event: CGEvent) -> Unmanaged<CGEvent>? {
+        if event.type == .keyDown {
+            return handleBrightnessKeyDown(event)
+        }
+        return handleSystemDefinedMediaKey(event)
+    }
+
+    private func handleBrightnessKeyDown(_ event: CGEvent) -> Unmanaged<CGEvent>? {
+        let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
+
+        let mediaKey: MediaKey
+        switch keyCode {
+        case Self.brightnessUpKeyCode:
+            mediaKey = .brightnessUp
+        case Self.brightnessDownKeyCode:
+            mediaKey = .brightnessDown
+        default:
+            return Unmanaged.passUnretained(event)
+        }
+
+        let modifiers = NSEvent.ModifierFlags(rawValue: UInt(event.flags.rawValue))
+        return applyResult(handleMediaKey(mediaKey, modifiers: modifiers), event: event)
+    }
+
+    private func handleSystemDefinedMediaKey(_ event: CGEvent) -> Unmanaged<CGEvent>? {
+        guard let nsEvent = NSEvent(cgEvent: event) else {
+            return Unmanaged.passUnretained(event)
+        }
+
+        guard nsEvent.type == .systemDefined, nsEvent.subtype.rawValue == 8 else {
+            return Unmanaged.passUnretained(event)
+        }
+
+        let data1 = nsEvent.data1
+        let keyCode = Int((data1 & 0xFFFF_0000) >> 16)
+        let flags = Int(data1 & 0x0000_FFFF)
+
+        let keyState = (flags & 0xFF00) >> 8
+        guard keyState == 0x0A else { return Unmanaged.passUnretained(event) }
+
+        guard let mk = MediaKey(rawValue: keyCode) else {
+            return Unmanaged.passUnretained(event)
+        }
+
+        return applyResult(handleMediaKey(mk, modifiers: nsEvent.modifierFlags), event: event)
+    }
+
+    private func applyResult(_ result: MediaKeyHandlingResult, event: CGEvent) -> Unmanaged<CGEvent>? {
+        switch result {
+        case .passThrough:
+            Unmanaged.passUnretained(event)
+        case .consumed:
+            nil
+        }
+    }
+
+    private func handleMediaKey(_ key: MediaKey, modifiers: NSEvent.ModifierFlags) -> MediaKeyHandlingResult {
+        switch key {
+            case .soundUp:
+                return DisplayManager.shared.setVolume(isUp: true)
+            case .soundDown:
+                return DisplayManager.shared.setVolume(isUp: false)
+            case .mute:
+                return DisplayManager.shared.toggleMute()
+            case .brightnessUp:
+                return DisplayManager.shared.setBrightness(isUp: true)
+            case .brightnessDown:
+                return DisplayManager.shared.setBrightness(isUp: false)
         }
     }
 }

@@ -358,7 +358,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         displayMenuItem.submenu = displaySubMenu
         
         if sHelper.checkPrivileges() {
-            MediaKeyTapManager.shared.updateMediaKeyTap()
+            MediaKeyMonitor.shared.start()
         }
         
         // Check new version?
@@ -595,6 +595,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {
+        MediaKeyMonitor.shared.stop()
         stopRunning()
         saveParams()
     }

@@ -1,91 +1,6 @@
 //  Copyright © MonitorControl. JoniVR, theOneyouseek, waydabber, AndreyLysikov
 //  SPDX-License-Identifier: Apache-2.0
 
-import AppKit
-import Foundation
-import CoreGraphics
-import CoreAudio
-
-enum Command: UInt8 {
-    case none = 0
-    case luminance = 0x10
-    case audioSpeakerVolume = 0x62
-    case audioMuteScreenBlank = 0x8D
-    case contrast = 0x12
-    public static let brightness = luminance
-}
-
-class Display: Equatable {
-    public let identifier: CGDirectDisplayID
-    public var name: String
-    public var savedVolume: Float = 0
-    public var displays: [Display] = []
-    
-    public static func == (lhs: Display, rhs: Display) -> Bool {
-        lhs.identifier == rhs.identifier
-    }
-    
-    init(_ identifier: CGDirectDisplayID, name: String) {
-        self.identifier = identifier
-        self.name = name
-    }
-    
-    public func isBuiltIn() -> Bool {
-        if CGDisplayIsBuiltin(self.identifier) != 0 {
-            return true
-        } else {
-            return false
-        }
-    }
-    
-    public func isHDR() -> Bool {
-        if let mainScreen = NSScreen.main {
-            if mainScreen.maximumPotentialExtendedDynamicRangeColorComponentValue > 1.0 {
-                return true
-            }
-        }
-        return false
-    }
-    
-    public func getVolumeDeviceName() -> String {
-        let currentOutputDevice: AudioDeviceID =  AudioManager.getDefaultOutputDevice()
-        return AudioManager.getDeviceName(deviceID: currentOutputDevice)!
-    }
-    
-    public func getCurrentBrightness() -> Float {
-        if let brightness = Float(UserDefaults.standard.string(forKey: "brightness." + self.name) ?? "") {
-            return brightness
-        }
-        return 100
-    }
-    
-    public func getCurrentVolume() -> Float {
-        let currentOutputDevice: AudioDeviceID =  AudioManager.getDefaultOutputDevice()
-        
-        if self.name != AudioManager.getDeviceName(deviceID: currentOutputDevice) {
-            return AudioManager.getDeviceVolume(deviceID: currentOutputDevice) * 100
-        } else {
-            if let volume = Float(UserDefaults.standard.string(forKey: "volume." + self.name) ?? "") {
-                return volume
-            }
-            return 0
-        }
-    }
-    
-    public func setVolume(valueVolume: Float) {
-        let currentOutputDevice: AudioDeviceID =  AudioManager.getDefaultOutputDevice()
-        AudioManager.setDeviceVolume(deviceID: currentOutputDevice, volumeLevel: valueVolume / 100)
-    }
-    
-    public func setDirectBrightness(valueBrightness: Float) {
-        UserDefaults.standard.set(valueBrightness, forKey: "brightness." + self.name)
-    }
-    
-    public func setDirectVolume(valueVolume: Float) {
-        UserDefaults.standard.set(valueVolume, forKey: "volume." + self.name)
-    }
-}
-
 class DisplayManager {
     public static let shared = DisplayManager()
     public var displays: [Display] = []
@@ -147,14 +62,14 @@ class DisplayManager {
         return CGDisplayIsBuiltin(displayID) != 0
     }
     
-    private func updateArm64AVServices() {
+    private func updateAVServices() {
             var displayIDs: [CGDirectDisplayID] = []
             for otherDisplay in self.getOtherDisplays() {
                 displayIDs.append(otherDisplay.identifier)
             }
-            for serviceMatch in Arm64DDC.getServiceMatches(displayIDs: displayIDs) {
+            for serviceMatch in DDC.getServiceMatches(displayIDs: displayIDs) {
                 for otherDisplay in self.getOtherDisplays() where otherDisplay.identifier == serviceMatch.displayID && serviceMatch.service != nil {
-                    otherDisplay.arm64avService = serviceMatch.service
+                    otherDisplay.ddcService = serviceMatch.service
                     if serviceMatch.discouraged {
                         otherDisplay.isDiscouraged = true
                     } else if serviceMatch.dummy {
@@ -187,7 +102,7 @@ class DisplayManager {
                 }
             }
         }
-        updateArm64AVServices()
+        updateAVServices()
     }
     
     public func getOtherDisplays() -> [OtherDisplay] {
@@ -205,7 +120,7 @@ class DisplayManager {
     }
     
     public func isAppleDisplayPresent() -> Bool {
-        for display in DisplayManager.shared.displays where display.isBuiltIn() {
+        for display in displays where display.isBuiltIn() {
             return true
         }
         return false
@@ -213,14 +128,27 @@ class DisplayManager {
     
     public func hasBrightnessControll() -> Bool {
         var brightness = false
-        for display in DisplayManager.shared.displays where !display.isBuiltIn() && !display.isHDR() {
+        for display in displays where !display.isBuiltIn() && !display.isHDR() {
             brightness = true
         }
-        
         return brightness
     }
     
-    public func toggleMute() {
+    public func hasVolumeControll() -> Bool {
+        var audio = false
+        for display in displays {
+            if String(display.name) == display.getDefaultAudioOutputDeviceName() {
+                audio = true
+            }
+        }
+        return audio
+    }
+    
+    public func toggleMute() -> MediaKeyHandlingResult {
+        if !hasVolumeControll() && !alwaysUseCustomOSD {
+            return .passThrough
+        }
+        
         for display in displays {
             var volumeValue = display.getCurrentVolume()
             if volumeValue == 0 {
@@ -232,17 +160,23 @@ class DisplayManager {
             
             osd.showOSD(value: Float(volumeValue),isDisplay: false, separators: adjSteps)
             
-            if display.name == display.getVolumeDeviceName() {
+            if display.name == display.getDefaultAudioOutputDeviceName() {
                 display.setDirectVolume(valueVolume: Float(volumeValue))
             } else {
                 display.setVolume(valueVolume: Float(volumeValue))
             }
         }
+        
+        return .consumed(didChange: true)
     }
     
-    public func setVolume(isUp: Bool) {
+    public func setVolume(isUp: Bool) -> MediaKeyHandlingResult {
         let step:Float = 100 / Float(adjSteps)
-
+        
+        if !hasVolumeControll() && !alwaysUseCustomOSD {
+            return .passThrough
+        }
+        
         for display in displays {
             var volumeValue = (display.getCurrentVolume()/step).rounded() * step + (isUp ? step : -step)
             
@@ -252,17 +186,24 @@ class DisplayManager {
                 volumeValue = 100
             }
             osd.showOSD(value: Float(volumeValue),isDisplay: false, separators: adjSteps)
-
-            if display.name == display.getVolumeDeviceName() {
+            
+            if display.name == display.getDefaultAudioOutputDeviceName() {
                 display.setDirectVolume(valueVolume: Float(volumeValue))
             } else {
                 display.setVolume(valueVolume: Float(volumeValue))
             }
+            
         }
+        
+        return .consumed(didChange: true)
     }
     
-    public func setBrightness(isUp: Bool) {
+    public func setBrightness(isUp: Bool) -> MediaKeyHandlingResult {
         let step:Float = 100 / Float(adjSteps)
+        
+        if !hasBrightnessControll() && !alwaysUseCustomOSD {
+            return .passThrough
+        }
         
         for display in displays {
                var brightnessValue = (display.getCurrentBrightness()/step).rounded() * step + (isUp ? step : -step)
@@ -275,45 +216,6 @@ class DisplayManager {
             osd.showOSD(value: Float(brightnessValue),isDisplay: true, separators: adjSteps)
             display.setDirectBrightness(valueBrightness: Float(brightnessValue))
         }
-    }
-
-    public static func engageMirror() -> Bool {
-        var onlineDisplayIDs = [CGDirectDisplayID](repeating: 0, count: 16)
-        var displayCount: UInt32 = 0
-        guard CGGetOnlineDisplayList(16, &onlineDisplayIDs, &displayCount) == .success, displayCount > 1 else {
-            return false
-        }
-        // Break display mirror if there is any
-        var mirrorBreak = false
-        var displayConfigRef: CGDisplayConfigRef?
-        for onlineDisplayID in onlineDisplayIDs where onlineDisplayID != 0 {
-            if CGDisplayIsInHWMirrorSet(onlineDisplayID) != 0 || CGDisplayIsInMirrorSet(onlineDisplayID) != 0 {
-                if mirrorBreak == false {
-                    CGBeginDisplayConfiguration(&displayConfigRef)
-                }
-                CGConfigureDisplayMirrorOfDisplay(displayConfigRef, onlineDisplayID, kCGNullDirectDisplay)
-                mirrorBreak = true
-            }
-        }
-        if mirrorBreak {
-            CGCompleteDisplayConfiguration(displayConfigRef, CGConfigureOption.permanently)
-            return true
-        }
-        // Build display mirror
-        var mainDisplayId = kCGNullDirectDisplay
-        for onlineDisplayID in onlineDisplayIDs where onlineDisplayID != 0 {
-            if CGDisplayIsBuiltin(onlineDisplayID) == 0, mainDisplayId == kCGNullDirectDisplay {
-                mainDisplayId = onlineDisplayID
-            }
-        }
-        guard mainDisplayId != kCGNullDirectDisplay else {
-            return false
-        }
-        CGBeginDisplayConfiguration(&displayConfigRef)
-        for onlineDisplayID in onlineDisplayIDs where onlineDisplayID != 0 && onlineDisplayID != mainDisplayId {
-            CGConfigureDisplayMirrorOfDisplay(displayConfigRef, onlineDisplayID, mainDisplayId)
-        }
-        CGCompleteDisplayConfiguration(displayConfigRef, CGConfigureOption.permanently)
-        return true
+        return .consumed(didChange: true)
     }
 }

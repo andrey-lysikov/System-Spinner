@@ -4,11 +4,10 @@
 import IOKit
 import Foundation
 
-let ARM64_DDC_7BIT_ADDRESS: UInt8 = 0x37 // This works with DisplayPort devices
-let ARM64_DDC_DATA_ADDRESS: UInt8 = 0x51
-
-class Arm64DDC: NSObject {
+class DDC: NSObject {
     static let MAX_MATCH_SCORE: Int = 20
+    static let ARM64_DDC_7BIT_ADDRESS: UInt8 = 0x37
+    static let ARM64_DDC_DATA_ADDRESS: UInt8 = 0x51
     
     struct IOregService {
         var edidUUID: String = ""
@@ -25,7 +24,7 @@ class Arm64DDC: NSObject {
         var displayAttributes: NSDictionary?
     }
     
-    struct Arm64Service {
+    struct ddcService {
         var displayID: CGDirectDisplayID = 0
         var service: IOAVService?
         var serviceLocation: Int = 0
@@ -35,16 +34,16 @@ class Arm64DDC: NSObject {
         var matchScore: Int = 0
     }
     
-    static func getServiceMatches(displayIDs: [CGDirectDisplayID]) -> [Arm64Service] {
+    static func getServiceMatches(displayIDs: [CGDirectDisplayID]) -> [ddcService] {
         let ioregServicesForMatching = self.getIoregServicesForMatching()
-        var matchedDisplayServices: [Arm64Service] = []
-        var scoredCandidateDisplayServices: [Int: [Arm64Service]] = [:]
+        var matchedDisplayServices: [ddcService] = []
+        var scoredCandidateDisplayServices: [Int: [ddcService]] = [:]
         for displayID in displayIDs {
             for ioregServiceForMatching in ioregServicesForMatching {
                 let score = self.ioregMatchScore(displayID: displayID, ioregEdidUUID: ioregServiceForMatching.edidUUID, ioDisplayLocation: ioregServiceForMatching.ioDisplayLocation, ioregProductName: ioregServiceForMatching.productName, ioregSerialNumber: ioregServiceForMatching.serialNumber, serviceLocation: ioregServiceForMatching.serviceLocation)
                 let discouraged = self.checkIfDiscouraged(ioregService: ioregServiceForMatching)
                 let dummy = self.checkIfDummy(ioregService: ioregServiceForMatching)
-                let displayService = Arm64Service(displayID: displayID, service: ioregServiceForMatching.service, serviceLocation: ioregServiceForMatching.serviceLocation, discouraged: discouraged, dummy: dummy, serviceDetails: ioregServiceForMatching, matchScore: score)
+                let displayService = ddcService(displayID: displayID, service: ioregServiceForMatching.service, serviceLocation: ioregServiceForMatching.serviceLocation, discouraged: discouraged, dummy: dummy, serviceDetails: ioregServiceForMatching, matchScore: score)
                 if scoredCandidateDisplayServices[score] == nil {
                     scoredCandidateDisplayServices[score] = []
                 }
@@ -112,7 +111,6 @@ class Arm64DDC: NSObject {
         return success
     }
     
-    // DDC checksum calculator
     static func checksum(chk: UInt8, data: inout [UInt8], start: Int, end: Int) -> UInt8 {
         var chkd: UInt8 = chk
         for i in start ... end {
@@ -267,30 +265,5 @@ class Arm64DDC: NSObject {
     
     static func checkIfDiscouraged(ioregService _: IOregService) -> Bool {
         false
-    }
-}
-
-class AppleDisplay: Display {
-    private var displayQueue: DispatchQueue
-    
-    override init(_ identifier: CGDirectDisplayID, name: String) {
-        self.displayQueue = DispatchQueue(label: String("displayQueue-\(identifier)"))
-        super.init(identifier, name: name)
-    }
-    
-    override func getCurrentBrightness() -> Float {
-        var brightness: Float = 0
-        DisplayServicesGetBrightness(self.identifier, &brightness)
-        return brightness * 100
-    }
-    
-    public func setAppleBrightness(value: Float) {
-        _ = self.displayQueue.sync {
-            DisplayServicesSetBrightness(self.identifier, value)
-        }
-    }
-    
-    override func setDirectBrightness(valueBrightness: Float) {
-        self.setAppleBrightness(value: valueBrightness / 100)
     }
 }
