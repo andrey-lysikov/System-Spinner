@@ -1,8 +1,6 @@
 //  Copyright © Serhiy Mytrovtsiy, AndreyLysikov
 //  SPDX-License-Identifier: Apache-2.0
 
-import Foundation
-
 class IOServiceData {
     private var con: io_connect_t = 0
     private var cpuTempKeys: [String] = []

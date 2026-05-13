@@ -2,7 +2,6 @@
 //  SPDX-License-Identifier: Apache-2.0
 
 import Cocoa
-import Foundation
 import UserNotifications
 
 var spinnerActive: String!

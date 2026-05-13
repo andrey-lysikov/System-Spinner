@@ -134,20 +134,8 @@ class DisplayManager {
         return brightness
     }
     
-    public func hasVolumeControll() -> Bool {
-        var audio = false
-        for display in displays {
-            if String(display.name) == display.getDefaultAudioOutputDeviceName() {
-                audio = true
-            }
-        }
-        return audio
-    }
-    
     public func toggleMute() -> MediaKeyHandlingResult {
-        if !hasVolumeControll() && !alwaysUseCustomOSD {
-            return .passThrough
-        }
+        var returnControl: MediaKeyHandlingResult = .passThrough
         
         for display in displays {
             var volumeValue = display.getCurrentVolume()
@@ -158,24 +146,20 @@ class DisplayManager {
                 volumeValue = 0
             }
             
-            osd.showOSD(value: Float(volumeValue),isDisplay: false, separators: adjSteps)
-            
-            if display.name == display.getDefaultAudioOutputDeviceName() {
-                display.setDirectVolume(valueVolume: Float(volumeValue))
-            } else {
-                display.setVolume(valueVolume: Float(volumeValue))
+            if display.hasVolumeControl() || alwaysUseCustomOSD {
+                returnControl = .consumed(didChange: true)
+                osd.showOSD(value: Float(volumeValue),isDisplay: false, separators: adjSteps)
             }
+            
+            display.setVolume(valueVolume: Float(volumeValue))
         }
         
-        return .consumed(didChange: true)
+        return returnControl
     }
     
     public func setVolume(isUp: Bool) -> MediaKeyHandlingResult {
         let step:Float = 100 / Float(adjSteps)
-        
-        if !hasVolumeControll() && !alwaysUseCustomOSD {
-            return .passThrough
-        }
+        var returnControl: MediaKeyHandlingResult = .passThrough
         
         for display in displays {
             var volumeValue = (display.getCurrentVolume()/step).rounded() * step + (isUp ? step : -step)
@@ -185,17 +169,16 @@ class DisplayManager {
             } else if volumeValue > 100 {
                 volumeValue = 100
             }
-            osd.showOSD(value: Float(volumeValue),isDisplay: false, separators: adjSteps)
             
-            if display.name == display.getDefaultAudioOutputDeviceName() {
-                display.setDirectVolume(valueVolume: Float(volumeValue))
-            } else {
-                display.setVolume(valueVolume: Float(volumeValue))
+            if display.hasVolumeControl() || alwaysUseCustomOSD {
+                returnControl = .consumed(didChange: true)
+                osd.showOSD(value: Float(volumeValue),isDisplay: false, separators: adjSteps)
             }
             
+            display.setVolume(valueVolume: Float(volumeValue))
         }
         
-        return .consumed(didChange: true)
+        return returnControl
     }
     
     public func setBrightness(isUp: Bool) -> MediaKeyHandlingResult {
@@ -214,7 +197,7 @@ class DisplayManager {
             }
             
             osd.showOSD(value: Float(brightnessValue),isDisplay: true, separators: adjSteps)
-            display.setDirectBrightness(valueBrightness: Float(brightnessValue))
+            display.setBrightness(valueBrightness: Float(brightnessValue))
         }
         return .consumed(didChange: true)
     }

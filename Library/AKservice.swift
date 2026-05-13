@@ -1,7 +1,6 @@
 //  Copyright © Takuto Nakamura, AndreyLysikov
 //  SPDX-License-Identifier: Apache-2.0
 
-import Foundation
 import Darwin
 import Cocoa
 import SystemConfiguration

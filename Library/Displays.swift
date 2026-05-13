@@ -36,7 +36,7 @@ class Display: Equatable {
         return false
     }
     
-    private func getDefaultAudioOutputDevice() -> AudioDeviceID {
+    public func getDefaultAudioOutputDevice() -> AudioDeviceID {
         var propertySize = UInt32(MemoryLayout<AudioDeviceID>.size)
         var deviceID = kAudioDeviceUnknown
         
@@ -50,7 +50,7 @@ class Display: Equatable {
         return deviceID
     }
     
-    private func getAudioDeviceVolume(deviceID: AudioDeviceID) -> Float {
+    public func getAudioDeviceVolume(deviceID: AudioDeviceID) -> Float {
         let channelsCount = 2
         var channels = [UInt32](repeating: 0, count: channelsCount)
         var propertySize = UInt32(MemoryLayout<UInt32>.size * channelsCount)
@@ -85,7 +85,7 @@ class Display: Equatable {
         return (leftLevel + rigthLevel) / 2
     }
     
-    private func setAudioDeviceVolume(deviceID: AudioDeviceID, volumeLevel: Float) {
+    public func setAudioDeviceVolume(deviceID: AudioDeviceID, volumeLevel: Float) {
         let channelsCount = 2
         var channels = [UInt32](repeating: 0, count: channelsCount)
         var propertySize = UInt32(MemoryLayout<UInt32>.size * channelsCount)
@@ -115,9 +115,7 @@ class Display: Equatable {
         
     }
     
-    public func getDefaultAudioOutputDeviceName() -> String {
-        let deviceID: AudioDeviceID =  getDefaultAudioOutputDevice()
-        
+    public func getDefaultAudioOutputDeviceName(deviceID: AudioDeviceID) -> String {
         var propertyAddress = AudioObjectPropertyAddress(
             mSelector: kAudioDevicePropertyDeviceNameCFString,
             mScope: kAudioObjectPropertyScopeGlobal,
@@ -147,8 +145,26 @@ class Display: Equatable {
         return ""
     }
     
+    public func hasVolumeControl() -> Bool {
+        let curentAudioDevice: AudioDeviceID = getDefaultAudioOutputDevice()
+        if name == getDefaultAudioOutputDeviceName(deviceID: curentAudioDevice) {
+            return true
+        } else {
+            return false
+        }
+            
+    }
+    
+    public func saveCurrentBrightness(valueBrightness: Float) {
+        UserDefaults.standard.set(valueBrightness, forKey: "brightness." + name)
+    }
+    
+    public func saveCurrentVolume(valueVolume: Float) {
+        UserDefaults.standard.set(valueVolume, forKey: "volume." + name)
+    }
+    
     public func getCurrentBrightness() -> Float {
-        if let brightness = Float(UserDefaults.standard.string(forKey: "brightness." + self.name) ?? "") {
+        if let brightness = Float(UserDefaults.standard.string(forKey: "brightness." + name) ?? "") {
             return brightness
         }
         return 100
@@ -157,27 +173,24 @@ class Display: Equatable {
     public func getCurrentVolume() -> Float {
         let curentAudioDevice: AudioDeviceID =  getDefaultAudioOutputDevice()
         
-        if self.name != getDefaultAudioOutputDeviceName() {
+        if self.name != getDefaultAudioOutputDeviceName(deviceID: curentAudioDevice) {
             return getAudioDeviceVolume(deviceID: curentAudioDevice) * 100
         } else {
-            if let volume = Float(UserDefaults.standard.string(forKey: "volume." + self.name) ?? "") {
+            if let volume = Float(UserDefaults.standard.string(forKey: "volume." + name) ?? "") {
                 return volume
             }
             return 0
         }
     }
     
+    public func setBrightness(valueBrightness: Float) {
+        saveCurrentBrightness(valueBrightness: valueBrightness)
+    }
+    
     public func setVolume(valueVolume: Float) {
         let curentAudioDevice: AudioDeviceID =  getDefaultAudioOutputDevice()
         setAudioDeviceVolume(deviceID: curentAudioDevice, volumeLevel: valueVolume / 100)
-    }
-    
-    public func setDirectBrightness(valueBrightness: Float) {
-        UserDefaults.standard.set(valueBrightness, forKey: "brightness." + self.name)
-    }
-    
-    public func setDirectVolume(valueVolume: Float) {
-        UserDefaults.standard.set(valueVolume, forKey: "volume." + self.name)
+        saveCurrentVolume(valueVolume: valueVolume)
     }
 }
 
@@ -191,28 +204,22 @@ class AppleDisplay: Display {
     
     override func getCurrentBrightness() -> Float {
         var brightness: Float = 0
-        DisplayServicesGetBrightness(self.identifier, &brightness)
+        DisplayServicesGetBrightness(identifier, &brightness)
         return brightness * 100
     }
     
-    public func setAppleBrightness(value: Float) {
+    override func setBrightness(valueBrightness: Float) {
         _ = self.displayQueue.sync {
-            DisplayServicesSetBrightness(self.identifier, value)
+            DisplayServicesSetBrightness(identifier, valueBrightness / 100)
         }
-    }
-    
-    override func setDirectBrightness(valueBrightness: Float) {
-        self.setAppleBrightness(value: valueBrightness / 100)
+        saveCurrentBrightness(valueBrightness: valueBrightness)
     }
 }
 
 class OtherDisplay: Display {
     enum Command: UInt8 {
-        case none = 0
         case luminance = 0x10
         case audioSpeakerVolume = 0x62
-        case audioMuteScreenBlank = 0x8D
-        case contrast = 0x12
         public static let brightness = luminance
     }
 
@@ -235,14 +242,20 @@ class OtherDisplay: Display {
         }
     }
     
-    override func setDirectBrightness(valueBrightness: Float) {
+    override func setBrightness(valueBrightness: Float) {
         self.writeDDCValues(command: .brightness, value: UInt16(valueBrightness))
-        UserDefaults.standard.set(valueBrightness, forKey: "brightness." + self.name)
+        saveCurrentBrightness(valueBrightness: valueBrightness)
     }
     
-    override func setDirectVolume(valueVolume: Float) {
-        self.writeDDCValues(command: .audioSpeakerVolume, value: UInt16(valueVolume))
-        UserDefaults.standard.set(valueVolume, forKey: "volume." + self.name)
+    override func setVolume(valueVolume: Float) {
+        let curentAudioDevice: AudioDeviceID =  getDefaultAudioOutputDevice()
+        
+        if name == getDefaultAudioOutputDeviceName(deviceID: curentAudioDevice) {
+            self.writeDDCValues(command: .audioSpeakerVolume, value: UInt16(valueVolume))
+        } else {
+            setAudioDeviceVolume(deviceID: curentAudioDevice, volumeLevel: valueVolume / 100)
+        }
+        saveCurrentVolume(valueVolume: valueVolume)
     }
     
     func asyncPerformWriteDDCValues(command: Command) {
@@ -259,7 +272,7 @@ class OtherDisplay: Display {
             self.writeDDCLastSavedValue[command] = value
         }
 
-        _ = DDC.write(service: self.ddcService, command: command.rawValue, value: value)
+        _ = DDC.write(service: ddcService, command: command.rawValue, value: value)
 
     }
 }

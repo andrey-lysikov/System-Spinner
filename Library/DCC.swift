@@ -2,7 +2,6 @@
 //  SPDX-License-Identifier: Apache-2.0
 
 import IOKit
-import Foundation
 
 class DDC: NSObject {
     static let MAX_MATCH_SCORE: Int = 20
