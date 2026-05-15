@@ -24,6 +24,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7F07C82D2FB458A2007C3DBC /* System_Spinner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = System_Spinner.entitlements; sourceTree = "<group>"; };
 		7F0D025A2D1EAD9A0029C507 /* DDC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DDC.h; sourceTree = "<group>"; };
 		7F0D026E2D1ECA450029C507 /* CoreDisplay.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreDisplay.framework; path = ../../../../System/Library/Frameworks/CoreDisplay.framework; sourceTree = "<group>"; };
 		7F0D02722D1ECADD0029C507 /* DisplayServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DisplayServices.framework; path = ../../../../System/Library/PrivateFrameworks/DisplayServices.framework; sourceTree = "<group>"; };
@@ -84,6 +85,7 @@
 		7FB9089E2B67B9A400E9EE24 = {
 			isa = PBXGroup;
 			children = (
+				7F07C82D2FB458A2007C3DBC /* System_Spinner.entitlements */,
 				7F65A9512DAEAD3C0052875D /* Localizable.xcstrings */,
 				7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */,
 				7F35E5932B847F230032163E /* README.md */,
@@ -330,7 +332,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.5.0;
+				MARKETING_VERSION = 4.5.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "System-Spinner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -373,7 +375,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.5.0;
+				MARKETING_VERSION = 4.5.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "System-Spinner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
