@@ -53,23 +53,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     ]
     
     @objc private func aboutWindow(sender: NSStatusItem) {
-        let appCurrentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+        let appCurrentVersion: String = (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String)!
         let anAbout = NSAlert()
-        anAbout.messageText = "System Spinner " + appCurrentVersion!
-        anAbout.informativeText = localizedString("System Spinner provides macOS system information in status bar. Minimal, small and light")
+        anAbout.messageText = "System Spinner"
+        anAbout.informativeText = localizedString("""
+                                                  System Spinner provides macOS system information in status bar.
+                                                  Minimal, small and light.
+                                                  
+                                                  Author: @Andrey.Lysikov
+                                                  Version: \(appCurrentVersion)
+                                                  """)
         anAbout.alertStyle = .informational
         anAbout.addButton(withTitle: localizedString("Goto site"))
-        anAbout.addButton(withTitle: localizedString("Check new version"))
         anAbout.addButton(withTitle: localizedString("Close"))
         let response = anAbout.runModal()
         switch response {
         case .alertFirstButtonReturn:
             NSWorkspace.shared.open(URL(string: sHelper.appAboutUrl)!)
-        case .alertSecondButtonReturn:
-            sHelper.hasNewVersion(checkNow: true)
         default:
             anAbout.window.close()
         }
+    }
+    
+    @objc private func checkNewVersion(sender: NSStatusItem) {
+        sHelper.hasNewVersion(checkNow: true)
     }
     
     private func showPopover(sender: Any?) {
@@ -375,6 +382,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         saveParams()
     }
     
+    @objc func applicationQuit() {
+        MediaKeyMonitor.shared.stop()
+        stopRunning()
+        saveParams()
+        exit(0)
+    }
+    
     private func saveParams() {
         UserDefaults.standard.set(spinnerActive, forKey: "spinnerActive")
         UserDefaults.standard.set(updateInterval, forKey: "spinnerUpdateInterval")
@@ -518,7 +532,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         aboutItem.image = NSImage(systemSymbolName: "info", accessibilityDescription: localizedString("About"))
         statusItemMenu.addItem(aboutItem)
         
-        let quitItem = NSMenuItem(title: localizedString("Quit"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "")
+        let checkUpdateItem = NSMenuItem(title: localizedString("Check new version"), action: #selector(checkNewVersion(sender:)), keyEquivalent: "")
+        checkUpdateItem.image = NSImage(systemSymbolName: "arrow.trianglehead.clockwise.rotate.90", accessibilityDescription: localizedString("Check new version"))
+        statusItemMenu.addItem(checkUpdateItem)
+        
+        let quitItem = NSMenuItem(title: localizedString("Quit"), action: #selector(applicationQuit), keyEquivalent: "")
         quitItem.image = NSImage(systemSymbolName: "xmark", accessibilityDescription: localizedString("Quit"))
         statusItemMenu.addItem(quitItem)
         
@@ -570,13 +588,41 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {
-        MediaKeyMonitor.shared.stop()
-        stopRunning()
-        saveParams()
-    }
+        applicationQuit()
+     }
     
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
         return true
+    }
+}
+
+
+func localizedString(_ key: String.LocalizationValue) -> String {
+    if useLocalization {
+        return String(localized: key)
+    } else {
+        return String(localized: key, table: "English")
+    }
+}
+
+extension NSImage {
+    func image(with tintColor: NSColor) -> NSImage {
+        if self.isTemplate == false {
+            return self
+        }
+        
+        let image = self.copy() as! NSImage
+        image.lockFocus()
+        
+        tintColor.set()
+        
+        let imageRect = NSRect(origin: .zero, size: image.size)
+        imageRect.fill(using: .sourceIn)
+        
+        image.unlockFocus()
+        image.isTemplate = false
+        
+        return image
     }
 }
 
@@ -586,7 +632,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
             AXIsProcessTrustedWithOptions(options)
         } else if response.actionIdentifier == localizedString("Quit") {
-            exit(0)
+            applicationQuit()
         } else if response.actionIdentifier == localizedString("Download") {
             NSWorkspace.shared.open(URL(string: sHelper.appLastestUrl)!)
         }

@@ -52,27 +52,29 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         
     }
     
-    public func sendSystemNotification(title: String, body: String = "", action: String) {
+    public func sendSystemNotification(title: String, body: String = "", action: String = "" ) {
         let content = UNMutableNotificationContent()
         let notificationCenter = UNUserNotificationCenter.current()
         let downloadAction = UNNotificationAction(identifier: action, title: action, options: .init(rawValue: 0))
         let category = UNNotificationCategory(identifier: "ACTION", actions: [downloadAction], intentIdentifiers: [], hiddenPreviewsBodyPlaceholder: "", options: .customDismissAction)
-        
-        content.title = title
-        content.body = body
-        content.sound = UNNotificationSound.default
-        content.categoryIdentifier = "ACTION"
-        notificationCenter.setNotificationCategories([category])
-        notificationCenter.removeAllPendingNotificationRequests()
-        notificationCenter.requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
-            if !granted {
-                print("Notifications is not allowed")
+        notificationCenter.requestAuthorization(options: [.alert, .sound, .badge]) { (granted, _) in
+            if granted {
+                content.title = title
+                content.body = body
+                content.sound = UNNotificationSound.default
+                
+                if !action.isEmpty {
+                    content.categoryIdentifier = "ACTION"
+                    notificationCenter.setNotificationCategories([category])
+                }
+                
+                notificationCenter.removeAllPendingNotificationRequests()
+                notificationCenter.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
             }
         }
-        notificationCenter.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
     }
     
-    public func hasNewVersion(checkNow: Bool = false) {
+   public func hasNewVersion(checkNow: Bool = false) {
         struct versionEntry: Codable {
             let id: Int
             var tagName: String
@@ -85,7 +87,7 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
             return Int(filteredString) ?? 0
         }
         
-        let appCurrentVersion = trimCharacter(val: Bundle.main.infoDictionary!["CFBundleShortVersionString"] as Any)
+       let versionAppString: String = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as Any as! String
         
         guard let url = URL(string: appApiUrl) else {
             return
@@ -103,12 +105,17 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
                     do {
                         let decoder = JSONDecoder()
                         decoder.keyDecodingStrategy = .convertFromSnakeCase
-                        let versionString = try decoder.decode(versionEntry.self, from: data).tagName
-                        let versionGit = trimCharacter(val: versionString)
-                        if versionGit > 0 && appCurrentVersion > 0 && versionGit > appCurrentVersion {
-                            self.sendSystemNotification(title: localizedString("System Spinner has updated"),
-                                                        body: localizedString("An new version \(versionString) is available. Would you like download to update?"),
+                        let versionGitString = try decoder.decode(versionEntry.self, from: data).tagName
+                        let versionGit: Int = Int(trimCharacter(val: versionGitString))
+                        let versionApp: Int = Int(trimCharacter(val: versionAppString))
+                        
+                        if versionGit > 0 && versionApp > 0 && versionGit > versionApp {
+                            self.sendSystemNotification(title: localizedString("System Spinner update"),
+                                                        body: localizedString("New version \(versionGitString) is available. Would you like download to update?"),
                                                         action: localizedString("Download"))
+                        } else if checkNow {
+                            self.sendSystemNotification(title: localizedString("System Spinner update"),
+                                                        body: localizedString("You version \(versionAppString) is actual version."))
                         }
                         UserDefaults.standard.set(Date(), forKey: "group.lastCheckVersion")
                         self.checkNewVersionInProgress = false
@@ -125,34 +132,5 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
     override init() {
         super.init()
         UNUserNotificationCenter.current().delegate = self
-    }
-}
-
-func localizedString(_ key: String.LocalizationValue) -> String {
-    if useLocalization {
-        return String(localized: key)
-    } else {
-        return String(localized: key, table: "English")
-    }
-}
-
-extension NSImage {
-    func image(with tintColor: NSColor) -> NSImage {
-        if self.isTemplate == false {
-            return self
-        }
-        
-        let image = self.copy() as! NSImage
-        image.lockFocus()
-        
-        tintColor.set()
-        
-        let imageRect = NSRect(origin: .zero, size: image.size)
-        imageRect.fill(using: .sourceIn)
-        
-        image.unlockFocus()
-        image.isTemplate = false
-        
-        return image
     }
 }
