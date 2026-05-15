@@ -544,6 +544,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        
+        // close app if it running
+        guard let bundleID = Bundle.main.bundleIdentifier else { return }
+        let runningApps = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
+        for app in runningApps {
+            if app.processIdentifier != NSRunningApplication.current.processIdentifier {
+                app.terminate()
+            }
+        }
+        
+        // load app preferences
         spinnerActive = UserDefaults.standard.string(forKey: "spinnerActive") ?? "Loader"
         updateInterval = Double(UserDefaults.standard.string(forKey: "spinnerUpdateInterval") ?? String(updateInterval))!
         enableStatusText = Bool(UserDefaults.standard.bool(forKey: "enableStatusText"))
