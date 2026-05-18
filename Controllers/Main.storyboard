@@ -94,6 +94,9 @@
                                                 </customSpacing>
                                             </stackView>
                                         </subviews>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="64" id="Kgh-JV-mRe"/>
+                                        </constraints>
                                         <visibilityPriorities>
                                             <integer value="1000"/>
                                             <integer value="1000"/>
@@ -122,7 +125,7 @@
                                             <levelIndicator verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RLA-xZ-kZB">
                                                 <rect key="frame" x="0.0" y="17" width="134" height="22"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="height" constant="20" id="kIG-to-l0y"/>
+                                                    <constraint firstAttribute="height" constant="20" id="kIG-to-l0y" userLabel="height = 22"/>
                                                 </constraints>
                                                 <levelIndicatorCell key="cell" alignment="left" doubleValue="2" maxValue="20" warningValue="12" criticalValue="18" id="FCa-5r-wuf"/>
                                                 <color key="fillColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -150,7 +153,6 @@
                                             </stackView>
                                         </subviews>
                                         <constraints>
-                                            <constraint firstItem="1dw-Sk-g0u" firstAttribute="leading" secondItem="TRe-cy-d0t" secondAttribute="leading" id="ZmD-N9-gXh"/>
                                             <constraint firstAttribute="trailing" secondItem="1dw-Sk-g0u" secondAttribute="trailing" id="tN1-BJ-1gX"/>
                                         </constraints>
                                         <visibilityPriorities>
@@ -366,7 +368,6 @@
                                     <constraint firstAttribute="trailing" secondItem="E6g-zr-YzW" secondAttribute="trailing" id="BjO-JV-84i"/>
                                     <constraint firstItem="XBL-lq-V4Y" firstAttribute="leading" secondItem="u9E-J8-04d" secondAttribute="leading" id="DPc-H4-mXb"/>
                                     <constraint firstAttribute="trailing" secondItem="LgR-pX-U3Q" secondAttribute="trailing" id="c0I-1e-XSU"/>
-                                    <constraint firstItem="XBL-lq-V4Y" firstAttribute="top" secondItem="u9E-J8-04d" secondAttribute="top" constant="145" id="cK4-lm-YR7"/>
                                     <constraint firstItem="E6g-zr-YzW" firstAttribute="leading" secondItem="u9E-J8-04d" secondAttribute="leading" id="jTU-qW-dnb"/>
                                     <constraint firstItem="Dgh-Ef-0Yj" firstAttribute="leading" secondItem="u9E-J8-04d" secondAttribute="leading" id="keD-Uh-lIy"/>
                                     <constraint firstAttribute="trailing" secondItem="TRe-cy-d0t" secondAttribute="trailing" id="sD2-Nn-1CR"/>
@@ -423,10 +424,10 @@
                 </viewController>
                 <customObject id="yyy-ap-QUY" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="70" y="40.5"/>
+            <point key="canvasLocation" x="70" y="-14.5"/>
         </scene>
     </scenes>
     <resources>
-        <image name="NSTouchBarGetInfoTemplate" width="20" height="20"/>
+        <image name="NSTouchBarGetInfoTemplate" width="19" height="19"/>
     </resources>
 </document>
