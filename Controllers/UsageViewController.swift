@@ -2,12 +2,97 @@
 //  SPDX-License-Identifier: Apache-2.0
 
 import Cocoa
+import SwiftUI
+import Charts
 
-class UsageViewController: NSViewController {
+struct chartData: Identifiable {
+    let id = UUID()
+    let time: Int
+    let usage: Double
+}
+
+struct tableData: Identifiable {
+    let id = UUID()
+    let name: String
+    let usage: String
+}
+
+@Observable class chartDataManager {
+    var chartPoints: [chartData] = []
+    var tablePoints: [tableData] = []
+    var title: String = ""
+}
+
+struct ChartContentView: View {
+    var chartItems: chartDataManager
+    var body: some View {
+            VStack(alignment: .leading) {
+                Text(chartItems.title)
+                    .font(.headline)
+                    .fontWeight(.heavy)
+                Chart(chartItems.chartPoints) { item in
+                    AreaMark(
+                        x: .value("Name", item.time),
+                        y: .value("Usage", item.usage)
+                    )
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [
+                                .blue.opacity(1),
+                                .blue.opacity(0.4)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                }
+                .frame(height: 100)
+                .chartYScale(domain: 0...100)
+                .chartXScale(domain: 0...359)
+                .chartXAxis { AxisMarks() { _ in
+                    AxisGridLine()
+                    AxisTick()
+                }}
+                Grid(alignment: .leading, horizontalSpacing: 20, verticalSpacing: 0) {
+                    GridRow {
+                        Text(localizedString("Name"))
+                            .bold()
+                        Spacer()
+                        Text(localizedString("Usage"))
+                            .bold()
+                    }
+                }
+                ScrollView(.vertical, showsIndicators: false) {
+                    Grid(alignment: .leading, horizontalSpacing: 5, verticalSpacing: 1) {
+                        ForEach(chartItems.tablePoints) { item in
+                            Divider()
+                            GridRow {
+                                Text(item.name).frame(width: 200, alignment: .leading)
+                                Spacer()
+                                Text(item.usage)
+                            }
+                            .font(.system(size: 11))
+                            .padding(.vertical, 2)
+                        }
+                        Divider()
+                    }
+                }
+                .frame(height: 230)
+            }
+            .padding()
+        }
+}
+
+class UsageViewController: NSViewController, NSPopoverDelegate {
     private var dataTimer: Timer? = nil
     private var cpuProcessMenu: NSMenu!
     private var memProcessMenu: NSMenu!
     private let ioService = IOServiceData()
+    private let popupChart = NSPopover()
+    private let dataManager = chartDataManager()
+    private var lastClickButton: NSButton? = nil
+    private var chartDataItems = [chartData(time: 0, usage: 0)]
+    private var tableDataItems = [tableData(name: "", usage: "")]
     
     @IBOutlet var fanStack: NSStackView!
     @IBOutlet var cpuTempStack: NSStackView!
@@ -33,47 +118,29 @@ class UsageViewController: NSViewController {
     
     @IBOutlet var netLabel: NSTextField!
     
-    @IBOutlet var cpuPopupButton: NSButton!
-    @IBOutlet var memPopupButton: NSButton!
-    
-    @objc private func itemMenuClick(sender: NSMenuItem) {
-        // no action yet
+    @IBOutlet var cpuChartPopupButton: NSButton!
+    @IBOutlet var memChartPopupButton: NSButton!
+ 
+    @IBAction func cpuPopupButtonAction(_ sender: NSButton) {
+        lastClickButton = sender
+        updatePopupData()
+        popupChart.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
     }
     
-    @objc private func cpuPopupAction(sender: NSButton) {
-        cpuProcessMenu.removeAllItems()
-        for item in ActivityData.getTopProcess().sorted(by: \.cpu) {
-            if item.cpu > 0 {
-                let menuItem = NSMenuItem(title: item.name + " (" + String(item.pid) + ") - " + String(item.cpu) + "%", action: #selector(itemMenuClick(sender:)), keyEquivalent: "")
-                let image = item.icon
-                image.size = NSSize(width: 19 / image.size.height * image.size.width, height: 19)
-                menuItem.image = image
-                menuItem.isEnabled = true
-                cpuProcessMenu.addItem(menuItem)
-            }
-        }
-        cpuProcessMenu.popUp(positioning: nil, at: NSPoint(x: -cpuProcessMenu.size.width/1.1, y: sender.frame.height + 5), in: sender)
+    @IBAction func memPopupButtonAction(_ sender: NSButton) {
+        lastClickButton = sender
+        updatePopupData()
+        popupChart.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
     }
     
-    @objc private func memPopupAction(sender: NSButton) {
-        memProcessMenu.removeAllItems()
-        for item in ActivityData.getTopProcess().sorted(by: \.mem) {
-            if item.mem > 0.5 {
-                let menuItem = NSMenuItem(title: item.name + " (" + String(item.pid) + ") " + String(item.realmem), action: #selector(itemMenuClick(sender:)), keyEquivalent: "")
-                let image = item.icon
-                image.size = NSSize(width: 19 / image.size.height * image.size.width, height: 19)
-                menuItem.image = image
-                memProcessMenu.addItem(menuItem)
-            }
-        }
-        memProcessMenu.popUp(positioning: nil, at: NSPoint(x:  -memProcessMenu.size.width/1.1, y: sender.frame.height + 5), in: sender)
+    func popoverWillClose(_ notification: Notification) {
+        guard let window = self.view.window else { return }
+        window.makeKey()
+        window.makeFirstResponder(self.view)
+        lastClickButton = nil
     }
     
     override func viewDidLoad() {
-        
-        //for autoresize
-        self.preferredContentSize = NSMakeSize(self.view.frame.width, 100);
-        
         // Air is not present fan
         if ioService.isAir {
             fanStack.removeFromSuperview()
@@ -84,16 +151,14 @@ class UsageViewController: NSViewController {
             cpuTempStack.removeFromSuperview()
         }
         
-        // create top cpu process menu
-        cpuProcessMenu = NSMenu()
-        cpuProcessMenu.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .medium)
-        cpuPopupButton.action =  #selector(cpuPopupAction(sender:))
-        
-        // create top mem process menu
-        memProcessMenu  = NSMenu()
-        memLevel.menu = memProcessMenu
-        memProcessMenu.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .medium)
-        memPopupButton.action =  #selector(memPopupAction(sender:))
+        // create chart data view
+        let hostingController = NSHostingController(rootView: ChartContentView(chartItems: dataManager))
+        let exactSize = NSSize(width: 350, height: 400)
+        hostingController.preferredContentSize = exactSize
+        popupChart.contentViewController = hostingController
+        popupChart.behavior = .transient
+        popupChart.animates = false
+        popupChart.delegate = self
         
         super.viewDidLoad()
     }
@@ -117,7 +182,7 @@ class UsageViewController: NSViewController {
     
     private func updateData() {
         ioService.update()
-        ActivityData.updateAll()
+        ActivityData.update()
         
         // CPU data
         cpuLabel.stringValue = localizedString("CPU Usage") + " " + Int(ActivityData.cpuPercentage).formatted(.percent)
@@ -173,6 +238,43 @@ class UsageViewController: NSViewController {
         memCompBar.doubleValue = ActivityData.memCompressed
         
         netLabel.stringValue = ActivityData.netIp + "\n↓ " + String(Int(ActivityData.netIn.value)) + ActivityData.netIn.unit + " | ↑ " + String(Int(ActivityData.netOut.value)) + ActivityData.netOut.unit
+        
+        if popupChart.isShown {
+            updatePopupData()
+        }
+    }
+    
+    private func updatePopupData() {
+        chartDataItems.removeAll()
+        tableDataItems.removeAll()
+        
+        if lastClickButton == cpuChartPopupButton {
+            dataManager.title = localizedString("CPU usage details:")
+            for (key, usage) in ActivityData.loadCpuPreviousHistDetails.enumerated() {
+                chartDataItems.append(chartData(time: key, usage: usage))
+            }
+            dataManager.chartPoints = chartDataItems
+            
+            for item in ActivityData.getTopProcess().sorted(by: \.cpu) {
+                if item.cpu > 0 {
+                    tableDataItems.append(tableData(name: item.name, usage: String(item.cpu) + "%"))
+                }
+            }
+            dataManager.tablePoints = tableDataItems
+        } else if lastClickButton == memChartPopupButton{
+            dataManager.title = localizedString("Memory usage details:")
+            for (key, usage) in ActivityData.loadMemPreviousHistDetails.enumerated() {
+                chartDataItems.append(chartData(time: key, usage: usage))
+            }
+            dataManager.chartPoints = chartDataItems
+            
+            for item in ActivityData.getTopProcess().sorted(by: \.mem) {
+                if item.mem > 0.1 {
+                    tableDataItems.append(tableData(name: item.name, usage: item.realmem))
+                }
+            }
+            dataManager.tablePoints = tableDataItems
+        }
     }
 }
 

@@ -34,17 +34,20 @@
                                         <rect key="frame" x="0.0" y="261" width="154" height="64"/>
                                         <subviews>
                                             <stackView distribution="fill" orientation="horizontal" alignment="centerY" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FSJ-2o-hL4">
-                                                <rect key="frame" x="0.0" y="45" width="55" height="19"/>
+                                                <rect key="frame" x="0.0" y="45" width="57" height="19"/>
                                                 <subviews>
-                                                    <button identifier="cpuPopupButton" translatesAutoresizingMaskIntoConstraints="NO" id="gwq-ce-bfq">
-                                                        <rect key="frame" x="0.0" y="2" width="15" height="15"/>
-                                                        <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSTouchBarGetInfoTemplate" imagePosition="only" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="OX8-vz-DPD">
+                                                    <button identifier="cpuChartPopButton" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="pIr-8I-1s8" userLabel="Cpu Chart Button">
+                                                        <rect key="frame" x="0.0" y="2.5" width="17" height="14"/>
+                                                        <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="chart.xyaxis.line" catalog="system" imagePosition="only" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="I9O-wC-lUS">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                             <font key="font" metaFont="system"/>
                                                         </buttonCell>
+                                                        <connections>
+                                                            <action selector="cpuPopupButtonAction:" target="xhu-mv-qwE" id="jpT-Lh-rr6"/>
+                                                        </connections>
                                                     </button>
-                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="HtW-LS-skZ">
-                                                        <rect key="frame" x="21" y="0.0" width="36" height="19"/>
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="HtW-LS-skZ">
+                                                        <rect key="frame" x="23" y="0.0" width="36" height="19"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="CPU" id="NZg-BL-gOH">
                                                             <font key="font" metaFont="systemMedium" size="15"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -53,7 +56,7 @@
                                                     </textField>
                                                 </subviews>
                                                 <constraints>
-                                                    <constraint firstItem="HtW-LS-skZ" firstAttribute="centerY" secondItem="gwq-ce-bfq" secondAttribute="centerY" id="4js-LJ-byT"/>
+                                                    <constraint firstItem="HtW-LS-skZ" firstAttribute="centerY" secondItem="pIr-8I-1s8" secondAttribute="centerY" id="nU5-Yi-gku"/>
                                                 </constraints>
                                                 <visibilityPriorities>
                                                     <integer value="1000"/>
@@ -69,7 +72,7 @@
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="22" id="Rqa-hS-0rA"/>
                                                 </constraints>
-                                                <levelIndicatorCell key="cell" alignment="left" doubleValue="2" maxValue="20" warningValue="15" criticalValue="18" id="vGN-J4-AfQ"/>
+                                                <levelIndicatorCell key="cell" enabled="NO" alignment="left" doubleValue="2" maxValue="20" warningValue="15" criticalValue="18" id="vGN-J4-AfQ"/>
                                                 <color key="fillColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="warningFillColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="criticalFillColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
@@ -77,7 +80,7 @@
                                             <stackView distribution="fill" orientation="vertical" alignment="centerX" spacing="0.0" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aYt-9S-xoe">
                                                 <rect key="frame" x="0.0" y="0.0" width="154" height="15"/>
                                                 <subviews>
-                                                    <textField horizontalHuggingPriority="247" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="HhM-HC-1yU">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="247" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="HhM-HC-1yU">
                                                         <rect key="frame" x="-2" y="0.0" width="158" height="15"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Power" id="zkR-kh-ICT">
                                                             <font key="font" metaFont="systemMedium" size="12"/>
@@ -114,7 +117,7 @@
                                             <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="anS-Yp-V2H">
                                                 <rect key="frame" x="0.0" y="62" width="120" height="5"/>
                                             </box>
-                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yxh-Ei-T0i">
+                                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yxh-Ei-T0i">
                                                 <rect key="frame" x="-2" y="43" width="41" height="17"/>
                                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Temp" id="bZp-0t-eAG">
                                                     <font key="font" metaFont="systemMedium" size="14"/>
@@ -127,7 +130,7 @@
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="20" id="kIG-to-l0y" userLabel="height = 22"/>
                                                 </constraints>
-                                                <levelIndicatorCell key="cell" alignment="left" doubleValue="2" maxValue="20" warningValue="12" criticalValue="18" id="FCa-5r-wuf"/>
+                                                <levelIndicatorCell key="cell" enabled="NO" alignment="left" doubleValue="2" maxValue="20" warningValue="12" criticalValue="18" id="FCa-5r-wuf"/>
                                                 <color key="fillColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="warningFillColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="criticalFillColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
@@ -135,7 +138,7 @@
                                             <stackView distribution="fill" orientation="vertical" alignment="centerX" spacing="0.0" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1dw-Sk-g0u">
                                                 <rect key="frame" x="0.0" y="0.0" width="154" height="15"/>
                                                 <subviews>
-                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="exY-zy-XQf">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="exY-zy-XQf">
                                                         <rect key="frame" x="49" y="0.0" width="56" height="15"/>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" alignment="center" title="fan/data" id="5hb-oL-lsr">
                                                             <font key="font" metaFont="systemMedium" size="12"/>
@@ -175,17 +178,20 @@
                                                 <rect key="frame" x="0.0" y="77" width="120" height="5"/>
                                             </box>
                                             <stackView distribution="fill" orientation="horizontal" alignment="top" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QQi-uR-oeX">
-                                                <rect key="frame" x="0.0" y="58" width="58" height="19"/>
+                                                <rect key="frame" x="0.0" y="58" width="60" height="19"/>
                                                 <subviews>
-                                                    <button identifier="memPopupButton" translatesAutoresizingMaskIntoConstraints="NO" id="Mfy-lg-rGi">
-                                                        <rect key="frame" x="0.0" y="-3" width="15" height="25"/>
-                                                        <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSTouchBarGetInfoTemplate" imagePosition="only" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="0TC-Xh-s0p">
+                                                    <button identifier="memChartPopButton" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Hrp-iM-vnk" userLabel="Mem Chart Button">
+                                                        <rect key="frame" x="0.0" y="2.5" width="17" height="14"/>
+                                                        <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="chart.xyaxis.line" catalog="system" imagePosition="only" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="Z1C-In-6tI">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                             <font key="font" metaFont="system"/>
                                                         </buttonCell>
+                                                        <connections>
+                                                            <action selector="memPopupButtonAction:" target="xhu-mv-qwE" id="bRw-YS-Hj3"/>
+                                                        </connections>
                                                     </button>
-                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NlV-oa-81H">
-                                                        <rect key="frame" x="21" y="0.0" width="39" height="19"/>
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NlV-oa-81H">
+                                                        <rect key="frame" x="23" y="0.0" width="39" height="19"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" title="MEM" id="FAO-9u-KAP">
                                                             <font key="font" metaFont="systemMedium" size="15"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -194,7 +200,7 @@
                                                     </textField>
                                                 </subviews>
                                                 <constraints>
-                                                    <constraint firstItem="NlV-oa-81H" firstAttribute="centerY" secondItem="Mfy-lg-rGi" secondAttribute="centerY" id="jDj-Up-ej3"/>
+                                                    <constraint firstItem="NlV-oa-81H" firstAttribute="centerY" secondItem="Hrp-iM-vnk" secondAttribute="centerY" id="Q8g-YL-LtO"/>
                                                 </constraints>
                                                 <visibilityPriorities>
                                                     <integer value="1000"/>
@@ -207,12 +213,12 @@
                                             </stackView>
                                             <levelIndicator verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="9YX-qF-SoU">
                                                 <rect key="frame" x="0.0" y="38" width="134" height="18"/>
-                                                <levelIndicatorCell key="cell" alignment="left" doubleValue="2" maxValue="20" warningValue="15" criticalValue="18" id="9wu-jN-5ah"/>
+                                                <levelIndicatorCell key="cell" enabled="NO" alignment="left" doubleValue="2" maxValue="20" warningValue="15" criticalValue="18" id="9wu-jN-5ah"/>
                                                 <color key="fillColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="warningFillColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="criticalFillColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
                                             </levelIndicator>
-                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="OvO-2T-Xut">
+                                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="OvO-2T-Xut">
                                                 <rect key="frame" x="-2" y="18" width="66" height="19"/>
                                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Pressure" id="k4h-eo-uKa">
                                                     <font key="font" metaFont="systemMedium" size="15"/>
@@ -222,7 +228,7 @@
                                             </textField>
                                             <levelIndicator verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="aua-ud-mmF">
                                                 <rect key="frame" x="0.0" y="-2" width="134" height="18"/>
-                                                <levelIndicatorCell key="cell" alignment="left" doubleValue="2" maxValue="20" warningValue="15" criticalValue="18" id="ZqK-9O-ZYv"/>
+                                                <levelIndicatorCell key="cell" enabled="NO" alignment="left" doubleValue="2" maxValue="20" warningValue="15" criticalValue="18" id="ZqK-9O-ZYv"/>
                                                 <color key="fillColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="warningFillColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="criticalFillColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
@@ -255,7 +261,7 @@
                                                     <progressIndicator wantsLayer="YES" maxValue="100" doubleValue="50" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="mcU-Jz-gB3">
                                                         <rect key="frame" x="0.0" y="0.0" width="91" height="20"/>
                                                     </progressIndicator>
-                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6UI-uU-yxl">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6UI-uU-yxl">
                                                         <rect key="frame" x="97" y="7" width="25" height="13"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="APP" id="qc3-9B-SfP">
                                                             <font key="font" metaFont="systemMedium" size="10"/>
@@ -279,7 +285,7 @@
                                                     <progressIndicator wantsLayer="YES" maxValue="100" doubleValue="50" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="gfz-pY-0xN">
                                                         <rect key="frame" x="0.0" y="0.0" width="87" height="20"/>
                                                     </progressIndicator>
-                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="3CD-CC-aQ5">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="3CD-CC-aQ5">
                                                         <rect key="frame" x="93" y="7" width="29" height="13"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="WRD" id="5hX-k2-rnS">
                                                             <font key="font" metaFont="systemMedium" size="10"/>
@@ -303,7 +309,7 @@
                                                     <progressIndicator wantsLayer="YES" maxValue="100" doubleValue="50" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="qWB-bf-6CP">
                                                         <rect key="frame" x="0.0" y="0.0" width="95" height="20"/>
                                                     </progressIndicator>
-                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zhz-4i-eqf">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zhz-4i-eqf">
                                                         <rect key="frame" x="101" y="7" width="21" height="13"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="ZIP" id="DG0-lw-Co6">
                                                             <font key="font" metaFont="systemMedium" size="10"/>
@@ -339,7 +345,7 @@
                                             <box verticalHuggingPriority="750" verifyAmbiguity="off" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="mPd-bq-Wc1">
                                                 <rect key="frame" x="17" y="21" width="120" height="5"/>
                                             </box>
-                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="lsQ-vN-vIM">
+                                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="lsQ-vN-vIM">
                                                 <rect key="frame" x="0.0" y="0.0" width="154" height="15"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="150" id="yC4-wa-zEL"/>
@@ -397,24 +403,27 @@
                             <constraint firstAttribute="width" constant="170" id="nKz-l5-x5z"/>
                             <constraint firstItem="u9E-J8-04d" firstAttribute="leading" secondItem="7tv-i3-Uoi" secondAttribute="leading" constant="8" id="vsK-95-D3F"/>
                         </constraints>
+                        <shadow key="shadow">
+                            <color key="color" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </shadow>
                     </view>
                     <connections>
+                        <outlet property="cpuChartPopupButton" destination="pIr-8I-1s8" id="d5Z-39-bID"/>
                         <outlet property="cpuLabel" destination="HtW-LS-skZ" id="wT5-H0-s4E"/>
                         <outlet property="cpuLevel" destination="wUp-SH-GmE" id="tor-3B-Qzg"/>
-                        <outlet property="cpuPopupButton" destination="gwq-ce-bfq" id="iCp-MS-ugF"/>
                         <outlet property="cpuTempLabel" destination="yxh-Ei-T0i" id="cXH-B0-xPl"/>
                         <outlet property="cpuTempStack" destination="TRe-cy-d0t" id="j6r-h0-z4O"/>
                         <outlet property="fanLabel" destination="exY-zy-XQf" id="1Gs-uL-gcK"/>
                         <outlet property="fanStack" destination="1dw-Sk-g0u" id="ccp-5L-TZE"/>
                         <outlet property="memApp" destination="6UI-uU-yxl" id="aqO-E9-yp9"/>
                         <outlet property="memAppBar" destination="mcU-Jz-gB3" id="Hmb-bv-DFl"/>
+                        <outlet property="memChartPopupButton" destination="Hrp-iM-vnk" id="xIQ-8X-JQ8"/>
                         <outlet property="memComp" destination="zhz-4i-eqf" id="WRW-Qo-T1P"/>
                         <outlet property="memCompBar" destination="qWB-bf-6CP" id="Vbc-Q7-18g"/>
                         <outlet property="memInactive" destination="3CD-CC-aQ5" id="CCi-gP-2U7"/>
                         <outlet property="memInactiveBar" destination="gfz-pY-0xN" id="3pF-No-UD9"/>
                         <outlet property="memLevel" destination="9YX-qF-SoU" id="IuT-OK-ITv"/>
                         <outlet property="memPercentage" destination="NlV-oa-81H" id="MEZ-0T-k1C"/>
-                        <outlet property="memPopupButton" destination="Mfy-lg-rGi" id="QXe-GE-8tv"/>
                         <outlet property="memPressure" destination="OvO-2T-Xut" id="Qwd-cR-LAb"/>
                         <outlet property="netLabel" destination="lsQ-vN-vIM" id="k6l-ud-WCw"/>
                         <outlet property="powerComp" destination="HhM-HC-1yU" id="Bkj-Mt-KxU"/>
@@ -428,6 +437,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="NSTouchBarGetInfoTemplate" width="19" height="19"/>
+        <image name="chart.xyaxis.line" catalog="system" width="17" height="14"/>
     </resources>
 </document>

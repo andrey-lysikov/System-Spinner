@@ -6,14 +6,18 @@ import Cocoa
 import SystemConfiguration
 
 class AKservice {
-    
     private let loadInfoCount = UInt32(exactly: MemoryLayout<host_cpu_load_info_data_t>.size / MemoryLayout<integer_t>.size)!
     private let hostVmInfo64Count = UInt32(exactly: MemoryLayout<vm_statistics64_data_t>.size / MemoryLayout<integer_t>.size)!
     private let hostBasicInfoCount = UInt32(exactly: MemoryLayout<host_basic_info_data_t>.size / MemoryLayout<integer_t>.size)!
-    private var loadPreviousHist: [Double] = []
     private var loadPrevious = host_cpu_load_info()
     private var previousUpload: Int64 = 0
     private var previousDownload: Int64 = 0
+    private let historyCount: Int = 10
+    private let historyCountDetail: Int = 360
+    private var loadCpuPreviousHist: [Double] = []
+    public var loadCpuPreviousHistDetails: [Double] = []
+    public var loadMemPreviousHistDetails: [Double] = []
+
     
     public struct netPacketData {
         public var value: Double
@@ -185,7 +189,9 @@ class AKservice {
         }
     }
     
-    public func updateCpuOnly() {
+    public func update() {
+        
+        // Update CPU Data
         let load = hostCPULoadInfo()
         cpuUser = Double(load.cpu_ticks.0 - loadPrevious.cpu_ticks.0)
         cpuSystem = Double(load.cpu_ticks.1 - loadPrevious.cpu_ticks.1)
@@ -195,16 +201,18 @@ class AKservice {
         let totalTicks  = cpuUser + cpuSystem + cpuIdle + cpuNiceD
         
         let cpuLast = round(In: min(99.9, ((100.0 * cpuSystem / totalTicks) + (100.0 * cpuUser / totalTicks))))
-        loadPreviousHist.append(cpuLast)
-        cpuPercentage = round(In: loadPreviousHist.reduce(0, +) / Double(loadPreviousHist.count))
-        if loadPreviousHist.count > 15 { loadPreviousHist.removeFirst() }
-        loadPrevious  = load
-    }
-    
-    public func updateAll() {
+        loadCpuPreviousHist.append(cpuLast)
+        loadCpuPreviousHistDetails.append(cpuLast)
+        cpuPercentage = round(In: loadCpuPreviousHist.reduce(0, +) / Double(loadCpuPreviousHist.count))
+        if loadCpuPreviousHist.count >  historyCount {
+            loadCpuPreviousHist.removeFirst()
+        }
         
-        // Update CPU Data
-        updateCpuOnly()
+        if loadCpuPreviousHistDetails.count >  historyCountDetail {
+            loadCpuPreviousHistDetails.removeFirst()
+        }
+        
+        loadPrevious  = load
         
         // Update MEM Data
         let maxMem = maxMemory
@@ -227,6 +235,10 @@ class AKservice {
         memCompressed = round(In: compressed)
         memInactive = round(In: 100.0 * (inactive) / maxMem)
         
+        loadMemPreviousHistDetails.append(memPercentage)
+        if loadMemPreviousHistDetails.count >  historyCountDetail {
+            loadMemPreviousHistDetails.removeFirst()
+        }
         
         // Update NET Data
         let netId = getDefaultNetworkDevice()
@@ -266,7 +278,7 @@ class AKservice {
     }
     
     init() {
-        updateAll()
+        update()
     }
     
 }

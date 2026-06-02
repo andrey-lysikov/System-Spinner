@@ -81,7 +81,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func showPopover(sender: Any?) {
         if let button = statusItem.button {
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
+          //  popover.animates = false
+            button.window?.layoutIfNeeded()
+            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         }
     }
     
@@ -176,7 +178,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func updateUsage() {
-        ActivityData.updateCpuOnly()
+        ActivityData.update()
         curFrame = curFrame + (spinnersRotationInvert ? -1 : 1)
         if curFrame > maxFrame - 1 {
             curFrame = 0
