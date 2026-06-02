@@ -13,6 +13,7 @@ var alwaysUseCustomOSD: Bool = false
 var adjSteps: Int = 16
 var spinnersEffectSelected : Int = 1
 var spinnersRotationInvert: Bool = false
+var usePopUpAnimation: Bool = true
 let ActivityData = AKservice()
 
 @main
@@ -81,7 +82,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func showPopover(sender: Any?) {
         if let button = statusItem.button {
-          //  popover.animates = false
+            popover.animates = usePopUpAnimation
             button.window?.layoutIfNeeded()
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         }
@@ -292,7 +293,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         changeSpinner(spinnerName: spinnerActive)
         saveParams()
     }
-    
+
     @objc private func changeLaunchAtLogin(sender: NSMenuItem) {
         if sHelper.isAutoLaunch {
             sender.state = .off
@@ -326,6 +327,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         saveParams()
         updateStatusMenu()
         changeSpinner(spinnerName: spinnerActive)
+    }
+    
+    @objc private func changePopUpAnimationClick(sender: NSMenuItem) {
+        if usePopUpAnimation {
+            sender.state = .off
+            usePopUpAnimation = false
+        } else {
+            sender.state = .on
+            usePopUpAnimation = true
+        }
     }
     
     @objc private func changeAlwaysUseCustomOSDClick(sender: NSMenuItem) {
@@ -400,6 +411,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.set(spinnersRotationInvert, forKey: "spinnersRotationInvert")
         UserDefaults.standard.set(alwaysUseCustomOSD, forKey: "alwaysUseCustomOSD")
         UserDefaults.standard.set(adjSteps, forKey: "adjSteps")
+        UserDefaults.standard.set(usePopUpAnimation, forKey: "usePopUpAnimation")
     }
     
     private func updateStatusMenu() {
@@ -467,6 +479,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         localizeItem.image = NSImage(systemSymbolName: "translate", accessibilityDescription: localizedString("Use system language"))
         statusItemMenu.addItem(localizeItem)
+        
+        // animation menu Item
+        let animationItem = NSMenuItem(title: localizedString("Use popup animation"), action: #selector(changePopUpAnimationClick(sender:)), keyEquivalent: "")
+        if usePopUpAnimation {
+            animationItem.state = .on
+        }
+        animationItem.image = NSImage(systemSymbolName: "translate", accessibilityDescription: localizedString("Use popup animation"))
+        statusItemMenu.addItem(animationItem)
         statusItemMenu.addItem(NSMenuItem.separator())
                 
         // ---------------------------- Spinner Section ----------------------------
@@ -565,6 +585,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         spinnersRotationInvert = Bool(UserDefaults.standard.bool(forKey: "spinnersRotationInvert"))
         alwaysUseCustomOSD = Bool(UserDefaults.standard.bool(forKey: "alwaysUseCustomOSD"))
         adjSteps = Int(UserDefaults.standard.string(forKey: "adjSteps") ?? String(adjSteps))!
+        usePopUpAnimation = Bool(UserDefaults.standard.bool(forKey: "usePopUpAnimation"))
         
         if let button = statusItem.button {
             button.action = #selector(togglePopover(sender:))

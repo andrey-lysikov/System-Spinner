@@ -157,7 +157,6 @@ class UsageViewController: NSViewController, NSPopoverDelegate {
         hostingController.preferredContentSize = exactSize
         popupChart.contentViewController = hostingController
         popupChart.behavior = .transient
-        popupChart.animates = false
         popupChart.delegate = self
         
         super.viewDidLoad()
@@ -176,6 +175,7 @@ class UsageViewController: NSViewController, NSPopoverDelegate {
         RunLoop.main.add(dataTimer!, forMode: .common)
         dataTimer?.fire()
         
+        popupChart.animates = usePopUpAnimation
         super.viewDidAppear()
         view.window?.makeKey()
     }

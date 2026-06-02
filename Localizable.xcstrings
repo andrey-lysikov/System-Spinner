@@ -718,6 +718,22 @@
         }
       }
     },
+    "Use popup animation" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ポップアップアニメーションを使用する"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Использовать анимацию в меню"
+          }
+        }
+      }
+    },
     "Use system language" : {
       "extractionState" : "manual",
       "localizations" : {
