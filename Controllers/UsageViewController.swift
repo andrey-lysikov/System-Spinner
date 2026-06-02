@@ -222,7 +222,7 @@ class UsageViewController: NSViewController, NSPopoverDelegate {
         }
         
         // memory data
-        memPercentage.stringValue =  localizedString("Memory Usage") + " " + Int(ActivityData.memPercentage).formatted(.percent)
+        memPercentage.stringValue =  localizedString("MEM Usage") + " " + Int(ActivityData.memPercentage).formatted(.percent)
         memLevel.doubleValue = ActivityData.memPercentage / 5
         
         memPressure.stringValue = localizedString("Pressure") + " " + Int(ActivityData.memPressure).formatted(.percent)

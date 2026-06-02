@@ -270,8 +270,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         saveParams()
     }
     
-    
-    
     @objc private func changeSpinnerEffectClick(sender: NSMenuItem) {
         stopRunning()
         
@@ -337,6 +335,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             sender.state = .on
             usePopUpAnimation = true
         }
+        saveParams()
     }
     
     @objc private func changeAlwaysUseCustomOSDClick(sender: NSMenuItem) {
@@ -485,7 +484,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if usePopUpAnimation {
             animationItem.state = .on
         }
-        animationItem.image = NSImage(systemSymbolName: "translate", accessibilityDescription: localizedString("Use popup animation"))
+        animationItem.image = NSImage(systemSymbolName: "lasso.badge.sparkles", accessibilityDescription: localizedString("Use popup animation"))
         statusItemMenu.addItem(animationItem)
         statusItemMenu.addItem(NSMenuItem.separator())
                 
@@ -566,7 +565,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        
         // close app if it running
         guard let bundleID = Bundle.main.bundleIdentifier else { return }
         let runningApps = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
@@ -629,7 +627,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 }
-
 
 func localizedString(_ key: String.LocalizationValue) -> String {
     if useLocalization {
