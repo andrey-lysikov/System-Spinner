@@ -115,11 +115,18 @@ class OSDWindow: NSPanel {
     
         var body: some View {
             let content = HStack(spacing: 16) {
-                Image(systemName: valueState.iconName)
-                    .font(.system(size: 24, weight: .medium))
-                    .frame(width: 28)
-                    .foregroundStyle(.primary.opacity(0.8))
-                    .contentTransition(.symbolEffect(.replace))
+                if usePopUpAnimation {
+                    Image(systemName: valueState.iconName)
+                        .font(.system(size: 24, weight: .medium))
+                        .frame(width: 28)
+                        .foregroundStyle(.primary.opacity(0.8))
+                        .contentTransition(.symbolEffect(.replace))
+                } else {
+                    Image(systemName: valueState.iconName)
+                        .font(.system(size: 24, weight: .medium))
+                        .frame(width: 28)
+                        .foregroundStyle(.primary.opacity(0.8))
+                }
                 VStack(spacing: 4) {
                     GeometryReader { geometry in
                         ZStack(alignment: .leading) {
@@ -222,27 +229,37 @@ class OSDWindow: NSPanel {
     
     func showWithAnimation() {
         updatePosition()
-
-        alphaValue = 0.0
-        orderFrontRegardless()
-
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.12
-            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
-            self.animator().alphaValue = 1.0
+        if usePopUpAnimation {
+            alphaValue = 0.0
+            orderFrontRegardless()
+            
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.3
+                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                self.animator().alphaValue = 1.0
+            }
+        } else {
+            orderFrontRegardless()
         }
+        
     }
 
     func hideWithAnimation() {
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.18
-            context.timingFunction = CAMediaTimingFunction(name: .easeIn)
-            self.animator().alphaValue = 0.0
-        } completionHandler: {
-            Task { @MainActor [weak self] in
-                self?.orderOut(nil)
+       if usePopUpAnimation {
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.3
+                context.timingFunction = CAMediaTimingFunction(name: .easeIn)
+                self.animator().alphaValue = 0.0
+            } completionHandler: {
+                Task { @MainActor [weak self] in
+                    self?.orderOut(nil)
+                }
             }
-        }
+       } else {
+           Task { @MainActor [weak self] in
+               self?.orderOut(nil)
+           }
+       }
     }
 }
 

@@ -48,7 +48,7 @@ struct ChartContentView: View {
                 }
                 .frame(height: 100)
                 .chartYScale(domain: 0...100)
-                .chartXScale(domain: 0...359)
+                .chartXScale(domain: 0...chartItems.chartPoints.count - 1)
                 .chartXAxis { AxisMarks() { _ in
                     AxisGridLine()
                     AxisTick()
@@ -67,9 +67,9 @@ struct ChartContentView: View {
                         ForEach(chartItems.tablePoints) { item in
                             Divider()
                             GridRow {
-                                Text(item.name).frame(width: 200, alignment: .leading)
+                                Text(item.name).frame(width: 220, alignment: .leading)
                                 Spacer()
-                                Text(item.usage)
+                                Text(item.usage).frame(width: 80, alignment: .trailing)
                             }
                             .font(.system(size: 11))
                             .padding(.vertical, 2)
@@ -122,12 +122,18 @@ class UsageViewController: NSViewController, NSPopoverDelegate {
     @IBOutlet var memChartPopupButton: NSButton!
  
     @IBAction func cpuPopupButtonAction(_ sender: NSButton) {
+        if popupChart.isShown {
+            popupChart.performClose(sender)
+        }
         lastClickButton = sender
         updatePopupData()
         popupChart.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
     }
     
     @IBAction func memPopupButtonAction(_ sender: NSButton) {
+        if popupChart.isShown {
+            popupChart.performClose(sender)
+        }
         lastClickButton = sender
         updatePopupData()
         popupChart.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
@@ -141,6 +147,10 @@ class UsageViewController: NSViewController, NSPopoverDelegate {
     }
     
     override func viewDidLoad() {
+        
+        //for autoresize
+        self.preferredContentSize = NSMakeSize(self.view.frame.width, 100);
+        
         // Air is not present fan
         if ioService.isAir {
             fanStack.removeFromSuperview()
@@ -150,7 +160,7 @@ class UsageViewController: NSViewController, NSPopoverDelegate {
         if !ioService.presentSMC {
             cpuTempStack.removeFromSuperview()
         }
-        
+      
         // create chart data view
         let hostingController = NSHostingController(rootView: ChartContentView(chartItems: dataManager))
         let exactSize = NSSize(width: 350, height: 400)

@@ -13,7 +13,7 @@ class AKservice {
     private var previousUpload: Int64 = 0
     private var previousDownload: Int64 = 0
     private let historyCount: Int = 10
-    private let historyCountDetail: Int = 360
+    private let historyCountDetail: Int = 900
     private var loadCpuPreviousHist: [Double] = []
     public var loadCpuPreviousHistDetails: [Double] = []
     public var loadMemPreviousHistDetails: [Double] = []
