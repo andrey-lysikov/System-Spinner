@@ -251,7 +251,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
         }
-        updateInterval = Double(sender.title.replacingOccurrences(of: localizedString("Second"), with: ""))!
+        
+        updateInterval = Double(sender.title.replacingOccurrences(of: localizedString("Second"), with: "").trimmingCharacters(in: .whitespacesAndNewlines))!
         sender.state = .on
         startRunning()
         saveParams()
