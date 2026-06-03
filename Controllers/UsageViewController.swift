@@ -97,6 +97,7 @@ class UsageViewController: NSViewController, NSPopoverDelegate {
     @IBOutlet var fanStack: NSStackView!
     @IBOutlet var cpuTempStack: NSStackView!
     @IBOutlet var cpuLabel: NSTextField!
+    @IBOutlet var gpuLabel: NSTextField!
     @IBOutlet var cpuTempLabel: NSTextField!
     @IBOutlet var fanLabel: NSTextField!
     
@@ -108,6 +109,7 @@ class UsageViewController: NSViewController, NSPopoverDelegate {
     @IBOutlet var powerComp: NSTextField!
     
     @IBOutlet var cpuLevel: NSLevelIndicator!
+    @IBOutlet var gpuLevel: NSLevelIndicator!
     @IBOutlet var tempLevel: NSLevelIndicator!
     @IBOutlet var memLevel: NSLevelIndicator!
     @IBOutlet var pressureLevel: NSLevelIndicator!
@@ -198,6 +200,11 @@ class UsageViewController: NSViewController, NSPopoverDelegate {
         cpuLabel.stringValue = localizedString("CPU Usage") + " " + Int(ActivityData.cpuPercentage).formatted(.percent)
         cpuLevel.doubleValue = ActivityData.cpuPercentage / 5
         
+        //GPU data
+        gpuLabel.stringValue = localizedString("GPU Usage") + " " + Int(ActivityData.gpuPercentage).formatted(.percent)
+        gpuLevel.doubleValue = ActivityData.gpuPercentage / 5
+        
+        
         // power data
         if ioService.systemAdapter > 0 {
             powerComp.stringValue = "PWR: " + String(ioService.systemPower) + "w, DC: " + String(ioService.systemAdapter) + "w"
@@ -227,7 +234,7 @@ class UsageViewController: NSViewController, NSPopoverDelegate {
         // if presentSMC
         if ioService.presentSMC {
             // temp data
-            cpuTempLabel.stringValue = localizedString("CPU Temp") + " " + String(round(ioService.cpuTemp)) + "°С"
+            cpuTempLabel.stringValue = localizedString("CPU Temp") + " " + String(Int(ioService.cpuTemp)) + "°С"
             tempLevel.doubleValue = ioService.cpuTemp / 5
         }
         

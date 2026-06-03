@@ -12,12 +12,12 @@ class AKservice {
     private var loadPrevious = host_cpu_load_info()
     private var previousUpload: Int64 = 0
     private var previousDownload: Int64 = 0
-    private let historyCount: Int = 10
+    private let historyCount: Int = 30
     private let historyCountDetail: Int = 900
     private var loadCpuPreviousHist: [Double] = []
+    private var loadGpuPreviousHist: [Double] = []
     public var loadCpuPreviousHistDetails: [Double] = []
     public var loadMemPreviousHistDetails: [Double] = []
-
     
     public struct netPacketData {
         public var value: Double
@@ -47,6 +47,7 @@ class AKservice {
     public var cpuIdle: Double = 0.0
     public var cpuNiceD: Double = 0.0
     public var cpuProcess: [topProcess] = []
+    public var gpuPercentage: Double = 0.0
     
     public var memPercentage: Double = 0.0
     public var memPressure: Double = 0.0
@@ -108,6 +109,35 @@ class AKservice {
         }
         
         return processes
+    }
+    
+    private func getGPUUsage() ->  Double? {
+        guard let matchingDict = IOServiceMatching("AGXAccelerator") else {
+            return nil
+        }
+        var iterator: io_iterator_t = 0
+        let result = IOServiceGetMatchingServices(kIOMainPortDefault, matchingDict, &iterator)
+        
+        guard result == KERN_SUCCESS else { return nil }
+        defer { IOObjectRelease(iterator) }
+        
+        var service = IOIteratorNext(iterator)
+        while service != 0 {
+            defer { IOObjectRelease(service) }
+            var entryProperties: Unmanaged<CFMutableDictionary>?
+            let registryResult = IORegistryEntryCreateCFProperties(service, &entryProperties, kCFAllocatorDefault, 0)
+            
+            if registryResult == KERN_SUCCESS, let properties = entryProperties?.takeRetainedValue() {
+                if let perfStats = CFDictionaryGetValue(properties, Unmanaged.passUnretained("PerformanceStatistics" as CFString).toOpaque()) {
+                    let statsDict = Unmanaged<CFDictionary>.fromOpaque(perfStats).takeUnretainedValue() as NSDictionary
+                    if let utilization = statsDict["Device Utilization %"] as? Int64 {
+                        return Double(utilization)
+                    }
+                }
+            }
+            service = IOIteratorNext(iterator)
+        }
+        return nil
     }
     
     private var vmStatistics64: vm_statistics64 {
@@ -213,6 +243,13 @@ class AKservice {
         }
         
         loadPrevious  = load
+        
+        // Update GPU data
+        loadGpuPreviousHist.append(getGPUUsage() ?? 0.0)
+        gpuPercentage = round(In: loadGpuPreviousHist.reduce(0, +) / Double(loadGpuPreviousHist.count))
+        if loadGpuPreviousHist.count >  historyCount {
+            loadGpuPreviousHist.removeFirst()
+        }
         
         // Update MEM Data
         let maxMem = maxMemory
