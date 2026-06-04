@@ -264,12 +264,19 @@ class OSDWindow: NSPanel {
 }
 
 final class OSD {
-    private var hudWindow = OSDWindow()
+    private var hudWindow: OSDWindow?
     private var hideTask: Task<Void, Never>?
     private(set) var currentValueState = valueState()
     static let shared = OSD()
     let valueChangePublisher = PassthroughSubject<valueState, Never>()
-    
+
+    private func ensureWindow() -> OSDWindow {
+        if let w = hudWindow { return w }
+        let w = OSDWindow()
+        hudWindow = w
+        return w
+    }
+
     func showOSD(value:Float, isDisplay:Bool, separators:Int = 16, autoHide:Bool = true) {
         let newState = valueState(
             value: value,
@@ -278,18 +285,19 @@ final class OSD {
         )
         currentValueState = newState
         OSD.shared.valueChangePublisher.send(currentValueState)
-        
+
         if autoHide {
             resetHideTask()
         } else {
             hideTask?.cancel()
         }
 
-        if hudWindow.isVisible == false {
-            hudWindow.showWithAnimation()
+        let window = ensureWindow()
+        if window.isVisible == false {
+            window.showWithAnimation()
         }
     }
-    
+
     private func resetHideTask() {
         hideTask?.cancel()
         hideTask = Task { [weak self] in
@@ -302,12 +310,13 @@ final class OSD {
     }
 
     private func hideHUD() {
-        hudWindow.hideWithAnimation()
+        hudWindow?.hideWithAnimation()
     }
 
     func stop() {
         hideTask?.cancel()
-        hudWindow.orderOut(nil)
+        hudWindow?.orderOut(nil)
+        hudWindow = nil
     }
 
     deinit {

@@ -25,10 +25,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }()
     
     private var cpuTimer: Timer? = nil
-    private var spinnerTimer: Timer? = nil
     private var frames: [NSImage] =  []
-    private var curFrame: Int = 0
     private var maxFrame: Int = 0
+    private var spinnerLayer: CALayer? = nil
+    private var lastSetTitle: String = ""
     private let popover = NSPopover()
     private var updateIntervalName:[Double] = [0.5, 1.0, 1.5, 2.0]
     private var adjStepsInterval:[Int] = [8, 16, 24, 32]
@@ -127,8 +127,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
              return image
             }
         }()
-        curFrame = 0
         maxFrame = spinnerFrames
+        updateStatusItemLength()
+        installSpinnerLayer()
         startRunning()
         
         // update effect menu
@@ -171,42 +172,70 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         RunLoop.main.add(cpuTimer!, forMode: .common)
         cpuTimer?.fire()
     }
-    
+
     @objc private func stopRunning() {
         closePopoverMenu(sender: self)
-        spinnerTimer?.invalidate()
         cpuTimer?.invalidate()
+        spinnerLayer?.removeAllAnimations()
     }
-    
+
+    private func updateStatusItemLength() {
+        let maxImageWidth = frames.map { $0.size.width }.max() ?? NSStatusBar.system.thickness
+        let titleReserve: CGFloat = enableStatusText ? 36 : 4
+        statusItem.length = maxImageWidth + titleReserve
+    }
+
+    private func installSpinnerLayer() {
+        guard let button = statusItem.button, !frames.isEmpty else { return }
+        button.wantsLayer = true
+
+        // Прозрачный image нужного размера — занимает место под layer и не рисует ничего.
+        let size = frames[0].size
+        let placeholder = NSImage(size: size, flipped: false) { _ in true }
+        placeholder.isTemplate = false
+        button.image = placeholder
+
+        spinnerLayer?.removeFromSuperlayer()
+
+        let layer = CALayer()
+        let scale = button.window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2.0
+        layer.contentsScale = scale
+        layer.contentsGravity = .resizeAspect
+        layer.autoresizingMask = [.layerHeightSizable]
+
+        // Кадры → массив CGImage. Удерживаем в Any? для CAKeyframeAnimation.values.
+        var rect = NSRect(origin: .zero, size: size)
+        let cgFrames: [Any] = frames.compactMap { img -> CGImage? in
+            img.cgImage(forProposedRect: &rect, context: nil, hints: nil)
+        }
+        guard !cgFrames.isEmpty else { return }
+
+        layer.contents = cgFrames.first
+
+        let animation = CAKeyframeAnimation(keyPath: "contents")
+        animation.values = spinnersRotationInvert ? cgFrames.reversed() : cgFrames
+        let frameInterval = 0.25 * Double(spinners[spinnerActive]?[2] ?? 1)
+        animation.duration = frameInterval * Double(cgFrames.count)
+        animation.calculationMode = .discrete
+        animation.repeatCount = .infinity
+        animation.isRemovedOnCompletion = false
+        layer.add(animation, forKey: "spin")
+
+        let buttonHeight = button.bounds.height > 0 ? button.bounds.height : NSStatusBar.system.thickness
+        layer.frame = CGRect(x: 0, y: 0, width: size.width, height: buttonHeight)
+        button.layer?.addSublayer(layer)
+        spinnerLayer = layer
+    }
+
     private func updateUsage() {
         ActivityData.update()
-        curFrame = curFrame + (spinnersRotationInvert ? -1 : 1)
-        if curFrame > maxFrame - 1 {
-            curFrame = 0
-        } else if curFrame < 0 {
-            curFrame = maxFrame - 1
+
+        let newTitle = enableStatusText ? String(Int(ActivityData.cpuPercentage)) + "% " : ""
+        if newTitle != lastSetTitle {
+            statusItem.button?.title = newTitle
+            lastSetTitle = newTitle
         }
-        statusItem.button?.image = frames[curFrame]
-        
-        if enableStatusText {
-            statusItem.button?.title =  String(Int(ActivityData.cpuPercentage)) + "% "
-        } else {
-            statusItem.button?.title = ""
-        }
-        let interval = 0.25 / max(1.0, min(100.0, ActivityData.cpuPercentage / Double(maxFrame))) * Double(spinners[spinnerActive]![2])
-        spinnerTimer?.invalidate()
-        spinnerTimer = Timer(timeInterval: interval, repeats: true, block: { [weak self] _ in
-            self!.curFrame = self!.curFrame + (spinnersRotationInvert ? -1 : 1)
-            if self!.curFrame == self!.maxFrame {
-                self!.curFrame = 0
-            } else if self!.curFrame < 0 {
-                self!.curFrame = self!.maxFrame - 1
-            }
-            self?.statusItem.button?.image = self?.frames[self!.curFrame]
-            
-        })
-        RunLoop.main.add(spinnerTimer!, forMode: .common)
-        
+
         // check if we need update display and menu
         if isDeviceChanged {
             isDeviceChanged = false
@@ -392,6 +421,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             sender.state = .on
             enableStatusText = true
         }
+        updateStatusItemLength()
         saveParams()
     }
     

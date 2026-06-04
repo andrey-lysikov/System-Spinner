@@ -3,6 +3,7 @@
 
 import Darwin
 import Cocoa
+import IOKit
 import SystemConfiguration
 
 class AKservice {
@@ -12,6 +13,10 @@ class AKservice {
     private var loadPrevious = host_cpu_load_info()
     private var previousUpload: Int64 = 0
     private var previousDownload: Int64 = 0
+    private var gpuService: io_service_t = 0
+    private static let perfStatsKey = "PerformanceStatistics" as CFString
+    private var dynamicStore: SCDynamicStore?
+    private var ipv4Key: CFString?
     private let historyCount: Int = 30
     private let historyCountDetail: Int = 900
     private var loadCpuPreviousHist: [Double] = []
@@ -111,33 +116,33 @@ class AKservice {
         return processes
     }
     
-    private func getGPUUsage() ->  Double? {
-        guard let matchingDict = IOServiceMatching("AGXAccelerator") else {
-            return nil
-        }
+    private func setupGPUService() {
+        guard let matchingDict = IOServiceMatching("AGXAccelerator") else { return }
         var iterator: io_iterator_t = 0
-        let result = IOServiceGetMatchingServices(kIOMainPortDefault, matchingDict, &iterator)
-        
-        guard result == KERN_SUCCESS else { return nil }
+        guard IOServiceGetMatchingServices(kIOMainPortDefault, matchingDict, &iterator) == KERN_SUCCESS else { return }
         defer { IOObjectRelease(iterator) }
-        
+
         var service = IOIteratorNext(iterator)
         while service != 0 {
-            defer { IOObjectRelease(service) }
-            var entryProperties: Unmanaged<CFMutableDictionary>?
-            let registryResult = IORegistryEntryCreateCFProperties(service, &entryProperties, kCFAllocatorDefault, 0)
-            
-            if registryResult == KERN_SUCCESS, let properties = entryProperties?.takeRetainedValue() {
-                if let perfStats = CFDictionaryGetValue(properties, Unmanaged.passUnretained("PerformanceStatistics" as CFString).toOpaque()) {
-                    let statsDict = Unmanaged<CFDictionary>.fromOpaque(perfStats).takeUnretainedValue() as NSDictionary
-                    if let utilization = statsDict["Device Utilization %"] as? Int64 {
-                        return Double(utilization)
-                    }
-                }
+            if let cf = IORegistryEntryCreateCFProperty(service, Self.perfStatsKey, kCFAllocatorDefault, 0),
+               let dict = cf.takeRetainedValue() as? NSDictionary,
+               dict["Device Utilization %"] != nil {
+                gpuService = service
+                return
             }
+            IOObjectRelease(service)
             service = IOIteratorNext(iterator)
         }
-        return nil
+    }
+
+    private func getGPUUsage() -> Double? {
+        guard gpuService != 0 else { return nil }
+        guard let cf = IORegistryEntryCreateCFProperty(gpuService, Self.perfStatsKey, kCFAllocatorDefault, 0),
+              let dict = cf.takeRetainedValue() as? NSDictionary,
+              let utilization = dict["Device Utilization %"] as? Int64 else {
+            return nil
+        }
+        return Double(utilization)
     }
     
     private var vmStatistics64: vm_statistics64 {
@@ -163,12 +168,15 @@ class AKservice {
     }
     
     private func getDefaultNetworkDevice() -> String {
-        let processName = ProcessInfo.processInfo.processName as CFString
-        let dynamicStore = SCDynamicStoreCreate(kCFAllocatorDefault, processName, nil, nil)
-        let ipv4Key = SCDynamicStoreKeyCreateNetworkGlobalEntity(kCFAllocatorDefault,
-                                                                 kSCDynamicStoreDomainState,
-                                                                 kSCEntNetIPv4)
-        guard let list = SCDynamicStoreCopyValue(dynamicStore, ipv4Key) as? [CFString: Any],
+        if dynamicStore == nil {
+            let processName = ProcessInfo.processInfo.processName as CFString
+            dynamicStore = SCDynamicStoreCreate(kCFAllocatorDefault, processName, nil, nil)
+            ipv4Key = SCDynamicStoreKeyCreateNetworkGlobalEntity(kCFAllocatorDefault,
+                                                                  kSCDynamicStoreDomainState,
+                                                                  kSCEntNetIPv4)
+        }
+        guard let store = dynamicStore, let key = ipv4Key,
+              let list = SCDynamicStoreCopyValue(store, key) as? [CFString: Any],
               let interface = list[kSCDynamicStorePropNetPrimaryInterface] as? String
         else {
             return ""
@@ -315,7 +323,12 @@ class AKservice {
     }
     
     init() {
+        setupGPUService()
         update()
+    }
+
+    deinit {
+        if gpuService != 0 { IOObjectRelease(gpuService) }
     }
     
 }
