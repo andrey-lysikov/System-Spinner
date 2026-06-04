@@ -9,10 +9,11 @@ class AKservice {
     private let loadInfoCount = UInt32(exactly: MemoryLayout<host_cpu_load_info_data_t>.size / MemoryLayout<integer_t>.size)!
     private let hostVmInfo64Count = UInt32(exactly: MemoryLayout<vm_statistics64_data_t>.size / MemoryLayout<integer_t>.size)!
     private let hostBasicInfoCount = UInt32(exactly: MemoryLayout<host_basic_info_data_t>.size / MemoryLayout<integer_t>.size)!
+    private var gpuService: io_service_t = 0
     private var loadPrevious = host_cpu_load_info()
     private var previousUpload: Int64 = 0
     private var previousDownload: Int64 = 0
-    private let historyCount: Int = 30
+    private let historyCount: Int = 15
     private let historyCountDetail: Int = 900
     private var loadCpuPreviousHist: [Double] = []
     private var loadGpuPreviousHist: [Double] = []
@@ -111,31 +112,40 @@ class AKservice {
         return processes
     }
     
-    private func getGPUUsage() ->  Double? {
-        guard let matchingDict = IOServiceMatching("AGXAccelerator") else {
-            return nil
+    private func setupGPUService() {
+          guard let matchingDict = IOServiceMatching("AGXAccelerator") else { return }
+          
+          var iterator: io_iterator_t = 0
+          let result = IOServiceGetMatchingServices(kIOMainPortDefault, matchingDict, &iterator)
+          
+          guard result == kIOReturnSuccess, iterator != 0 else { return }
+          defer { IOObjectRelease(iterator) }
+          
+          let service = IOIteratorNext(iterator)
+          if service != 0 {
+              self.gpuService = service
+          }
+          
+          var unusedService = IOIteratorNext(iterator)
+          while unusedService != 0 {
+              IOObjectRelease(unusedService)
+              unusedService = IOIteratorNext(iterator)
+          }
+      }
+
+    public func getGPUUsage() -> Double? {
+        if gpuService == 0 {
+            setupGPUService()
         }
-        var iterator: io_iterator_t = 0
-        let result = IOServiceGetMatchingServices(kIOMainPortDefault, matchingDict, &iterator)
-        
-        guard result == KERN_SUCCESS else { return nil }
-        defer { IOObjectRelease(iterator) }
-        
-        var service = IOIteratorNext(iterator)
-        while service != 0 {
-            defer { IOObjectRelease(service) }
-            var entryProperties: Unmanaged<CFMutableDictionary>?
-            let registryResult = IORegistryEntryCreateCFProperties(service, &entryProperties, kCFAllocatorDefault, 0)
-            
+        var entryProperties: Unmanaged<CFMutableDictionary>?
+        let registryResult = IORegistryEntryCreateCFProperties(gpuService, &entryProperties, kCFAllocatorDefault, 0)
             if registryResult == KERN_SUCCESS, let properties = entryProperties?.takeRetainedValue() {
-                if let perfStats = CFDictionaryGetValue(properties, Unmanaged.passUnretained("PerformanceStatistics" as CFString).toOpaque()) {
-                    let statsDict = Unmanaged<CFDictionary>.fromOpaque(perfStats).takeUnretainedValue() as NSDictionary
-                    if let utilization = statsDict["Device Utilization %"] as? Int64 {
-                        return Double(utilization)
-                    }
-                }
+               if let perfStats = CFDictionaryGetValue(properties, Unmanaged.passUnretained("PerformanceStatistics" as CFString).toOpaque()) {
+                   let statsDict = Unmanaged<CFDictionary>.fromOpaque(perfStats).takeUnretainedValue() as NSDictionary
+                   if let utilization = statsDict["Device Utilization %"] as? Int64 {
+                       return Double(utilization)
+                   }
             }
-            service = IOIteratorNext(iterator)
         }
         return nil
     }

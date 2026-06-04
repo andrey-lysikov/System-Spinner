@@ -27,6 +27,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var cpuTimer: Timer? = nil
     private var spinnerTimer: Timer? = nil
     private var frames: [NSImage] =  []
+    private var statusButtonLabelHist: String = ""
+    private var statusButtonIntervalHist: Double = 0.0
     private var curFrame: Int = 0
     private var maxFrame: Int = 0
     private let popover = NSPopover()
@@ -188,24 +190,35 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         statusItem.button?.image = frames[curFrame]
         
+        var statusButtonLabel: String = ""
         if enableStatusText {
-            statusItem.button?.title =  String(Int(ActivityData.cpuPercentage)) + "% "
+            statusButtonLabel =  String(Int(ActivityData.cpuPercentage)) + "% "
         } else {
-            statusItem.button?.title = ""
+            statusButtonLabel = ""
         }
+        
+        if statusButtonLabelHist != statusButtonLabel {
+            statusButtonLabelHist = statusButtonLabel
+            statusItem.button?.title = statusButtonLabel
+        }
+        
         let interval = 0.25 / max(1.0, min(100.0, ActivityData.cpuPercentage / Double(maxFrame))) * Double(spinners[spinnerActive]![2])
-        spinnerTimer?.invalidate()
-        spinnerTimer = Timer(timeInterval: interval, repeats: true, block: { [weak self] _ in
-            self!.curFrame = self!.curFrame + (spinnersRotationInvert ? -1 : 1)
-            if self!.curFrame == self!.maxFrame {
-                self!.curFrame = 0
-            } else if self!.curFrame < 0 {
-                self!.curFrame = self!.maxFrame - 1
-            }
-            self?.statusItem.button?.image = self?.frames[self!.curFrame]
-            
-        })
-        RunLoop.main.add(spinnerTimer!, forMode: .common)
+
+        if round(statusButtonIntervalHist * 100) != round(interval * 100) {
+            spinnerTimer?.invalidate()
+            spinnerTimer = Timer(timeInterval: interval, repeats: true, block: { [weak self] _ in
+                self!.curFrame = self!.curFrame + (spinnersRotationInvert ? -1 : 1)
+                if self!.curFrame == self!.maxFrame {
+                    self!.curFrame = 0
+                } else if self!.curFrame < 0 {
+                    self!.curFrame = self!.maxFrame - 1
+                }
+                self?.statusItem.button?.image = self?.frames[self!.curFrame]
+                
+            })
+            RunLoop.main.add(spinnerTimer!, forMode: .common)
+            statusButtonIntervalHist = interval
+        }
         
         // check if we need update display and menu
         if isDeviceChanged {

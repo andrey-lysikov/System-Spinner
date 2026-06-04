@@ -83,7 +83,7 @@ struct ChartContentView: View {
         }
 }
 
-class UsageViewController: NSViewController, NSPopoverDelegate {
+class UsageViewController: NSViewController {
     private var dataTimer: Timer? = nil
     private var cpuProcessMenu: NSMenu!
     private var memProcessMenu: NSMenu!
@@ -93,6 +93,9 @@ class UsageViewController: NSViewController, NSPopoverDelegate {
     private var lastClickButton: NSButton? = nil
     private var chartDataItems = [chartData(time: 0, usage: 0)]
     private var tableDataItems = [tableData(name: "", usage: "")]
+    private var netHistory: Int = 0
+    private var fanHistory: String = ""
+    private var pwrHistory: String = ""
     
     @IBOutlet var fanStack: NSStackView!
     @IBOutlet var cpuTempStack: NSStackView!
@@ -141,15 +144,7 @@ class UsageViewController: NSViewController, NSPopoverDelegate {
         popupChart.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
     }
     
-    func popoverWillClose(_ notification: Notification) {
-        guard let window = self.view.window else { return }
-        window.makeKey()
-        window.makeFirstResponder(self.view)
-        lastClickButton = nil
-    }
-    
     override func viewDidLoad() {
-        
         //for autoresize
         self.preferredContentSize = NSMakeSize(self.view.frame.width, 100);
         
@@ -169,7 +164,6 @@ class UsageViewController: NSViewController, NSPopoverDelegate {
         hostingController.preferredContentSize = exactSize
         popupChart.contentViewController = hostingController
         popupChart.behavior = .transient
-        popupChart.delegate = self
         
         super.viewDidLoad()
     }
@@ -185,9 +179,10 @@ class UsageViewController: NSViewController, NSPopoverDelegate {
             self?.updateData()
         })
         RunLoop.main.add(dataTimer!, forMode: .common)
-        dataTimer?.fire()
         
         popupChart.animates = usePopUpAnimation
+        updateData()
+        
         super.viewDidAppear()
         view.window?.makeKey()
     }
@@ -197,64 +192,93 @@ class UsageViewController: NSViewController, NSPopoverDelegate {
         ActivityData.update()
         
         // CPU data
-        cpuLabel.stringValue = localizedString("CPU Usage") + " " + Int(ActivityData.cpuPercentage).formatted(.percent)
-        cpuLevel.doubleValue = ActivityData.cpuPercentage / 5
+        if round(cpuLevel.doubleValue) != round(ActivityData.cpuPercentage) {
+            cpuLabel.stringValue = localizedString("CPU Usage") + " " + Int(ActivityData.cpuPercentage).formatted(.percent)
+            cpuLevel.doubleValue = ActivityData.cpuPercentage / 5
+        }
         
         //GPU data
-        gpuLabel.stringValue = localizedString("GPU Usage") + " " + Int(ActivityData.gpuPercentage).formatted(.percent)
-        gpuLevel.doubleValue = ActivityData.gpuPercentage / 5
-        
+        if round(gpuLabel.doubleValue) != round(ActivityData.gpuPercentage) {
+            gpuLabel.stringValue = localizedString("GPU Usage") + " " + Int(ActivityData.gpuPercentage).formatted(.percent)
+            gpuLevel.doubleValue = ActivityData.gpuPercentage / 5
+        }
         
         // power data
+        var pwrLabelValue: String = ""
         if ioService.systemAdapter > 0 {
-            powerComp.stringValue = "PWR: " + String(ioService.systemPower) + "w, DC: " + String(ioService.systemAdapter) + "w"
+            pwrLabelValue = "PWR: " + String(ioService.systemPower) + "w, DC: " + String(ioService.systemAdapter) + "w"
         } else if (ioService.systemBattery > 0 && ioService.systemAdapter > 0)  {
-            powerComp.stringValue = "PWR: " + String(ioService.systemPower) + "w, BAT: " + String(ioService.systemBattery) + "w, DC: " + String(ioService.systemAdapter) + "w"
+            pwrLabelValue = "PWR: " + String(ioService.systemPower) + "w, BAT: " + String(ioService.systemBattery) + "w, DC: " + String(ioService.systemAdapter) + "w"
         } else {
-            powerComp.stringValue = "PWR: " + String(ioService.systemPower) + "w, BAT: " + String(ioService.systemBattery) + "w"
+            pwrLabelValue = "PWR: " + String(ioService.systemPower) + "w, BAT: " + String(ioService.systemBattery) + "w"
+        }
+        
+        if pwrHistory != pwrLabelValue {
+            powerComp.stringValue = pwrLabelValue
+            pwrHistory = pwrLabelValue
         }
         
         // Air is not present fan
         if !ioService.isAir {
+            var fanLabelValue: String = ""
             var fanSpeed: Int = 0
+            
             for (key, _) in ioService.fanSpeed.enumerated() {
                 if key == 0 {
-                    fanLabel.stringValue =  "fan " + String(ioService.fanSpeed[key])
+                    fanLabelValue =  "fan " + String(ioService.fanSpeed[key])
                 } else {
-                    fanLabel.stringValue +=  " | " + String(ioService.fanSpeed[key])
+                    fanLabelValue +=  " | " + String(ioService.fanSpeed[key])
                 }
                 fanSpeed += ioService.fanSpeed[key]
+                fanLabelValue += String(ioService.fanSpeed[key])
             }
-            fanLabel.stringValue += " rpm"
+            
             if fanSpeed == 0 {
-                fanLabel.stringValue =  localizedString("fan is stoped")
+                fanLabelValue =  localizedString("fan is stoped")
+            } else {
+                fanLabelValue += " rpm"
+            }
+            
+            if fanLabelValue != fanHistory {
+                fanLabel.stringValue = fanLabelValue
+                fanHistory = fanLabelValue
             }
         }
         
         // if presentSMC
         if ioService.presentSMC {
             // temp data
-            cpuTempLabel.stringValue = localizedString("CPU Temp") + " " + String(Int(ioService.cpuTemp)) + "°С"
-            tempLevel.doubleValue = ioService.cpuTemp / 5
+            if round(tempLevel.doubleValue) != round(ioService.cpuTemp) {
+                cpuTempLabel.stringValue = localizedString("CPU Temp") + " " + String(Int(ioService.cpuTemp)) + "°С"
+                tempLevel.doubleValue = ioService.cpuTemp / 5
+            }
         }
         
         // memory data
-        memPercentage.stringValue =  localizedString("MEM Usage") + " " + Int(ActivityData.memPercentage).formatted(.percent)
-        memLevel.doubleValue = ActivityData.memPercentage / 5
+        if round(memLevel.doubleValue) != round(ActivityData.memPercentage) {
+            memPercentage.stringValue =  localizedString("MEM Usage") + " " + Int(ActivityData.memPercentage).formatted(.percent)
+            memLevel.doubleValue = ActivityData.memPercentage / 5
+        }
         
-        memPressure.stringValue = localizedString("Pressure") + " " + Int(ActivityData.memPressure).formatted(.percent)
-        pressureLevel.doubleValue = ActivityData.memPressure / 5
+        if round(pressureLevel.doubleValue) != round(ActivityData.memPressure) {
+            memPressure.stringValue = localizedString("Pressure") + " " + Int(ActivityData.memPressure).formatted(.percent)
+            pressureLevel.doubleValue = ActivityData.memPressure / 5
+            
+            memApp.stringValue = String(Int(round(ActivityData.memApp))) + "% (App)"
+            memAppBar.doubleValue = ActivityData.memApp
+            
+            memInactive.stringValue = String(Int(round(ActivityData.memInactive))) + "% (NAct)"
+            memInactiveBar.doubleValue = ActivityData.memInactive
+            
+            memComp.stringValue = String(Int(round(ActivityData.memCompressed))) + "% (Comp)"
+            memCompBar.doubleValue = ActivityData.memCompressed
+        }
         
-        memApp.stringValue = String(Int(round(ActivityData.memApp))) + "% (App)"
-        memAppBar.doubleValue = ActivityData.memApp
         
-        memInactive.stringValue = String(Int(round(ActivityData.memInactive))) + "% (NAct)"
-        memInactiveBar.doubleValue = ActivityData.memInactive
-        
-        memComp.stringValue = String(Int(round(ActivityData.memCompressed))) + "% (Comp)"
-        memCompBar.doubleValue = ActivityData.memCompressed
-        
-        netLabel.stringValue = ActivityData.netIp + "\n↓ " + String(Int(ActivityData.netIn.value)) + ActivityData.netIn.unit + " | ↑ " + String(Int(ActivityData.netOut.value)) + ActivityData.netOut.unit
+        if netHistory != Int(ActivityData.netIn.value + ActivityData.netOut.value) {
+            netLabel.stringValue = ActivityData.netIp + "\n↓ " + String(Int(ActivityData.netIn.value)) + ActivityData.netIn.unit + " | ↑ " + String(Int(ActivityData.netOut.value)) + ActivityData.netOut.unit
+            netHistory  = Int(ActivityData.netIn.value + ActivityData.netOut.value)
+        }
         
         if popupChart.isShown {
             updatePopupData()
