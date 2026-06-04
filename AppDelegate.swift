@@ -25,12 +25,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }()
     
     private var cpuTimer: Timer? = nil
-    private var spinnerTimer: Timer? = nil
-    private var frames: [NSImage] =  []
+    private var spinnerLayer: CALayer? = nil
     private var statusButtonLabelHist: String = ""
-    private var statusButtonIntervalHist: Double = 0.0
-    private var curFrame: Int = 0
-    private var maxFrame: Int = 0
+    private var lastSpinnerSpeed: Float = -1
     private let popover = NSPopover()
     private var updateIntervalName:[Double] = [0.5, 1.0, 1.5, 2.0]
     private var adjStepsInterval:[Int] = [8, 16, 24, 32]
@@ -101,7 +98,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func changeSpinner(spinnerName: String) {
         stopRunning()
         spinnerActive = spinnerName
+        let layer = CALayer()
         let spinnerFrames: Int = spinners[spinnerName]![0]
+        let animation = CAKeyframeAnimation(keyPath: "contents")
+        var frames: [NSImage] =  []
+        guard let button = statusItem.button else { return }
         
         // load spinner
         frames = {
@@ -129,9 +130,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
              return image
             }
         }()
-        curFrame = 0
-        maxFrame = spinnerFrames
-        startRunning()
+        
+        spinnerLayer?.removeFromSuperlayer()
+        button.image = NSImage(size: frames[0].size, flipped: false) { _ in true }
+        layer.contents = frames.first
+        animation.values = spinnersRotationInvert ? frames.reversed() : frames
+        animation.duration = 0.25 * Double(spinners[spinnerActive]?[2] ?? 1) * Double(frames.count)
+        animation.calculationMode = .discrete
+        animation.repeatCount = .infinity
+        layer.add(animation, forKey: "spin")
+        
+        layer.frame = CGRect(x: 0, y: 0, width: frames[0].size.width, height: button.bounds.height > 0 ? button.bounds.height : NSStatusBar.system.thickness)
+        button.layer?.addSublayer(layer)
+        spinnerLayer = layer
+        lastSpinnerSpeed = -1
         
         // update effect menu
         for menuItem in statusItemMenu.items {
@@ -157,6 +169,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         
+        statusItem.length = (enableStatusText ? 36 : 4) + (frames.map { $0.size.width }.max() ?? NSStatusBar.system.thickness)
+        startRunning()
         saveParams()
     }
     
@@ -173,53 +187,42 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         RunLoop.main.add(cpuTimer!, forMode: .common)
         cpuTimer?.fire()
     }
-    
+
     @objc private func stopRunning() {
         closePopoverMenu(sender: self)
-        spinnerTimer?.invalidate()
         cpuTimer?.invalidate()
+        spinnerLayer?.removeAllAnimations()
     }
-    
+
+    private func applySpinnerSpeed() {
+        guard let layer = spinnerLayer else { return }
+        let factor = Float(max(1.0, min(100.0, ActivityData.cpuPercentage / Double(spinners[spinnerActive]![0] - 1))))
+        if abs(factor - lastSpinnerSpeed) < 0.01 { return }
+        let now = CACurrentMediaTime()
+        let local = layer.convertTime(now, from: nil)
+        layer.speed = factor
+        layer.timeOffset = local
+        layer.beginTime = now
+        lastSpinnerSpeed = factor
+    }
+
     private func updateUsage() {
         ActivityData.update()
-        curFrame = curFrame + (spinnersRotationInvert ? -1 : 1)
-        if curFrame > maxFrame - 1 {
-            curFrame = 0
-        } else if curFrame < 0 {
-            curFrame = maxFrame - 1
-        }
-        statusItem.button?.image = frames[curFrame]
-        
-        var statusButtonLabel: String = ""
-        if enableStatusText {
-            statusButtonLabel =  String(Int(ActivityData.cpuPercentage)) + "% "
-        } else {
-            statusButtonLabel = ""
-        }
-        
-        if statusButtonLabelHist != statusButtonLabel {
-            statusButtonLabelHist = statusButtonLabel
-            statusItem.button?.title = statusButtonLabel
-        }
-        
-        let interval = 0.25 / max(1.0, min(100.0, ActivityData.cpuPercentage / Double(maxFrame))) * Double(spinners[spinnerActive]![2])
 
-        if round(statusButtonIntervalHist * 100) != round(interval * 100) {
-            spinnerTimer?.invalidate()
-            spinnerTimer = Timer(timeInterval: interval, repeats: true, block: { [weak self] _ in
-                self!.curFrame = self!.curFrame + (spinnersRotationInvert ? -1 : 1)
-                if self!.curFrame == self!.maxFrame {
-                    self!.curFrame = 0
-                } else if self!.curFrame < 0 {
-                    self!.curFrame = self!.maxFrame - 1
-                }
-                self?.statusItem.button?.image = self?.frames[self!.curFrame]
-                
-            })
-            RunLoop.main.add(spinnerTimer!, forMode: .common)
-            statusButtonIntervalHist = interval
+        var statusButtonLabel: String = ""
+               if enableStatusText {
+                   statusButtonLabel =  String(Int(ActivityData.cpuPercentage)) + "% "
+               } else {
+                   statusButtonLabel = ""
+               }
+               
+        if statusButtonLabelHist != statusButtonLabel {
+                   statusButtonLabelHist = statusButtonLabel
+                   statusItem.button?.title = statusButtonLabel
         }
-        
+
+        applySpinnerSpeed()
+
         // check if we need update display and menu
         if isDeviceChanged {
             isDeviceChanged = false
@@ -267,8 +270,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         updateInterval = Double(sender.title.replacingOccurrences(of: localizedString("Second"), with: "").trimmingCharacters(in: .whitespacesAndNewlines))!
         sender.state = .on
-        startRunning()
-        saveParams()
+        changeSpinner(spinnerName: spinnerActive)
     }
     
     @objc private func changeAdjustmentStepsClick(sender: NSMenuItem) {
@@ -303,7 +305,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
         sender.state = .on
         changeSpinner(spinnerName: spinnerActive)
-        saveParams()
     }
 
     @objc private func changeLaunchAtLogin(sender: NSMenuItem) {
@@ -325,7 +326,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             sender.state = .on
             spinnersRotationInvert = true
         }
-        saveParams()
+        changeSpinner(spinnerName: spinnerActive)
     }
     
     @objc private func changelocalizeClick(sender: NSMenuItem) {
@@ -405,7 +406,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             sender.state = .on
             enableStatusText = true
         }
-        saveParams()
+        changeSpinner(spinnerName: spinnerActive)
     }
     
     @objc func applicationQuit() {
