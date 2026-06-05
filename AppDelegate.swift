@@ -108,16 +108,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         frames = {
             return (0 ..< spinnerFrames).map { n in
                 var image = NSImage(named: spinnerName + " \(n)")!
-                image.size = NSSize(width: (NSStatusBar.system.thickness - 2) / image.size.height * image.size.width, height: (NSStatusBar.system.thickness - 2))
+                image = image.resizeImage(width: (NSStatusBar.system.thickness - 2) / image.size.height * image.size.width, height: NSStatusBar.system.thickness - 2)
                 // Apply image effect
                 if spinners[spinnerName]![1] > 0 { switch spinnersEffectSelected {
                     case 2: // White opage 80%
                         image.isTemplate = true
-                        image = image.image(with: NSColor(red: 1, green: 1, blue: 1, alpha: 0.8))
+                        image = image.imageTint(with: NSColor(red: 1, green: 1, blue: 1, alpha: 0.8))
                         break
                     case 3: // Black opage 80%
                         image.isTemplate = true
-                        image = image.image(with: NSColor(red: 0, green: 0, blue: 0, alpha: 0.8))
+                        image = image.imageTint(with: NSColor(red: 0, green: 0, blue: 0, alpha: 0.8))
                         break
                     case 4: // Automatic
                         image.isTemplate = true
@@ -133,14 +133,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         spinnerLayer?.removeFromSuperlayer()
         button.image = NSImage(size: frames[0].size, flipped: false) { _ in true }
-        layer.contents = frames.first
         animation.values = spinnersRotationInvert ? frames.reversed() : frames
         animation.duration = 0.25 * Double(spinners[spinnerActive]?[2] ?? 1) * Double(frames.count)
         animation.calculationMode = .discrete
         animation.repeatCount = .infinity
-        layer.add(animation, forKey: "spin")
-        
+        layer.contents = frames.first
         layer.frame = CGRect(x: 0, y: 0, width: frames[0].size.width, height: button.bounds.height > 0 ? button.bounds.height : NSStatusBar.system.thickness)
+        layer.add(animation, forKey: "spin")
         button.layer?.addSublayer(layer)
         spinnerLayer = layer
         lastSpinnerSpeed = -1
@@ -168,8 +167,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
         }
-        
-        statusItem.length = (enableStatusText ? 36 : 4) + (frames.map { $0.size.width }.max() ?? NSStatusBar.system.thickness)
+    
+        statusItem.length = (enableStatusText ? 36 : 4) + frames[0].size.width
         startRunning()
         saveParams()
     }
@@ -651,8 +650,37 @@ func localizedString(_ key: String.LocalizationValue) -> String {
     }
 }
 
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        if response.actionIdentifier == localizedString("Allow")  {
+            let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
+            AXIsProcessTrustedWithOptions(options)
+        } else if response.actionIdentifier == localizedString("Quit") {
+            applicationQuit()
+        } else if response.actionIdentifier == localizedString("Download") {
+            NSWorkspace.shared.open(URL(string: sHelper.appLastestUrl)!)
+        }
+        completionHandler()
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound, .list])
+    }
+}
+
 extension NSImage {
-    func image(with tintColor: NSColor) -> NSImage {
+    func resizeImage(width: CGFloat, height: CGFloat) -> NSImage {
+        let img = NSImage(size: CGSize(width:width, height:height))
+        img.lockFocus()
+        let ctx = NSGraphicsContext.current
+        ctx?.imageInterpolation = .high
+        self.draw(in: NSMakeRect(0, 0, width, height), from: NSMakeRect(0, 0, size.width, size.height), operation: .copy, fraction: 1)
+        img.unlockFocus()
+
+        return img
+    }
+    
+    func imageTint(with tintColor: NSColor) -> NSImage {
         if self.isTemplate == false {
             return self
         }
@@ -669,23 +697,5 @@ extension NSImage {
         image.isTemplate = false
         
         return image
-    }
-}
-
-extension AppDelegate: UNUserNotificationCenterDelegate {
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        if response.actionIdentifier == localizedString("Allow")  {
-            let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
-            AXIsProcessTrustedWithOptions(options)
-        } else if response.actionIdentifier == localizedString("Quit") {
-            applicationQuit()
-        } else if response.actionIdentifier == localizedString("Download") {
-            NSWorkspace.shared.open(URL(string: sHelper.appLastestUrl)!)
-        }
-        completionHandler()
-    }
-
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler([.banner, .sound, .list])
     }
 }
