@@ -19,6 +19,8 @@ let ActivityData = AKservice()
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItemMenu: NSMenu!
+    private var appearanceObservation: NSKeyValueObservation?
+    private var currentSpinnerFrames: [NSImage] = []
     private var sHelper = Helper()
     var statusItem: NSStatusItem = {
         return NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -103,36 +105,34 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let animation = CAKeyframeAnimation(keyPath: "contents")
         var frames: [NSImage] =  []
         guard let button = statusItem.button else { return }
-        
         // load spinner
         frames = {
             return (0 ..< spinnerFrames).map { n in
                 var image = NSImage(named: spinnerName + " \(n)")!
                 image = image.resizeImage(width: (NSStatusBar.system.thickness - 2) / image.size.height * image.size.width, height: NSStatusBar.system.thickness - 2)
-                // Apply image effect
-                if spinners[spinnerName]![1] > 0 { switch spinnersEffectSelected {
-                    case 2: // White opage 80%
-                        image.isTemplate = true
-                        image = image.imageTint(with: NSColor(red: 1, green: 1, blue: 1, alpha: 0.8))
+                if spinners[spinnerName]![1] > 0 {
+                    switch spinnersEffectSelected {
+                    case 2:
+                        image = image.imageWithTint(color: NSColor(red: 1, green: 1, blue: 1, alpha: 0.8))
                         break
-                    case 3: // Black opage 80%
-                        image.isTemplate = true
-                        image = image.imageTint(with: NSColor(red: 0, green: 0, blue: 0, alpha: 0.8))
+                    case 3:
+                        image = image.imageWithTint(color: NSColor(red: 0, green: 0, blue: 0, alpha: 0.8))
                         break
-                    case 4: // Automatic
-                        image.isTemplate = true
-                        break
-                    default:
-                        image.isTemplate = false
-                        break
+                    case 4:
+                        let appearance = statusItem.button?.effectiveAppearance ?? NSApp.effectiveAppearance
+                        let isDark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+                        image = image.imageWithTint(color: isDark ? .white : .black)
+                    default: break
                     }
                 }
-             return image
+                return image
             }
         }()
-        
+
+        self.currentSpinnerFrames = frames
+
         spinnerLayer?.removeFromSuperlayer()
-        button.image = NSImage(size: frames[0].size, flipped: false) { _ in true }
+        button.image?.size = frames[0].size
         animation.values = spinnersRotationInvert ? frames.reversed() : frames
         animation.duration = 0.25 * Double(spinners[spinnerActive]?[2] ?? 1) * Double(frames.count)
         animation.calculationMode = .discrete
@@ -140,10 +140,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         layer.contents = frames.first
         layer.frame = CGRect(x: 0, y: 0, width: frames[0].size.width, height: button.bounds.height > 0 ? button.bounds.height : NSStatusBar.system.thickness)
         layer.add(animation, forKey: "spin")
+
         button.layer?.addSublayer(layer)
         spinnerLayer = layer
         lastSpinnerSpeed = -1
-        
+
         // update effect menu
         for menuItem in statusItemMenu.items {
             if menuItem.title == localizedString("Spinners Effects") {
@@ -171,6 +172,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem.length = (enableStatusText ? 36 : 4) + frames[0].size.width
         startRunning()
         saveParams()
+    }
+    
+    @objc private func handleAppearanceChange() {
+        guard spinnersEffectSelected == 4,
+              spinners[spinnerActive]![1] > 0,
+              let layer = spinnerLayer,
+              let currentAnimation = layer.animation(forKey: "spin") as? CAKeyframeAnimation,
+              !currentSpinnerFrames.isEmpty else { return }
+        
+        guard let animationCopy = currentAnimation.copy() as? CAKeyframeAnimation else { return }
+        let appearance = statusItem.button?.effectiveAppearance ?? NSApp.effectiveAppearance
+        let isDark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        let tintColor = isDark ? NSColor.white : NSColor.black
+        let tintedFrames = currentSpinnerFrames.map { $0.imageWithTint(color: tintColor) }
+        animationCopy.values = spinnersRotationInvert ? tintedFrames.reversed() : tintedFrames
+        layer.add(animationCopy, forKey: "spin")
+        layer.contents = spinnersRotationInvert ? tintedFrames.last : tintedFrames.first
     }
     
     @objc private func WakeNotification() {
@@ -410,6 +428,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @objc func applicationQuit() {
         MediaKeyMonitor.shared.stop()
+        appearanceObservation?.invalidate()
         stopRunning()
         saveParams()
         exit(0)
@@ -627,6 +646,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             closePopoverMenu(sender: self)
         })
         
+        appearanceObservation = statusItem.button?.observe(\.effectiveAppearance, options: [.new]) { [weak self] _, _ in
+               DispatchQueue.main.async {
+                   self?.handleAppearanceChange()
+               }
+        }
+        
         // change monitor device?
         CGDisplayRegisterReconfigurationCallback({ displayID, flags, userInfo in AppDelegate.doChangeDevice()}, nil)
         
@@ -680,22 +705,15 @@ extension NSImage {
         return img
     }
     
-    func imageTint(with tintColor: NSColor) -> NSImage {
-        if self.isTemplate == false {
-            return self
-        }
-        
-        let image = self.copy() as! NSImage
-        image.lockFocus()
-        
-        tintColor.set()
-        
-        let imageRect = NSRect(origin: .zero, size: image.size)
-        imageRect.fill(using: .sourceIn)
-        
-        image.unlockFocus()
-        image.isTemplate = false
-        
-        return image
+    func imageWithTint(color: NSColor) -> NSImage {
+           guard let tintedImage = self.copy() as? NSImage else { return self }
+           tintedImage.lockFocus()
+           
+           color.set()
+           let imageRect = NSRect(origin: .zero, size: tintedImage.size)
+           imageRect.fill(using: .sourceAtop)
+           
+           tintedImage.unlockFocus()
+           return tintedImage
     }
 }
