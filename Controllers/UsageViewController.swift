@@ -103,6 +103,7 @@ class UsageViewController: NSViewController {
     @IBOutlet var gpuLabel: NSTextField!
     @IBOutlet var cpuTempLabel: NSTextField!
     @IBOutlet var fanLabel: NSTextField!
+    @IBOutlet var memSwapLabel: NSTextField!
     
     @IBOutlet var memPercentage: NSTextField!
     @IBOutlet var memPressure: NSTextField!
@@ -116,6 +117,7 @@ class UsageViewController: NSViewController {
     @IBOutlet var tempLevel: NSLevelIndicator!
     @IBOutlet var memLevel: NSLevelIndicator!
     @IBOutlet var pressureLevel: NSLevelIndicator!
+    @IBOutlet var memSwapLevel: NSLevelIndicator!
     
     @IBOutlet var memAppBar: NSProgressIndicator!
     @IBOutlet var memInactiveBar: NSProgressIndicator!
@@ -274,6 +276,10 @@ class UsageViewController: NSViewController {
             memCompBar.doubleValue = ActivityData.memCompressed
         }
         
+        if round(memSwapLabel.doubleValue) != round(ActivityData.memSwap) {
+            memSwapLabel.stringValue = localizedString("Swap") + " " + Int(ActivityData.memSwap).formatted(.percent)
+            memSwapLevel.doubleValue = ActivityData.memSwap / 5
+        }
         
         if netHistory != Int(ActivityData.netIn.value + ActivityData.netOut.value) {
             netLabel.stringValue = ActivityData.netIp + "\n↓ " + String(Int(ActivityData.netIn.value)) + ActivityData.netIn.unit + " | ↑ " + String(Int(ActivityData.netOut.value)) + ActivityData.netOut.unit
