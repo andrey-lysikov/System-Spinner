@@ -224,7 +224,7 @@ class UsageViewController: NSViewController {
         if !ioService.isAir {
             var fanLabelValue: String = ""
             var fanSpeed: Int = 0
-            
+           
             for (key, _) in ioService.fanSpeed.enumerated() {
                 if key == 0 {
                     fanLabelValue =  "fan " + String(ioService.fanSpeed[key])
@@ -232,7 +232,6 @@ class UsageViewController: NSViewController {
                     fanLabelValue +=  " | " + String(ioService.fanSpeed[key])
                 }
                 fanSpeed += ioService.fanSpeed[key]
-                fanLabelValue += String(ioService.fanSpeed[key])
             }
             
             if fanSpeed == 0 {
