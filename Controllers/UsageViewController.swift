@@ -222,28 +222,11 @@ class UsageViewController: NSViewController {
         
         // Air is not present fan
         if !ioService.isAir {
-            var fanLabelValue: String = ""
-            var fanSpeed: Int = 0
-           
-            for (key, _) in ioService.fanSpeed.enumerated() {
-                if key == 0 {
-                    fanLabelValue =  "fan " + String(ioService.fanSpeed[key])
-                } else {
-                    fanLabelValue +=  " | " + String(ioService.fanSpeed[key])
-                }
-                fanSpeed += ioService.fanSpeed[key]
+            var fanLabelValue = "fan \(ioService.fanSpeed.map { String($0) }.joined(separator: " | ")) rpm"
+            if ioService.fanSpeed[0] == 0 {
+                fanLabelValue = localizedString("fan is stopped")
             }
-            
-            if fanSpeed == 0 {
-                fanLabelValue =  localizedString("fan is stoped")
-            } else {
-                fanLabelValue += " rpm"
-            }
-            
-            if fanLabelValue != fanHistory {
-                fanLabel.stringValue = fanLabelValue
-                fanHistory = fanLabelValue
-            }
+            fanLabel.stringValue = fanLabelValue
         }
         
         // if presentSMC
