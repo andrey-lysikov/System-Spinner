@@ -34,10 +34,10 @@
                                         <rect key="frame" x="0.0" y="303" width="154" height="105"/>
                                         <subviews>
                                             <stackView distribution="fill" orientation="horizontal" alignment="centerY" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FSJ-2o-hL4">
-                                                <rect key="frame" x="0.0" y="86" width="57" height="19"/>
+                                                <rect key="frame" x="0.0" y="86" width="58" height="19"/>
                                                 <subviews>
                                                     <button identifier="cpuChartPopButton" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="pIr-8I-1s8" userLabel="Cpu Chart Button">
-                                                        <rect key="frame" x="0.0" y="2.5" width="17" height="14"/>
+                                                        <rect key="frame" x="0.0" y="3" width="18" height="14"/>
                                                         <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="chart.xyaxis.line" catalog="system" imagePosition="only" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="I9O-wC-lUS">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                             <font key="font" metaFont="system"/>
@@ -47,7 +47,7 @@
                                                         </connections>
                                                     </button>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HtW-LS-skZ">
-                                                        <rect key="frame" x="23" y="0.0" width="36" height="19"/>
+                                                        <rect key="frame" x="24" y="0.0" width="36" height="19"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" alignment="left" title="CPU" id="NZg-BL-gOH">
                                                             <font key="font" metaFont="systemMedium" size="15"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -186,10 +186,10 @@
                                                 <rect key="frame" x="0.0" y="117" width="120" height="5"/>
                                             </box>
                                             <stackView distribution="fill" orientation="horizontal" alignment="top" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QQi-uR-oeX">
-                                                <rect key="frame" x="0.0" y="98" width="60" height="19"/>
+                                                <rect key="frame" x="0.0" y="98" width="61" height="19"/>
                                                 <subviews>
                                                     <button identifier="memChartPopButton" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Hrp-iM-vnk" userLabel="Mem Chart Button">
-                                                        <rect key="frame" x="0.0" y="2.5" width="17" height="14"/>
+                                                        <rect key="frame" x="0.0" y="3" width="18" height="14"/>
                                                         <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="chart.xyaxis.line" catalog="system" imagePosition="only" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="Z1C-In-6tI">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                             <font key="font" metaFont="system"/>
@@ -199,7 +199,7 @@
                                                         </connections>
                                                     </button>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NlV-oa-81H">
-                                                        <rect key="frame" x="23" y="0.0" width="39" height="19"/>
+                                                        <rect key="frame" x="24" y="0.0" width="39" height="19"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" title="MEM" id="FAO-9u-KAP">
                                                             <font key="font" metaFont="systemMedium" size="15"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -433,7 +433,6 @@
                                     <constraint firstItem="E6g-zr-YzW" firstAttribute="leading" secondItem="u9E-J8-04d" secondAttribute="leading" id="jTU-qW-dnb"/>
                                     <constraint firstItem="Dgh-Ef-0Yj" firstAttribute="leading" secondItem="u9E-J8-04d" secondAttribute="leading" id="keD-Uh-lIy"/>
                                     <constraint firstAttribute="trailing" secondItem="TRe-cy-d0t" secondAttribute="trailing" id="sD2-Nn-1CR"/>
-                                    <constraint firstAttribute="bottom" secondItem="XBL-lq-V4Y" secondAttribute="bottom" constant="100" id="sls-Tp-baV"/>
                                     <constraint firstAttribute="trailing" secondItem="Dgh-Ef-0Yj" secondAttribute="trailing" id="zxg-6p-j4e"/>
                                 </constraints>
                                 <visibilityPriorities>
@@ -494,6 +493,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="chart.xyaxis.line" catalog="system" width="17" height="14"/>
+        <image name="chart.xyaxis.line" catalog="system" width="18" height="14"/>
     </resources>
 </document>

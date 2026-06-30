@@ -258,9 +258,9 @@ class UsageViewController: NSViewController {
             memCompBar.doubleValue = ActivityData.memCompressed
         }
         
-        if round(memSwapLabel.doubleValue) != round(ActivityData.memSwap) {
-            memSwapLabel.stringValue = localizedString("Swap") + " " + Int(ActivityData.memSwap).formatted(.percent)
-            memSwapLevel.doubleValue = ActivityData.memSwap / 5
+        if round(memSwapLevel.doubleValue) != Double(ActivityData.memSwap) {
+            memSwapLabel.stringValue = localizedString("Swap") + " " + ActivityData.memSwap.formatted(.percent)
+            memSwapLevel.doubleValue = Double(ActivityData.memSwap) / 5
         }
         
         if netHistory != Int(ActivityData.netIn.value + ActivityData.netOut.value) {

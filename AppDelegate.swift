@@ -28,7 +28,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private var cpuTimer: Timer? = nil
     private var spinnerLayer: CALayer? = nil
-    private var statusButtonLabelHist: String = ""
     private var lastSpinnerSpeed: Float = -1
     private let popover = NSPopover()
     private var updateIntervalName:[Double] = [0.5, 1.0, 1.5, 2.0]
@@ -132,6 +131,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.currentSpinnerFrames = frames
 
         spinnerLayer?.removeFromSuperlayer()
+        button.wantsLayer = true
         button.image?.size = frames[0].size
         animation.values = spinnersRotationInvert ? frames.reversed() : frames
         animation.duration = 0.25 * Double(spinners[spinnerActive]?[2] ?? 1) * Double(frames.count)
@@ -169,7 +169,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
     
-        statusItem.length = (enableStatusText ? 36 : 4) + frames[0].size.width
+        statusItem.length = (enableStatusText ? 32 : 4) + frames[0].size.width
+        
         startRunning()
         saveParams()
     }
@@ -225,20 +226,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func updateUsage() {
         ActivityData.update()
-
-        var statusButtonLabel: String = ""
-               if enableStatusText {
-                   statusButtonLabel =  String(Int(ActivityData.cpuPercentage)) + "% "
-               } else {
-                   statusButtonLabel = ""
-               }
-               
-        if statusButtonLabelHist != statusButtonLabel {
-                   statusButtonLabelHist = statusButtonLabel
-                   statusItem.button?.title = statusButtonLabel
-        }
-
         applySpinnerSpeed()
+        
+        statusItem.button?.title = enableStatusText ? "   \(Int(ActivityData.cpuPercentage))%" : ""
 
         // check if we need update display and menu
         if isDeviceChanged {

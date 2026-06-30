@@ -56,7 +56,7 @@ class AKservice {
     public var memWired: Double = 0.0
     public var memCompressed: Double = 0.0
     public var memInactive: Double = 0.0
-    public var memSwap: Double = 0.0
+    public var memSwap: Int = 0
     public var netIp: String = localizedString("no ip found")
     public var netIn = netPacketData(value: 0.0, unit: localizedString("KB/s"))
     public var netOut = netPacketData(value: 0.0, unit: localizedString("KB/s"))
@@ -187,18 +187,16 @@ class AKservice {
         return interface
     }
     
-    func getSystemSwapUsage() -> Double {
+    func getSystemSwapUsage() -> Int {
         var mib = [CTL_VM, VM_SWAPUSAGE]
         var size = MemoryLayout<xsw_usage>.size
         var usage = xsw_usage()
         
-        let result = sysctl(&mib, u_int(mib.count), &usage, &size, nil, 0)
+        guard sysctl(&mib, 2, &usage, &size, nil, 0) == 0, usage.xsu_total > 0 else { return 0 }
         
-        guard result == 0 else {
-            return 0
-        }
+        let swSize = (Double(usage.xsu_used) / Double(usage.xsu_total) * 100)
         
-        return Double(usage.xsu_used) / Double(usage.xsu_total) * 100
+        return swSize.isNaN || swSize.isInfinite ? 0 : Int(swSize)
     }
     
     private func getBytesInfo(_ id: String, _ pointer: UnsafeMutablePointer<ifaddrs>) -> (up: Int64, down: Int64)? {
