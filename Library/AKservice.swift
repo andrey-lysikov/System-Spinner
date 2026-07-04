@@ -11,12 +11,12 @@ class AKservice {
     private let hostBasicInfoCount = UInt32(exactly: MemoryLayout<host_basic_info_data_t>.size / MemoryLayout<integer_t>.size)!
     private var gpuService: io_service_t = 0
     private var loadPrevious = host_cpu_load_info()
-    private var previousUpload: Int64 = 0
-    private var previousDownload: Int64 = 0
     private let historyCount: Int = 15
     private let historyCountDetail: Int = 900
     private var loadCpuPreviousHist: [Double] = []
     private var loadGpuPreviousHist: [Double] = []
+    private var lastInBytes: UInt64 = 0
+    private var lastOutBytes: UInt64 = 0
     public var loadCpuPreviousHistDetails: [Double] = []
     public var loadMemPreviousHistDetails: [Double] = []
     
@@ -173,20 +173,6 @@ class AKservice {
         return Double(data.max_mem) / 1073741824
     }
     
-    private func getDefaultNetworkDevice() -> String {
-        let processName = ProcessInfo.processInfo.processName as CFString
-        let dynamicStore = SCDynamicStoreCreate(kCFAllocatorDefault, processName, nil, nil)
-        let ipv4Key = SCDynamicStoreKeyCreateNetworkGlobalEntity(kCFAllocatorDefault,
-                                                                 kSCDynamicStoreDomainState,
-                                                                 kSCEntNetIPv4)
-        guard let list = SCDynamicStoreCopyValue(dynamicStore, ipv4Key) as? [CFString: Any],
-              let interface = list[kSCDynamicStorePropNetPrimaryInterface] as? String
-        else {
-            return ""
-        }
-        return interface
-    }
-    
     func getSystemSwapUsage() -> Int {
         var mib = [CTL_VM, VM_SWAPUSAGE]
         var size = MemoryLayout<xsw_usage>.size
@@ -197,33 +183,6 @@ class AKservice {
         let swSize = (Double(usage.xsu_used) / Double(usage.xsu_total) * 100)
         
         return swSize.isNaN || swSize.isInfinite ? 0 : Int(swSize)
-    }
-    
-    private func getBytesInfo(_ id: String, _ pointer: UnsafeMutablePointer<ifaddrs>) -> (up: Int64, down: Int64)? {
-        let name = String(cString: pointer.pointee.ifa_name)
-        if name == id {
-            let addr = pointer.pointee.ifa_addr.pointee
-            guard addr.sa_family == UInt8(AF_LINK) else { return nil }
-            var data: UnsafeMutablePointer<if_data>? = nil
-            data = unsafeBitCast(pointer.pointee.ifa_data,
-                                 to: UnsafeMutablePointer<if_data>.self)
-            return (up: Int64(data?.pointee.ifi_obytes ?? 0),
-                    down: Int64(data?.pointee.ifi_ibytes ?? 0))
-        }
-        return nil
-    }
-    
-    private func getIPAddress(_ id: String,_ pointer: UnsafeMutablePointer<ifaddrs>) -> String? {
-        let name = String(cString: pointer.pointee.ifa_name)
-        if name == id {
-            var addr = pointer.pointee.ifa_addr.pointee
-            guard addr.sa_family == UInt8(AF_INET) else { return nil }
-            var ip = [CChar](repeating: 0, count: Int(NI_MAXHOST))
-            getnameinfo(&addr, socklen_t(addr.sa_len), &ip,
-                        socklen_t(ip.count), nil, socklen_t(0), NI_NUMERICHOST)
-            return String(cString: ip)
-        }
-        return nil
     }
     
     private func convert(byte: Double) -> netPacketData {
@@ -240,6 +199,61 @@ class AKservice {
         } else {
             return netPacketData(value: round(In: byte / KB), unit: localizedString("KB/s"))
         }
+    }
+    
+    private func getNetworkInterfaceBytesAndIP() -> (inBytes: UInt64, outBytes: UInt64, activeIP: String) {
+            var ifaddr: UnsafeMutablePointer<ifaddrs>? = nil
+            var totalIn: UInt64 = 0
+            var totalOut: UInt64 = 0
+            var activeIPAddress: String = localizedString("no ip found")
+            
+            guard getifaddrs(&ifaddr) == 0 else {
+                return (0, 0, activeIPAddress)
+            }
+            
+            var ptr = ifaddr
+            while ptr != nil {
+                defer { ptr = ptr?.pointee.ifa_next }
+                guard let interface = ptr?.pointee else { continue }
+                
+                let addrFamily = interface.ifa_addr.pointee.sa_family
+                let flags = Int32(interface.ifa_flags)
+                
+                if addrFamily == UInt8(AF_LINK) {
+                    if let dataPtr = interface.ifa_data {
+                        let stats = dataPtr.assumingMemoryBound(to: if_data.self).pointee
+                        totalIn += UInt64(stats.ifi_ibytes)
+                        totalOut += UInt64(stats.ifi_obytes)
+                    }
+                }
+                if (flags & (IFF_UP | IFF_RUNNING | IFF_LOOPBACK)) == (IFF_UP | IFF_RUNNING) {
+                    if addrFamily == UInt8(AF_INET) || addrFamily == UInt8(AF_INET6) {
+                        var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                        
+                        let result = getnameinfo(
+                            interface.ifa_addr,
+                            socklen_t(interface.ifa_addr.pointee.sa_len),
+                            &hostname,
+                            socklen_t(hostname.count),
+                            nil,
+                            0,
+                            NI_NUMERICHOST
+                        )
+                        
+                        if result == 0 {
+                            let ip = String(cString: hostname)
+                            if addrFamily == UInt8(AF_INET) {
+                                activeIPAddress = ip
+                            } else if activeIPAddress == localizedString("no ip found") {
+                                activeIPAddress = ip
+                            }
+                        }
+                    }
+                }
+            }
+            
+            freeifaddrs(ifaddr)
+            return (totalIn, totalOut, activeIPAddress)
     }
     
     public func update() {
@@ -303,39 +317,18 @@ class AKservice {
         memSwap = getSystemSwapUsage()
         
         // Update NET Data
-        let netId = getDefaultNetworkDevice()
-        if netId.isEmpty {
+        let net = getNetworkInterfaceBytesAndIP()
+        
+        if net.activeIP == localizedString("no ip found") {
             netIp = localizedString("no ip found")
             netIn = netPacketData(value: 0.0, unit: localizedString("KB/s"))
             netOut = netPacketData(value: 0.0, unit: localizedString("KB/s"))
         } else {
-            var ifaddr: UnsafeMutablePointer<ifaddrs>? = nil
-            getifaddrs(&ifaddr)
-            
-            var pointer = ifaddr
-            var upload: Int64 = 0
-            var download: Int64 = 0
-            while pointer != nil {
-                defer { pointer = pointer?.pointee.ifa_next }
-                if let info = getBytesInfo(netId, pointer!) {
-                    upload += info.up
-                    download += info.down
-                }
-                if let ip = getIPAddress(netId, pointer!) {
-                    if netIp != ip {
-                        previousUpload = 0
-                        previousDownload = 0
-                    }
-                    netIp = ip
-                }
-            }
-            freeifaddrs(ifaddr)
-            if previousUpload != 0 && previousDownload != 0 {
-                netIn = convert(byte: Double(download - previousDownload))
-                netOut = convert(byte: Double(upload - previousUpload))
-            }
-            previousUpload = upload
-            previousDownload = download
+            netIp = net.activeIP
+            netIn = convert(byte: Double(net.inBytes >= lastInBytes ? net.inBytes - lastInBytes : 0))
+            netOut = convert(byte: Double(net.outBytes >= lastOutBytes ? net.outBytes - lastOutBytes : 0))
+            lastInBytes = net.inBytes
+            lastOutBytes = net.outBytes
         }
     }
     
