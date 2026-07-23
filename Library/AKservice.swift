@@ -19,6 +19,11 @@ class AKservice {
     private var lastOutBytes: UInt64 = 0
     public var loadCpuPreviousHistDetails: [Double] = []
     public var loadMemPreviousHistDetails: [Double] = []
+    private var cachedVmStats: vm_statistics64 = vm_statistics64()
+    private var cachedActiveIP: String = ""
+    private var cpuHistSum: Double = 0.0
+    private var gpuHistSum: Double = 0.0
+    private var memHistSum: Double = 0.0
     
     public struct netPacketData {
         public var value: Double
@@ -66,19 +71,19 @@ class AKservice {
     }
     
     private func hostCPULoadInfo() -> host_cpu_load_info {
-        var info = host_cpu_load_info_data_t()
-        var count = mach_msg_type_number_t(MemoryLayout<host_cpu_load_info>.stride / MemoryLayout<integer_t>.stride)
-        
-        let kerr: kern_return_t = withUnsafeMutablePointer(to: &info, {
-            host_statistics(mach_host_self(), HOST_CPU_LOAD_INFO, $0.withMemoryRebound(to: integer_t.self, capacity: 1, { $0 }), &count)
-        })
-        
-        guard kerr == KERN_SUCCESS else {
-            return host_cpu_load_info()
-        }
-        
-        return info
-    }
+         var info = host_cpu_load_info_data_t()
+         var count = mach_msg_type_number_t(MemoryLayout<host_cpu_load_info>.stride / MemoryLayout<integer_t>.stride)
+         
+         let kerr: kern_return_t = withUnsafeMutablePointer(to: &info, {
+             host_statistics(mach_host_self(), HOST_CPU_LOAD_INFO, $0.withMemoryRebound(to: integer_t.self, capacity: 1, { $0 }), &count)
+         })
+         
+         guard kerr == KERN_SUCCESS else {
+             return host_cpu_load_info()
+         }
+         
+         return info
+     }
     
     public func getTopProcess() -> [topProcess] {
         let task = Process()
@@ -152,25 +157,25 @@ class AKservice {
     }
     
     private var vmStatistics64: vm_statistics64 {
-        var size: mach_msg_type_number_t = hostVmInfo64Count
-        let hostInfo = vm_statistics64_t.allocate(capacity: 1)
-        let _ = hostInfo.withMemoryRebound(to: integer_t.self, capacity: Int(size)) { (pointer) -> kern_return_t in
-            return host_statistics64(mach_host_self(), HOST_VM_INFO64, pointer, &size)
-        }
-        let data = hostInfo.move()
-        hostInfo.deallocate()
-        return data
+          var size: mach_msg_type_number_t = hostVmInfo64Count
+          let hostInfo = vm_statistics64_t.allocate(capacity: 1)
+          let _ = hostInfo.withMemoryRebound(to: integer_t.self, capacity: Int(size)) { (pointer) -> kern_return_t in
+              return host_statistics64(mach_host_self(), HOST_VM_INFO64, pointer, &size)
+          }
+          let data = hostInfo.move()
+          hostInfo.deallocate()
+          return data
     }
     
     private var maxMemory: Double {
-        var size: mach_msg_type_number_t = hostBasicInfoCount
-        let hostInfo = host_basic_info_t.allocate(capacity: 1)
-        let _ = hostInfo.withMemoryRebound(to: integer_t.self, capacity: Int()) { (pointer) -> kern_return_t in
-            return host_info(mach_host_self(), HOST_BASIC_INFO, pointer, &size)
-        }
-        let data = hostInfo.move()
-        hostInfo.deallocate()
-        return Double(data.max_mem) / 1073741824
+          var size: mach_msg_type_number_t = hostBasicInfoCount
+          let hostInfo = host_basic_info_t.allocate(capacity: 1)
+          let _ = hostInfo.withMemoryRebound(to: integer_t.self, capacity: Int()) { (pointer) -> kern_return_t in
+              return host_info(mach_host_self(), HOST_BASIC_INFO, pointer, &size)
+          }
+          let data = hostInfo.move()
+          hostInfo.deallocate()
+          return Double(data.max_mem) / 1073741824
     }
     
     func getSystemSwapUsage() -> Int {
@@ -226,27 +231,34 @@ class AKservice {
                         totalOut += UInt64(stats.ifi_obytes)
                     }
                 }
+                
+                let shouldParseIP = (cachedActiveIP == localizedString("no ip found") || cachedActiveIP != (activeIPAddress))
+                
                 if (flags & (IFF_UP | IFF_RUNNING | IFF_LOOPBACK)) == (IFF_UP | IFF_RUNNING) {
                     if addrFamily == UInt8(AF_INET) || addrFamily == UInt8(AF_INET6) {
-                        var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
-                        
-                        let result = getnameinfo(
-                            interface.ifa_addr,
-                            socklen_t(interface.ifa_addr.pointee.sa_len),
-                            &hostname,
-                            socklen_t(hostname.count),
-                            nil,
-                            0,
-                            NI_NUMERICHOST
-                        )
-                        
-                        if result == 0 {
-                            let ip = String(cString: hostname)
-                            if addrFamily == UInt8(AF_INET) {
-                                activeIPAddress = ip
-                            } else if activeIPAddress == localizedString("no ip found") {
-                                activeIPAddress = ip
+                        if shouldParseIP {
+                            var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                            
+                            let result = getnameinfo(
+                                interface.ifa_addr,
+                                socklen_t(interface.ifa_addr.pointee.sa_len),
+                                &hostname,
+                                socklen_t(hostname.count),
+                                nil,
+                                0,
+                                NI_NUMERICHOST
+                            )
+                            
+                            if result == 0 {
+                                let ip = String(cString: hostname)
+                                if addrFamily == UInt8(AF_INET) {
+                                    activeIPAddress = ip
+                                } else if activeIPAddress == localizedString("no ip found") {
+                                    activeIPAddress = ip
+                                }
                             }
+                        } else {
+                            activeIPAddress = cachedActiveIP
                         }
                     }
                 }
@@ -258,7 +270,6 @@ class AKservice {
     
     public func update() {
         
-        // Update CPU Data
         let load = hostCPULoadInfo()
         cpuUser = Double(load.cpu_ticks.0 - loadPrevious.cpu_ticks.0)
         cpuSystem = Double(load.cpu_ticks.1 - loadPrevious.cpu_ticks.1)
@@ -268,31 +279,38 @@ class AKservice {
         let totalTicks  = cpuUser + cpuSystem + cpuIdle + cpuNiceD
         
         let cpuLast = round(In: min(99.9, ((100.0 * cpuSystem / totalTicks) + (100.0 * cpuUser / totalTicks))))
+        
         loadCpuPreviousHist.append(cpuLast)
         loadCpuPreviousHistDetails.append(cpuLast)
-        cpuPercentage = round(In: loadCpuPreviousHist.reduce(0, +) / Double(loadCpuPreviousHist.count))
-        if loadCpuPreviousHist.count >  historyCount {
-            loadCpuPreviousHist.removeFirst()
+        cpuHistSum += cpuLast
+        
+        if loadCpuPreviousHist.count > historyCount {
+            let removed = loadCpuPreviousHist.removeFirst()
+            cpuHistSum -= removed
         }
         
-        if loadCpuPreviousHistDetails.count >  historyCountDetail {
+        if loadCpuPreviousHistDetails.count > historyCountDetail {
             loadCpuPreviousHistDetails.removeFirst()
         }
         
+        cpuPercentage = round(In: cpuHistSum / Double(loadCpuPreviousHist.count))
+        
         loadPrevious  = load
         
-        // Update GPU data
-        loadGpuPreviousHist.append(getGPUUsage() ?? 0.0)
-        gpuPercentage = round(In: loadGpuPreviousHist.reduce(0, +) / Double(loadGpuPreviousHist.count))
-        if loadGpuPreviousHist.count >  historyCount {
-            loadGpuPreviousHist.removeFirst()
+        let gpuLast = getGPUUsage() ?? 0.0
+        loadGpuPreviousHist.append(gpuLast)
+        gpuHistSum += gpuLast
+        if loadGpuPreviousHist.count > historyCount {
+            let removed = loadGpuPreviousHist.removeFirst()
+            gpuHistSum -= removed
         }
+        gpuPercentage = round(In: gpuHistSum / Double(loadGpuPreviousHist.count))
         
         // Update MEM Data
-        let maxMem = maxMemory
         let memLoad = vmStatistics64
-        
+        let cachedMaxMemory = maxMemory
         let unit        = Double(vm_kernel_page_size) / 1073741824
+        
         let active      = Double(memLoad.active_count) * unit
         let speculative = Double(memLoad.speculative_count) * unit
         let inactive    = Double(memLoad.inactive_count) * unit
@@ -302,15 +320,15 @@ class AKservice {
         let external    = Double(memLoad.external_page_count) * unit
         let using       = active + inactive + speculative + wired + compressed - purgeable - external
         
-        memPercentage = round(In: min(99.9, (100.0 * using / maxMem)))
-        memPressure   = round(In: 100.0 * (wired + compressed) / maxMem)
-        memApp        = round(In: 100.0 * (using - wired - compressed) / maxMem)
+        memPercentage = round(In: min(99.9, (100.0 * using / cachedMaxMemory)))
+        memPressure   = round(In: 100.0 * (wired + compressed) / cachedMaxMemory)
+        memApp        = round(In: 100.0 * (using - wired - compressed) / cachedMaxMemory)
         memWired      = round(In: wired)
         memCompressed = round(In: compressed)
-        memInactive = round(In: 100.0 * (inactive) / maxMem)
+        memInactive = round(In: 100.0 * (inactive) / cachedMaxMemory)
         
         loadMemPreviousHistDetails.append(memPercentage)
-        if loadMemPreviousHistDetails.count >  historyCountDetail {
+        if loadMemPreviousHistDetails.count > historyCountDetail {
             loadMemPreviousHistDetails.removeFirst()
         }
         
@@ -318,6 +336,10 @@ class AKservice {
         
         // Update NET Data
         let net = getNetworkInterfaceBytesAndIP()
+        
+        if net.activeIP != localizedString("no ip found") {
+            cachedActiveIP = net.activeIP
+        }
         
         if net.activeIP == localizedString("no ip found") {
             netIp = localizedString("no ip found")
