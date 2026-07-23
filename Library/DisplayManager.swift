@@ -3,9 +3,8 @@
 
 class DisplayManager {
     public static let shared = DisplayManager()
-    public var displays: [Display] = []
     public let globalDDCQueue = DispatchQueue(label: "Global DDC queue")
-    private var audioControlTargetDisplays: [OtherDisplay] = []
+    public var displays: [Display] = []
     private let osd = OSD()
     
     static func getDisplayNameByID(displayID: CGDirectDisplayID) -> String {

@@ -15,4 +15,3 @@ extern IOReturn IOAVServiceWriteI2C(IOAVService service, uint32_t chipAddress, u
 extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID);
 extern int DisplayServicesGetBrightness(CGDirectDisplayID display, float *brightness);
 extern int DisplayServicesSetBrightness(CGDirectDisplayID display, float brightness);
-extern void CGSServiceForDisplayNumber(CGDirectDisplayID display, io_service_t* service);

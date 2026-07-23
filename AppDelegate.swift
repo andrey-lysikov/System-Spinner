@@ -16,41 +16,48 @@ var spinnersRotationInvert: Bool = false
 var usePopUpAnimation: Bool = true
 let ActivityData = AKservice()
 
+private struct Spinner {
+    let frameCount: Int
+    let supportsEffect: Bool
+    let speedCoefficient: Int
+}
+
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItemMenu: NSMenu!
-    private var appearanceObservation: NSKeyValueObservation?
-    private var currentSpinnerFrames: [NSImage] = []
     private var sHelper = Helper()
     var statusItem: NSStatusItem = {
         return NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     }()
     
     private var cpuTimer: Timer? = nil
-    private var spinnerLayer: CALayer? = nil
-    private var lastSpinnerSpeed: Float = -1
+    private var spinnerTimer: Timer? = nil
+    private var frames: [NSImage] =  []
+    private var statusButtonIntervalHist: Double = 0.0
+    private var curFrame: Int = 0
+    private var maxFrame: Int = 0
     private let popover = NSPopover()
     private var updateIntervalName:[Double] = [0.5, 1.0, 1.5, 2.0]
     private var adjStepsInterval:[Int] = [8, 16, 24, 32]
     private var spinnersEffect: [String:Int] = [:]
-    private let spinners: [String: [Int]] =  [ // [name: [item count, can use effect?, speed coefficient]]
-        "Blue Ball" : [19, 1, 1],
-        "Cat" : [5, 1, 2],
-        "Circles Two" : [9, 1, 1],
-        "Cirrcles" : [8, 0, 1],
-        "Color Balls" : [17, 1, 1],
-        "Color Well" : [20, 0, 1],
-        "Dots" : [12, 0, 1],
-        "Delay" : [17, 1, 1],
-        "Grey Loader" : [18, 0, 1],
-        "Loader" : [8, 0, 1],
-        "Pie" : [6, 0, 1],
-        "Pikachu" : [4, 1, 2],
-        "Rainbow Pie" : [15, 0, 1],
-        "Recharges" : [ 8, 1, 1],
-        "Rotation Color Well" : [24, 0, 2],
-        "Sun" : [23, 1, 1],
-        "Waves" : [17, 1, 1]
+    private let spinners: [String: Spinner] = [
+        "Blue Ball": Spinner(frameCount: 19, supportsEffect: true, speedCoefficient: 1),
+        "Cat": Spinner(frameCount: 5, supportsEffect: true, speedCoefficient: 2),
+        "Circles Two": Spinner(frameCount: 9, supportsEffect: true, speedCoefficient: 1),
+        "Cirrcles": Spinner(frameCount: 8, supportsEffect: false, speedCoefficient: 1),
+        "Color Balls": Spinner(frameCount: 17, supportsEffect: true, speedCoefficient: 1),
+        "Color Well": Spinner(frameCount: 20, supportsEffect: false, speedCoefficient: 1),
+        "Dots": Spinner(frameCount: 12, supportsEffect: false, speedCoefficient: 1),
+        "Delay": Spinner(frameCount: 17, supportsEffect: true, speedCoefficient: 1),
+        "Grey Loader": Spinner(frameCount: 18, supportsEffect: false, speedCoefficient: 1),
+        "Loader": Spinner(frameCount: 8, supportsEffect: false, speedCoefficient: 1),
+        "Pie": Spinner(frameCount: 6, supportsEffect: false, speedCoefficient: 1),
+        "Pikachu": Spinner(frameCount: 4, supportsEffect: true, speedCoefficient: 2),
+        "Rainbow Pie": Spinner(frameCount: 15, supportsEffect: false, speedCoefficient: 1),
+        "Recharges": Spinner(frameCount: 8, supportsEffect: true, speedCoefficient: 1),
+        "Rotation Color Well": Spinner(frameCount: 24, supportsEffect: false, speedCoefficient: 2),
+        "Sun": Spinner(frameCount: 23, supportsEffect: true, speedCoefficient: 1),
+        "Waves": Spinner(frameCount: 17, supportsEffect: true, speedCoefficient: 1)
     ]
     
     @objc private func aboutWindow(sender: NSStatusItem) {
@@ -97,99 +104,67 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func changeSpinner(spinnerName: String) {
-        stopRunning()
-        spinnerActive = spinnerName
-        let layer = CALayer()
-        let spinnerFrames: Int = spinners[spinnerName]![0]
-        let animation = CAKeyframeAnimation(keyPath: "contents")
-        var frames: [NSImage] =  []
-        guard let button = statusItem.button else { return }
-        // load spinner
-        frames = {
-            return (0 ..< spinnerFrames).map { n in
-                var image = NSImage(named: spinnerName + " \(n)")!
-                image = image.resizeImage(width: (NSStatusBar.system.thickness - 2) / image.size.height * image.size.width, height: NSStatusBar.system.thickness - 2)
-                if spinners[spinnerName]![1] > 0 {
-                    switch spinnersEffectSelected {
-                    case 2:
-                        image = image.imageWithTint(color: NSColor(red: 1, green: 1, blue: 1, alpha: 0.8))
-                        break
-                    case 3:
-                        image = image.imageWithTint(color: NSColor(red: 0, green: 0, blue: 0, alpha: 0.8))
-                        break
-                    case 4:
-                        let appearance = statusItem.button?.effectiveAppearance ?? NSApp.effectiveAppearance
-                        let isDark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-                        image = image.imageWithTint(color: isDark ? .white : .black)
-                    default: break
+            stopRunning()
+            spinnerActive = spinnerName
+            let spinnerConfig = spinners[spinnerName]!
+            let spinnerFrames: Int = spinnerConfig.frameCount
+            
+            // load spinner
+            frames = {
+                return (0 ..< spinnerFrames).map { n in
+                    var image = NSImage(named: spinnerName + " \(n)")!
+                    image.size = NSSize(width: (NSStatusBar.system.thickness - 2) / image.size.height * image.size.width, height: (NSStatusBar.system.thickness - 2))
+                    // Apply image effect
+                    if spinnerConfig.supportsEffect { 
+                        switch spinnersEffectSelected {
+                        case 2: // White opage 80%
+                            image.isTemplate = true
+                            image = image.imageWithTint(color: NSColor(red: 1, green: 1, blue: 1, alpha: 0.8))
+                            break
+                        case 3: // Black opage 80%
+                            image.isTemplate = true
+                            image = image.imageWithTint(color: NSColor(red: 0, green: 0, blue: 0, alpha: 0.8))
+                            break
+                        case 4: // Automatic
+                            image.isTemplate = true
+                            break
+                        default:
+                            image.isTemplate = false
+                            break
+                        }
                     }
+                 return image
                 }
-                return image
-            }
-        }()
-
-        self.currentSpinnerFrames = frames
-
-        spinnerLayer?.removeFromSuperlayer()
-        button.wantsLayer = true
-        button.image?.size = frames[0].size
-        animation.values = spinnersRotationInvert ? frames.reversed() : frames
-        animation.duration = 0.25 * Double(spinners[spinnerActive]?[2] ?? 1) * Double(frames.count)
-        animation.calculationMode = .discrete
-        animation.repeatCount = .infinity
-        layer.contents = frames.first
-        layer.frame = CGRect(x: 0, y: 0, width: frames[0].size.width, height: button.bounds.height > 0 ? button.bounds.height : NSStatusBar.system.thickness)
-        layer.add(animation, forKey: "spin")
-
-        button.layer?.addSublayer(layer)
-        spinnerLayer = layer
-        lastSpinnerSpeed = -1
-
-        // update effect menu
-        for menuItem in statusItemMenu.items {
-            if menuItem.title == localizedString("Spinners Effects") {
-                if spinners[spinnerName]![1] > 0 {
-                    menuItem.action = #selector(changeSpinnerEffectClick(sender:))
-                } else {
-                    menuItem.action = nil
-                }
-            }
-        }
-        
-        // update spinners menu
-        for menuItem in statusItemMenu.items {
-            if menuItem.hasSubmenu && menuItem.title == localizedString("Spinners") {
-                for subMenuItem in menuItem.submenu!.items {
-                    if subMenuItem.title == spinnerName {
-                        subMenuItem.state = .on
+            }()
+            curFrame = 0
+            maxFrame = spinnerFrames
+            startRunning()
+            
+            // update effect menu
+            for menuItem in statusItemMenu.items {
+                if menuItem.title == localizedString("Spinners Effects") {
+                    if spinnerConfig.supportsEffect {
+                        menuItem.action = #selector(changeSpinnerEffectClick(sender:))
                     } else {
-                        subMenuItem.state = .off
+                        menuItem.action = nil
                     }
                 }
             }
-        }
-    
-        statusItem.length = (enableStatusText ? 32 : 4) + frames[0].size.width
-        
-        startRunning()
-        saveParams()
-    }
-    
-    @objc private func handleAppearanceChange() {
-        guard spinnersEffectSelected == 4,
-              spinners[spinnerActive]![1] > 0,
-              let layer = spinnerLayer,
-              let currentAnimation = layer.animation(forKey: "spin") as? CAKeyframeAnimation,
-              !currentSpinnerFrames.isEmpty else { return }
-        
-        guard let animationCopy = currentAnimation.copy() as? CAKeyframeAnimation else { return }
-        let appearance = statusItem.button?.effectiveAppearance ?? NSApp.effectiveAppearance
-        let isDark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-        let tintColor = isDark ? NSColor.white : NSColor.black
-        let tintedFrames = currentSpinnerFrames.map { $0.imageWithTint(color: tintColor) }
-        animationCopy.values = spinnersRotationInvert ? tintedFrames.reversed() : tintedFrames
-        layer.add(animationCopy, forKey: "spin")
-        layer.contents = spinnersRotationInvert ? tintedFrames.last : tintedFrames.first
+            
+            // update spinners menu
+            for menuItem in statusItemMenu.items {
+                if menuItem.hasSubmenu && menuItem.title == localizedString("Spinners") {
+                    for subMenuItem in menuItem.submenu!.items {
+                        if subMenuItem.title == spinnerName {
+                            subMenuItem.state = .on
+                        } else {
+                            subMenuItem.state = .off
+                        }
+                    }
+                }
+            }
+            
+            saveParams()
     }
     
     @objc private func WakeNotification() {
@@ -205,36 +180,54 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         RunLoop.main.add(cpuTimer!, forMode: .common)
         cpuTimer?.fire()
     }
-
+    
     @objc private func stopRunning() {
         closePopoverMenu(sender: self)
+        spinnerTimer?.invalidate()
         cpuTimer?.invalidate()
-        spinnerLayer?.removeAllAnimations()
     }
 
-    private func applySpinnerSpeed() {
-        guard let layer = spinnerLayer else { return }
-        let factor = Float(max(1.0, min(100.0, ActivityData.cpuPercentage / Double(spinners[spinnerActive]![0] - 1))))
-        if abs(factor - lastSpinnerSpeed) < 0.01 { return }
-        let now = CACurrentMediaTime()
-        let local = layer.convertTime(now, from: nil)
-        layer.speed = factor
-        layer.timeOffset = local
-        layer.beginTime = now
-        lastSpinnerSpeed = factor
-    }
-
+  
     private func updateUsage() {
-        ActivityData.update()
-        applySpinnerSpeed()
-        
-        statusItem.button?.title = enableStatusText ? "   \(Int(ActivityData.cpuPercentage))%" : ""
+          ActivityData.update()
+          curFrame = curFrame + (spinnersRotationInvert ? -1 : 1)
+          if curFrame > maxFrame - 1 {
+              curFrame = 0
+          } else if curFrame < 0 {
+              curFrame = maxFrame - 1
+          }
+          statusItem.button?.image = frames[curFrame]
+          
+          if enableStatusText {
+              statusItem.button?.title = String(Int(ActivityData.cpuPercentage)) + "%"
+          } else if ((statusItem.button?.title.isEmpty) != nil) {
+              statusItem.button?.title = ""
+          }
+          
+          let spinnerConfig = spinners[spinnerActive]!
+          let interval = 0.25 / max(1.0, min(100.0, ActivityData.cpuPercentage / Double(maxFrame))) * Double(spinnerConfig.speedCoefficient)
 
-        // check if we need update display and menu
-        if isDeviceChanged {
-            isDeviceChanged = false
-            displayDeviceChanged()
-        }
+          if round(statusButtonIntervalHist * 100) != round(interval * 100) {
+              spinnerTimer?.invalidate()
+              spinnerTimer = Timer(timeInterval: interval, repeats: true, block: { [weak self] _ in
+                  self!.curFrame = self!.curFrame + (spinnersRotationInvert ? -1 : 1)
+                  if self!.curFrame == self!.maxFrame {
+                      self!.curFrame = 0
+                  } else if self!.curFrame < 0 {
+                      self!.curFrame = self!.maxFrame - 1
+                  }
+                  self?.statusItem.button?.image = self?.frames[self!.curFrame]
+                  
+              })
+              RunLoop.main.add(spinnerTimer!, forMode: .common)
+              statusButtonIntervalHist = interval
+          }
+          
+          // check if we need update display and menu
+          if isDeviceChanged {
+              isDeviceChanged = false
+              displayDeviceChanged()
+          }
     }
     
     @objc static func doChangeDevice() {
@@ -333,7 +326,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             sender.state = .on
             spinnersRotationInvert = true
         }
-        changeSpinner(spinnerName: spinnerActive)
+        saveParams()
     }
     
     @objc private func changelocalizeClick(sender: NSMenuItem) {
@@ -346,7 +339,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         saveParams()
         updateStatusMenu()
-        changeSpinner(spinnerName: spinnerActive)
     }
     
     @objc private func changePopUpAnimationClick(sender: NSMenuItem) {
@@ -413,12 +405,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             sender.state = .on
             enableStatusText = true
         }
-        changeSpinner(spinnerName: spinnerActive)
+        saveParams()
     }
     
     @objc func applicationQuit() {
         MediaKeyMonitor.shared.stop()
-        appearanceObservation?.invalidate()
         stopRunning()
         saveParams()
         exit(0)
@@ -636,12 +627,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             closePopoverMenu(sender: self)
         })
         
-        appearanceObservation = statusItem.button?.observe(\.effectiveAppearance, options: [.new]) { [weak self] _, _ in
-               DispatchQueue.main.async {
-                   self?.handleAppearanceChange()
-               }
-        }
-        
         // change monitor device?
         CGDisplayRegisterReconfigurationCallback({ displayID, flags, userInfo in AppDelegate.doChangeDevice()}, nil)
         
@@ -684,17 +669,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 }
 
 extension NSImage {
-    func resizeImage(width: CGFloat, height: CGFloat) -> NSImage {
-        let img = NSImage(size: CGSize(width:width, height:height))
-        img.lockFocus()
-        let ctx = NSGraphicsContext.current
-        ctx?.imageInterpolation = .high
-        self.draw(in: NSMakeRect(0, 0, width, height), from: NSMakeRect(0, 0, size.width, size.height), operation: .copy, fraction: 1)
-        img.unlockFocus()
-
-        return img
-    }
-    
     func imageWithTint(color: NSColor) -> NSImage {
            guard let tintedImage = self.copy() as? NSImage else { return self }
            tintedImage.lockFocus()
