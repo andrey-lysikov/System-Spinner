@@ -37,7 +37,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var curFrame: Int = 0
     private var maxFrame: Int = 0
     private let popover = NSPopover()
-    private var lastCpuDisplay: Int = -1
     
     private var updateIntervalName:[Double] = [0.5, 1.0, 1.5, 2.0]
     private var adjStepsInterval:[Int] = [8, 16, 24, 32]
@@ -165,7 +164,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     }
                 }
             }
-            
+        statusButtonIntervalHist = -1
             saveParams()
     }
     
@@ -189,54 +188,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         cpuTimer?.invalidate()
     }
 
-  
     private func updateUsage() {
-          ActivityData.update()
+        ActivityData.update()
+
+        if enableStatusText {
+            statusItem.button?.title = String(Int(ActivityData.cpuPercentage)) + "%"
+        } else if ((statusItem.button?.title.isEmpty) != nil) {
+            statusItem.button?.title = ""
+        }
           
-          let direction = spinnersRotationInvert ? -1 : 1
-          curFrame += direction
-          if curFrame >= maxFrame {
-              curFrame = 0
-          } else if curFrame < 0 {
-              curFrame = maxFrame - 1
-          }
-          statusItem.button?.image = frames[curFrame]
-          
-          let currentCpuPercent = Int(ActivityData.cpuPercentage)
-          if enableStatusText && currentCpuPercent != lastCpuDisplay {
-              statusItem.button?.title = "\(currentCpuPercent)%"
-              lastCpuDisplay = currentCpuPercent
-          } else if !enableStatusText, statusItem.button?.title != "" {
-              statusItem.button?.title = ""
-              lastCpuDisplay = -1
-          }
-          
-          let spinnerConfig = spinners[spinnerActive]!
-          let floatInterval = 0.25 / max(1.0, min(100.0, ActivityData.cpuPercentage / Double(maxFrame))) * Double(spinnerConfig.speedCoefficient)
-          let intInterval = Int(floatInterval * 100)
-          
-          if intInterval != Int(statusButtonIntervalHist * 100) {
-              spinnerTimer?.invalidate()
-              spinnerTimer = Timer(timeInterval: floatInterval, repeats: true) { [weak self] _ in
-                  guard let self = self else { return }
-                  let dir = spinnersRotationInvert ? -1 : 1
-                  self.curFrame += dir
-                  if self.curFrame == self.maxFrame {
-                      self.curFrame = 0
-                  } else if self.curFrame < 0 {
-                      self.curFrame = self.maxFrame - 1
-                  }
-                  self.statusItem.button?.image = self.frames[self.curFrame]
+        let spinnerConfig = spinners[spinnerActive]!
+        let floatInterval = 0.25 / max(1.0, min(100.0, ActivityData.cpuPercentage / Double(maxFrame))) * Double(spinnerConfig.speedCoefficient)
+        
+        if Int(floatInterval * 100) != Int(statusButtonIntervalHist * 100) {
+            spinnerTimer?.invalidate()
+            spinnerTimer = Timer(timeInterval: floatInterval, repeats: true, block: { [weak self] _ in
+              self!.curFrame = self!.curFrame + (spinnersRotationInvert ? -1 : 1)
+              if self!.curFrame == self!.maxFrame {
+                  self!.curFrame = 0
+              } else if self!.curFrame < 0 {
+                  self!.curFrame = self!.maxFrame - 1
               }
-              RunLoop.main.add(spinnerTimer!, forMode: .common)
-              statusButtonIntervalHist = floatInterval
-          }
-          
-          // check if we need update display and menu
-          if isDeviceChanged {
-              isDeviceChanged = false
-              displayDeviceChanged()
-          }
+              self?.statusItem.button?.image = self?.frames[self!.curFrame]
+              
+            })
+            RunLoop.main.add(spinnerTimer!, forMode: .common)
+            statusButtonIntervalHist = floatInterval
+        }
+
+        if isDeviceChanged {
+            isDeviceChanged = false
+            displayDeviceChanged()
+        }
     }
     
     @objc static func doChangeDevice() {
