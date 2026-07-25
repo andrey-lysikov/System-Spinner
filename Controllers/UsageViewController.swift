@@ -93,7 +93,6 @@ class UsageViewController: NSViewController {
     private var lastClickButton: NSButton? = nil
     private var chartDataItems = [chartData(time: 0, usage: 0)]
     private var tableDataItems = [tableData(name: "", usage: "")]
-    private var netHistory: Int = 0
     private var fanHistory: String = ""
     private var pwrHistory: String = ""
     
@@ -263,10 +262,8 @@ class UsageViewController: NSViewController {
             memSwapLevel.doubleValue = Double(ActivityData.memSwap) / 5
         }
         
-        if netHistory != Int(ActivityData.netIn.value + ActivityData.netOut.value) {
-            netLabel.stringValue = ActivityData.netIp + "\n↓ " + String(Int(ActivityData.netIn.value)) + ActivityData.netIn.unit + " | ↑ " + String(Int(ActivityData.netOut.value)) + ActivityData.netOut.unit
-            netHistory  = Int(ActivityData.netIn.value + ActivityData.netOut.value)
-        }
+        netLabel.stringValue = ActivityData.netIp + "\n↓ " + String(Int(ActivityData.netIn.value)) + ActivityData.netIn.unit + " | ↑ " + String(Int(ActivityData.netOut.value)) + ActivityData.netOut.unit
+   
         
         if popupChart.isShown {
             updatePopupData()

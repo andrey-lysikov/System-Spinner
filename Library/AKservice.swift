@@ -21,7 +21,8 @@ class AKservice {
     public var loadCpuPreviousHistDetails: [Double] = []
     public var loadMemPreviousHistDetails: [Double] = []
     private var cachedVmStats: vm_statistics64 = vm_statistics64()
-    private var cachedActiveIP: String = ""
+    private var cachedLocalIP: String = ""
+    private var cachedInternetIP: String = ""
     private var cpuHistSum: Double = 0.0
     private var gpuHistSum: Double = 0.0
     private var memHistSum: Double = 0.0
@@ -259,42 +260,40 @@ class AKservice {
                 }
             }
         }
-        // get internet adress if it show
-        if cachedActiveIP.isEmpty || cachedActiveIP != activeIPAddress {
-            do {
-                // harcoded for dyndns
-                let request = URLRequest(url: URL(string: "https://checkip.dyndns.org")!)
-                let semaphore = DispatchSemaphore(value: 0)
-                var ipResult: String?
-                
-                URLSession.shared.dataTask(with: request) { data, response, error in
-                    if let data = data, let html = String(data: data, encoding: .utf8) {
+    
+        // get internet adress with delay
+        if cachedLocalIP != activeIPAddress {
+            let startAfter: DispatchTime = .now() + 15
+            DispatchQueue.main.asyncAfter(deadline: startAfter) {
+                URLSession.shared.dataTask(with: URL(string: "https://checkip.dyndns.org")!) { (data, res, err) in
+                    guard let data = data else {
+                        return
+                    }
+
+                    if let html = String(data: data, encoding: .utf8) {
                         if let range = html.range(of: "Current IP Address: ") {
                             let potentialIP = String(html[range.upperBound...])
                             let ip = potentialIP.components(separatedBy: "<").first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
                             if !ip.isEmpty {
-                                ipResult = ip
+                                self.cachedInternetIP = ip
                             }
                         }
                     }
-                    semaphore.signal()
+                
                 }.resume()
-                
-                semaphore.wait()
-                
-                if let ip = ipResult {
-                    cachedActiveIP = ip
-                    return (totalIn, totalOut, ip)
-                }
             }
-            cachedActiveIP = activeIPAddress
+            cachedLocalIP = activeIPAddress
+            cachedInternetIP = ""
         }
-        
-        return (totalIn, totalOut, cachedActiveIP)
+    
+        if cachedInternetIP.isEmpty {
+            return (totalIn, totalOut, cachedLocalIP)
+        } else {
+            return (totalIn, totalOut, cachedInternetIP)
+        }
     }
     
     public func update() {
-        
         let load = hostCPULoadInfo()
         cpuUser = Double(load.cpu_ticks.0 - loadPrevious.cpu_ticks.0)
         cpuSystem = Double(load.cpu_ticks.1 - loadPrevious.cpu_ticks.1)
@@ -361,22 +360,11 @@ class AKservice {
         
         // Update NET Data
         let net = getNetworkInterfaceBytesAndIP()
-        
-        if net.activeIP != localizedString("no ip found") {
-            cachedActiveIP = net.activeIP
-        }
-        
-        if net.activeIP == localizedString("no ip found") {
-            netIp = localizedString("no ip found")
-            netIn = netPacketData(value: 0.0, unit: localizedString("KB/s"))
-            netOut = netPacketData(value: 0.0, unit: localizedString("KB/s"))
-        } else {
-            netIp = net.activeIP
-            netIn = convert(byte: Double(net.inBytes >= lastInBytes ? net.inBytes - lastInBytes : 0))
-            netOut = convert(byte: Double(net.outBytes >= lastOutBytes ? net.outBytes - lastOutBytes : 0))
-            lastInBytes = net.inBytes
-            lastOutBytes = net.outBytes
-        }
+        netIp = net.activeIP
+        netIn = convert(byte: Double(net.inBytes >= lastInBytes ? net.inBytes - lastInBytes : 0))
+        netOut = convert(byte: Double(net.outBytes >= lastOutBytes ? net.outBytes - lastOutBytes : 0))
+        lastInBytes = net.inBytes
+        lastOutBytes = net.outBytes
     }
     
     init() {
