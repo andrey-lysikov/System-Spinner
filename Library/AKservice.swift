@@ -4,6 +4,7 @@
 import Darwin
 import Cocoa
 import SystemConfiguration
+import Foundation
 
 class AKservice {
     private let loadInfoCount = UInt32(exactly: MemoryLayout<host_cpu_load_info_data_t>.size / MemoryLayout<integer_t>.size)!
@@ -207,65 +208,89 @@ class AKservice {
     }
     
     private func getNetworkInterfaceBytesAndIP() -> (inBytes: UInt64, outBytes: UInt64, activeIP: String) {
-            var ifaddr: UnsafeMutablePointer<ifaddrs>? = nil
-            var totalIn: UInt64 = 0
-            var totalOut: UInt64 = 0
-            var activeIPAddress: String = localizedString("no ip found")
+        var ifaddr: UnsafeMutablePointer<ifaddrs>? = nil
+        var totalIn: UInt64 = 0
+        var totalOut: UInt64 = 0
+        var activeIPAddress: String = localizedString("no ip found")
+        
+        guard getifaddrs(&ifaddr) == 0 else {
+            return (0, 0, activeIPAddress)
+        }
+        defer { freeifaddrs(ifaddr) }
+        
+        var ptr = ifaddr
+        while ptr != nil {
+            defer { ptr = ptr?.pointee.ifa_next }
+            guard let interface = ptr?.pointee else { continue }
             
-            guard getifaddrs(&ifaddr) == 0 else {
-                return (0, 0, activeIPAddress)
+            let addrFamily = interface.ifa_addr.pointee.sa_family
+            let flags = Int32(interface.ifa_flags)
+            
+            if addrFamily == UInt8(AF_LINK) {
+                if let dataPtr = interface.ifa_data {
+                    let stats = dataPtr.assumingMemoryBound(to: if_data.self).pointee
+                    totalIn += UInt64(stats.ifi_ibytes)
+                    totalOut += UInt64(stats.ifi_obytes)
+                }
             }
             
-            var ptr = ifaddr
-            while ptr != nil {
-                defer { ptr = ptr?.pointee.ifa_next }
-                guard let interface = ptr?.pointee else { continue }
-                
-                let addrFamily = interface.ifa_addr.pointee.sa_family
-                let flags = Int32(interface.ifa_flags)
-                
-                if addrFamily == UInt8(AF_LINK) {
-                    if let dataPtr = interface.ifa_data {
-                        let stats = dataPtr.assumingMemoryBound(to: if_data.self).pointee
-                        totalIn += UInt64(stats.ifi_ibytes)
-                        totalOut += UInt64(stats.ifi_obytes)
-                    }
-                }
-                
-                let shouldParseIP = (cachedActiveIP == localizedString("no ip found") || cachedActiveIP != (activeIPAddress))
-                
-                if (flags & (IFF_UP | IFF_RUNNING | IFF_LOOPBACK)) == (IFF_UP | IFF_RUNNING) {
-                    if addrFamily == UInt8(AF_INET) || addrFamily == UInt8(AF_INET6) {
-                        if shouldParseIP {
-                            var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
-                            
-                            let result = getnameinfo(
-                                interface.ifa_addr,
-                                socklen_t(interface.ifa_addr.pointee.sa_len),
-                                &hostname,
-                                socklen_t(hostname.count),
-                                nil,
-                                0,
-                                NI_NUMERICHOST
-                            )
-                            
-                            if result == 0 {
-                                let ip = String(cString: hostname)
-                                if addrFamily == UInt8(AF_INET) {
-                                    activeIPAddress = ip
-                                } else if activeIPAddress == localizedString("no ip found") {
-                                    activeIPAddress = ip
-                                }
-                            }
-                        } else {
-                            activeIPAddress = cachedActiveIP
+            if (flags & (IFF_UP | IFF_RUNNING | IFF_LOOPBACK)) == (IFF_UP | IFF_RUNNING) {
+                if addrFamily == UInt8(AF_INET) || addrFamily == UInt8(AF_INET6) {
+                    var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                    
+                    let result = getnameinfo(
+                        interface.ifa_addr,
+                        socklen_t(interface.ifa_addr.pointee.sa_len),
+                        &hostname,
+                        socklen_t(hostname.count),
+                        nil,
+                        0,
+                        NI_NUMERICHOST
+                    )
+                    
+                    if result == 0 {
+                        let ip = String(cString: hostname)
+                        if addrFamily == UInt8(AF_INET) {
+                            activeIPAddress = ip
+                        } else if activeIPAddress == localizedString("no ip found") {
+                            activeIPAddress = ip
                         }
                     }
                 }
             }
-            
-            freeifaddrs(ifaddr)
-            return (totalIn, totalOut, activeIPAddress)
+        }
+        // get internet adress if it show
+        if cachedActiveIP.isEmpty || cachedActiveIP != activeIPAddress {
+            do {
+                // harcoded for dyndns
+                let request = URLRequest(url: URL(string: "https://checkip.dyndns.org")!)
+                let semaphore = DispatchSemaphore(value: 0)
+                var ipResult: String?
+                
+                URLSession.shared.dataTask(with: request) { data, response, error in
+                    if let data = data, let html = String(data: data, encoding: .utf8) {
+                        if let range = html.range(of: "Current IP Address: ") {
+                            let potentialIP = String(html[range.upperBound...])
+                            let ip = potentialIP.components(separatedBy: "<").first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                            if !ip.isEmpty {
+                                ipResult = ip
+                            }
+                        }
+                    }
+                    semaphore.signal()
+                }.resume()
+                
+                semaphore.wait()
+                
+                if let ip = ipResult {
+                    cachedActiveIP = ip
+                    return (totalIn, totalOut, ip)
+                }
+            }
+            cachedActiveIP = activeIPAddress
+        }
+        
+        return (totalIn, totalOut, cachedActiveIP)
     }
     
     public func update() {
