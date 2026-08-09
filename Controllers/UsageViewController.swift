@@ -59,10 +59,10 @@ struct ChartContentView: View {
                     GridRow {
                         Text(localizedString("PID"))
                             .bold()
-                            .frame(width: 50, alignment: .leading)
+                            .frame(width: 38, alignment: .leading)
                         Text(localizedString("Name"))
                             .bold()
-                            .frame(minWidth: 130, alignment: .leading)
+                            .frame(minWidth: 140, alignment: .leading)
                         Spacer()
                         Text(localizedString("Usage"))
                             .bold()
