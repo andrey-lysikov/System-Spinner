@@ -13,6 +13,8 @@ struct chartData: Identifiable {
 
 struct tableData: Identifiable {
     let id = UUID()
+    let pid: Int
+    let icon: NSImage
     let name: String
     let usage: String
 }
@@ -55,11 +57,16 @@ struct ChartContentView: View {
                 }}
                 Grid(alignment: .leading, horizontalSpacing: 20, verticalSpacing: 0) {
                     GridRow {
+                        Text(localizedString("PID"))
+                            .bold()
+                            .frame(width: 50, alignment: .leading)
                         Text(localizedString("Name"))
                             .bold()
+                            .frame(minWidth: 130, alignment: .leading)
                         Spacer()
                         Text(localizedString("Usage"))
                             .bold()
+                            .frame(width: 120, alignment: .trailing)
                     }
                 }
                 ScrollView(.vertical, showsIndicators: false) {
@@ -67,9 +74,27 @@ struct ChartContentView: View {
                         ForEach(chartItems.tablePoints) { item in
                             Divider()
                             GridRow {
-                                Text(item.name).frame(width: 220, alignment: .leading)
+                                Text(String(item.pid))
+                                    .font(.system(size: 11, design: .monospaced))
+                                    .foregroundStyle(.secondary)
+                                    .frame(width: 50, alignment: .leading)
+                                
+                                HStack(spacing: 6) {
+                                    Image(nsImage: item.icon)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 18, height: 18)
+                                    
+                                    Text(item.name)
+                                        .lineLimit(1)
+                                        .truncationMode(.tail)
+                                }
+                                .frame(minWidth: 150, alignment: .leading)
+                                
                                 Spacer()
-                                Text(item.usage).frame(width: 80, alignment: .trailing)
+                                
+                                Text(item.usage)
+                                    .frame(width: 100, alignment: .trailing)
                             }
                             .font(.system(size: 11))
                             .padding(.vertical, 2)
@@ -92,7 +117,7 @@ class UsageViewController: NSViewController {
     private let dataManager = chartDataManager()
     private var lastClickButton: NSButton? = nil
     private var chartDataItems = [chartData(time: 0, usage: 0)]
-    private var tableDataItems = [tableData(name: "", usage: "")]
+    private var tableDataItems = [tableData(pid: 0, icon: NSImage(), name: "", usage: "")]
     private var fanHistory: String = ""
     private var pwrHistory: String = ""
     
@@ -161,7 +186,7 @@ class UsageViewController: NSViewController {
       
         // create chart data view
         let hostingController = NSHostingController(rootView: ChartContentView(chartItems: dataManager))
-        let exactSize = NSSize(width: 350, height: 400)
+        let exactSize = NSSize(width: 420, height: 400)
         hostingController.preferredContentSize = exactSize
         popupChart.contentViewController = hostingController
         popupChart.behavior = .transient
@@ -283,7 +308,12 @@ class UsageViewController: NSViewController {
             
             for item in ActivityData.getTopProcess().sorted(by: \.cpu) {
                 if item.cpu > 0 {
-                    tableDataItems.append(tableData(name: item.name, usage: String(item.cpu) + "%"))
+                    tableDataItems.append(tableData(
+                        pid: item.pid,
+                        icon: item.icon,
+                        name: item.name,
+                        usage: String(item.cpu) + "%"
+                    ))
                 }
             }
             dataManager.tablePoints = tableDataItems
@@ -296,7 +326,12 @@ class UsageViewController: NSViewController {
             
             for item in ActivityData.getTopProcess().sorted(by: \.mem) {
                 if item.mem > 0.1 {
-                    tableDataItems.append(tableData(name: item.name, usage: item.realmem))
+                    tableDataItems.append(tableData(
+                        pid: item.pid,
+                        icon: item.icon,
+                        name: item.name,
+                        usage: item.realmem
+                    ))
                 }
             }
             dataManager.tablePoints = tableDataItems
