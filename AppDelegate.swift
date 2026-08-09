@@ -38,6 +38,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var maxFrame: Int = 0
     private let popover = NSPopover()
     
+    // Для предотвращения множественных вызовов displayDeviceChanged
+    private var displayDeviceChangedWorkItem: DispatchWorkItem?
+    
     private var updateIntervalName:[Double] = [0.5, 1.0, 1.5, 2.0]
     private var adjStepsInterval:[Int] = [8, 16, 24, 32]
     private var spinnersEffect: [String:Int] = [:]
@@ -189,36 +192,66 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func updateUsage() {
-        ActivityData.update()
-
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            
+            ActivityData.update()
+            
+            DispatchQueue.main.async {
+                self.updateUIElements()
+                self.updateSpinnerSpeed()
+                
+                if isDeviceChanged {
+                    isDeviceChanged = false
+            
+                    self.displayDeviceChangedWorkItem?.cancel()
+                    
+                    let workItem = DispatchWorkItem { [weak self] in
+                        self?.displayDeviceChanged()
+                    }
+                    self.displayDeviceChangedWorkItem = workItem
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + updateInterval, execute: workItem)
+                }
+            }
+        }
+    }
+    
+    private func updateUIElements() {
         if enableStatusText {
-            statusItem.button?.title = String(Int(ActivityData.cpuPercentage)) + "%"
-        } else if ((statusItem.button?.title.isEmpty) != nil) {
+            let newTitle = "\(Int(ActivityData.cpuPercentage))%"
+            if statusItem.button?.title != newTitle {
+                statusItem.button?.title = newTitle
+            }
+        } else if statusItem.button?.title != "" {
             statusItem.button?.title = ""
         }
-          
-        let spinnerConfig = spinners[spinnerActive]!
-        let floatInterval = 0.25 / max(1.0, min(100.0, ActivityData.cpuPercentage / Double(maxFrame))) * Double(spinnerConfig.speedCoefficient)
+    }
+    
+    private func updateSpinnerSpeed() {
+        guard let spinnerConfig = spinners[spinnerActive] else { return }
+        
+        // Ограничиваем минимальный интервал для предотвращения чрезмерной загрузки CPU (120 FPS максимум)
+        let minInterval = 0.0083 // ~120 FPS максимум (1/120 = 0.00833...)
+        let floatInterval = max(minInterval, 0.25 / max(1.0, min(100.0, ActivityData.cpuPercentage / Double(maxFrame))) * Double(spinnerConfig.speedCoefficient))
         
         if Int(floatInterval * 100) != Int(statusButtonIntervalHist * 100) {
             spinnerTimer?.invalidate()
             spinnerTimer = Timer(timeInterval: floatInterval, repeats: true, block: { [weak self] _ in
-              self!.curFrame = self!.curFrame + (spinnersRotationInvert ? -1 : 1)
-              if self!.curFrame == self!.maxFrame {
-                  self!.curFrame = 0
-              } else if self!.curFrame < 0 {
-                  self!.curFrame = self!.maxFrame - 1
+              guard let self = self else { return }
+              self.curFrame = self.curFrame + (spinnersRotationInvert ? -1 : 1)
+              if self.curFrame == self.maxFrame {
+                  self.curFrame = 0
+              } else if self.curFrame < 0 {
+                  self.curFrame = self.maxFrame - 1
               }
-              self?.statusItem.button?.image = self?.frames[self!.curFrame]
-              
+              self.statusItem.button?.image = self.frames[self.curFrame]
             })
-            RunLoop.main.add(spinnerTimer!, forMode: .common)
+            
+            if let timer = spinnerTimer {
+                RunLoop.main.add(timer, forMode: .common)
+            }
             statusButtonIntervalHist = floatInterval
-        }
-
-        if isDeviceChanged {
-            isDeviceChanged = false
-            displayDeviceChanged()
         }
     }
     
