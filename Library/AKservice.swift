@@ -91,19 +91,7 @@ class AKservice {
     
     public func getTopProcess() -> [topProcess] {
         var processes: [topProcess] = []
-        
-        // Вычисляем время с последнего обновления
         let now = Date()
-        let timeDelta = now.timeIntervalSince(lastProcessUpdateTime)
-        
-        // При первом вызове просто собираем данные
-        let isFirstRun = previousProcessCPUTimes.isEmpty
-        
-        if !isFirstRun && timeDelta < processUpdateInterval {
-            return cachedProcesses // Возвращаем кэшированные данные вместо пустого массива
-        }
-        
-        // Получаем список всех PID процессов
         let pidCount = proc_listallpids(nil, 0)
         guard pidCount > 0 else { return cachedProcesses }
         
@@ -117,8 +105,7 @@ class AKservice {
         
         var currentProcessCPUTimes: [pid_t: UInt64] = [:]
         var processesRaw: [(pid: pid_t, name: String, cpuTime: Double, mem: Double, memString: String)] = []
-        
-        // Собираем сырые данные о процессах
+ 
         for i in 0..<totalPids {
             let pid = pids[i]
             guard pid > 0 else { continue }
@@ -153,16 +140,9 @@ class AKservice {
             }
             
             guard processName != "WindowServer" else { continue }
-            
-            // Сохраняем текущее CPU time
             let currentTotalTime = taskInfo.pti_total_user + taskInfo.pti_total_system
             currentProcessCPUTimes[pid] = currentTotalTime
             
-            if isFirstRun {
-                continue
-            }
-            
-            // Вычисляем CPU time delta (в наносекундах)
             var cpuTimeDelta: Double = 0.0
             if let previousTime = previousProcessCPUTimes[pid], currentTotalTime > previousTime {
                 cpuTimeDelta = Double(currentTotalTime - previousTime) / 1_000_000_000.0 // Конвертируем в секунды
@@ -185,34 +165,21 @@ class AKservice {
             }
         }
         
-        // Обновляем кэш
         previousProcessCPUTimes = currentProcessCPUTimes
         lastProcessUpdateTime = now
         
-        if isFirstRun {
-            return cachedProcesses // При первом запуске возвращаем пустой кэш
-        }
-        
-        // Вычисляем общее CPU time всех процессов
         let totalProcessCPUTime = processesRaw.reduce(0.0) { $0 + $1.cpuTime }
+        let systemCPUPercent = cpuPercentage
         
-        // Получаем текущую системную загрузку CPU в процентах
-        let systemCPUPercent = cpuPercentage // Это значение из hostCPULoadInfo
-        
-        // Распределяем CPU% пропорционально вкладу каждого процесса
         for processRaw in processesRaw {
             let cpuUsagePercent: Double
             
             if totalProcessCPUTime > 0 {
-                // Вычисляем долю процесса от общего CPU time
                 let processShare = processRaw.cpuTime / totalProcessCPUTime
-                // Умножаем на системную загрузку
                 cpuUsagePercent = processShare * systemCPUPercent
             } else {
                 cpuUsagePercent = 0.0
             }
-            
-            // Добавляем процесс с вычисленным CPU%
             if cpuUsagePercent > 0.05 || processRaw.mem > 0.1 {
                 processes.append(topProcess(
                     pid: Int(processRaw.pid),
@@ -224,10 +191,7 @@ class AKservice {
             }
         }
         
-        // Сортируем по CPU usage
         let sortedProcesses = processes.sorted { $0.cpu > $1.cpu }
-        
-        // Сохраняем в кэш
         cachedProcesses = sortedProcesses
         
         return sortedProcesses

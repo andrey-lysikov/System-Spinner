@@ -206,6 +206,8 @@ class UsageViewController: NSViewController {
         })
         RunLoop.main.add(dataTimer!, forMode: .common)
         
+        let _ = ActivityData.getTopProcess() // разово вызываем чтобы наполнить историю данных
+        
         popupChart.animates = usePopUpAnimation
         updateData()
         
