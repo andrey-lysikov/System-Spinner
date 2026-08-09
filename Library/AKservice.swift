@@ -5,6 +5,11 @@ import Darwin
 import Cocoa
 import Foundation
 
+// Константы для libproc API
+private let PROC_PIDPATHINFO_MAXSIZE: Int32 = 4096
+private let PROC_PIDTASKINFO: Int32 = 4
+private let PROC_PIDTBSDINFO: Int32 = 3
+
 class AKservice {
     private let loadInfoCount = UInt32(exactly: MemoryLayout<host_cpu_load_info_data_t>.size / MemoryLayout<integer_t>.size)!
     private let hostVmInfo64Count = UInt32(exactly: MemoryLayout<vm_statistics64_data_t>.size / MemoryLayout<integer_t>.size)!
@@ -23,6 +28,12 @@ class AKservice {
     private var cachedInternetIP: String = ""
     private var cpuHistSum: Double = 0.0
     private var gpuHistSum: Double = 0.0
+    
+    // Кэш для вычисления CPU usage процессов
+    private var previousProcessCPUTimes: [pid_t: UInt64] = [:]
+    private var lastProcessUpdateTime: Date = Date()
+    private let processUpdateInterval: TimeInterval = 1.0 // обновляем раз в секунду
+    private var cachedProcesses: [topProcess] = [] // Кэш последних вычисленных процессов
     
     public struct netPacketData {
         public var value: Double
@@ -47,17 +58,11 @@ class AKservice {
     }
     
     public var cpuPercentage: Double = 0.0
-    public var cpuUser: Double = 0.0
-    public var cpuSystem: Double = 0.0
-    public var cpuIdle: Double = 0.0
-    public var cpuNiceD: Double = 0.0
-    public var cpuProcess: [topProcess] = []
     public var gpuPercentage: Double = 0.0
     
     public var memPercentage: Double = 0.0
     public var memPressure: Double = 0.0
     public var memApp: Double = 0.0
-    public var memWired: Double = 0.0
     public var memCompressed: Double = 0.0
     public var memInactive: Double = 0.0
     public var memSwap: Int = 0
@@ -85,36 +90,147 @@ class AKservice {
      }
     
     public func getTopProcess() -> [topProcess] {
-        let task = Process()
-        task.launchPath = "/bin/ps"
-        task.arguments = ["-Aceo pid,pcpu,pmem,comm", "-r"]
-        
-        let outputPipe = Pipe()
-        task.standardOutput = outputPipe
-        
-        task.launch()
-        
-        let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-        let output = String(decoding: outputData, as: UTF8.self)
-        task.waitUntilExit()
-        
         var processes: [topProcess] = []
-        output.enumerateLines { (line, stop) -> Void in
-            let str = line.trimmingCharacters(in: .whitespaces)
-            let pidFind = str.findAndCrop(pattern: "^\\d+")
-            let usageFindCpu = pidFind.remain.findAndCrop(pattern: "^[0-9,.]+ ")
-            let usageFindMem = usageFindCpu.remain.findAndCrop(pattern: "^[0-9,.]+ ")
-            let command = usageFindMem.remain.trimmingCharacters(in: .whitespaces)
-            let usagePCPU = Double(usageFindCpu.cropped.replacingOccurrences(of: ",", with: ".")) ?? 0
-            let usagePMEM = Double(usageFindMem.cropped.replacingOccurrences(of: ",", with: ".")) ?? 0
-            let strMem = String(self.round(In: (self.maxMemory * 10.24 * usagePMEM))) + " MB"
+        
+        // Вычисляем время с последнего обновления
+        let now = Date()
+        let timeDelta = now.timeIntervalSince(lastProcessUpdateTime)
+        
+        // При первом вызове просто собираем данные
+        let isFirstRun = previousProcessCPUTimes.isEmpty
+        
+        if !isFirstRun && timeDelta < processUpdateInterval {
+            return cachedProcesses // Возвращаем кэшированные данные вместо пустого массива
+        }
+        
+        // Получаем список всех PID процессов
+        let pidCount = proc_listallpids(nil, 0)
+        guard pidCount > 0 else { return cachedProcesses }
+        
+        var pids = [pid_t](repeating: 0, count: Int(pidCount))
+        let bufferSize = Int32(pidCount) * Int32(MemoryLayout<pid_t>.size)
+        let actualCount = proc_listallpids(&pids, bufferSize)
+        guard actualCount > 0 else { return cachedProcesses }
+        
+        let totalPids = Int(actualCount)
+        let maxMemoryGB = maxMemory
+        
+        var currentProcessCPUTimes: [pid_t: UInt64] = [:]
+        var processesRaw: [(pid: pid_t, name: String, cpuTime: Double, mem: Double, memString: String)] = []
+        
+        // Собираем сырые данные о процессах
+        for i in 0..<totalPids {
+            let pid = pids[i]
+            guard pid > 0 else { continue }
             
-            if let pid = Int(pidFind.cropped), command != "WindowServer" {
-                processes.append(topProcess(pid: pid, name: command, cpu: usagePCPU, mem: usagePMEM, realmem: strMem))
+            var taskInfo = proc_taskinfo()
+            let taskInfoSize = MemoryLayout<proc_taskinfo>.size
+            
+            let result = proc_pidinfo(pid, PROC_PIDTASKINFO, 0, &taskInfo, Int32(taskInfoSize))
+            guard result == Int32(taskInfoSize) else { continue }
+            
+            // Получаем имя процесса
+            var pathBuffer = [CChar](repeating: 0, count: Int(PROC_PIDPATHINFO_MAXSIZE))
+            let pathLength = proc_pidpath(pid, &pathBuffer, UInt32(PROC_PIDPATHINFO_MAXSIZE))
+            
+            var processName: String
+            if pathLength > 0 {
+                let fullPath = String(cString: pathBuffer)
+                processName = (fullPath as NSString).lastPathComponent
+            } else {
+                var bsdInfo = proc_bsdinfo()
+                let bsdInfoSize = MemoryLayout<proc_bsdinfo>.size
+                let bsdResult = proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &bsdInfo, Int32(bsdInfoSize))
+                
+                if bsdResult == Int32(bsdInfoSize) {
+                    processName = withUnsafeBytes(of: &bsdInfo.pbi_comm) { bytes in
+                        let buffer = bytes.bindMemory(to: CChar.self)
+                        return String(cString: buffer.baseAddress!)
+                    }
+                } else {
+                    continue
+                }
+            }
+            
+            guard processName != "WindowServer" else { continue }
+            
+            // Сохраняем текущее CPU time
+            let currentTotalTime = taskInfo.pti_total_user + taskInfo.pti_total_system
+            currentProcessCPUTimes[pid] = currentTotalTime
+            
+            if isFirstRun {
+                continue
+            }
+            
+            // Вычисляем CPU time delta (в наносекундах)
+            var cpuTimeDelta: Double = 0.0
+            if let previousTime = previousProcessCPUTimes[pid], currentTotalTime > previousTime {
+                cpuTimeDelta = Double(currentTotalTime - previousTime) / 1_000_000_000.0 // Конвертируем в секунды
+            }
+            
+            // Memory usage
+            let memoryBytes = taskInfo.pti_resident_size
+            let memoryMB = Double(memoryBytes) / (1024 * 1024)
+            let memoryPercent = (Double(memoryBytes) / (maxMemoryGB * 1024 * 1024 * 1024)) * 100.0
+            let memoryString = String(format: "%.1f MB", memoryMB)
+            
+            if cpuTimeDelta > 0.0 || memoryPercent > 0.1 {
+                processesRaw.append((
+                    pid: pid,
+                    name: processName,
+                    cpuTime: cpuTimeDelta,
+                    mem: memoryPercent,
+                    memString: memoryString
+                ))
             }
         }
         
-        return processes
+        // Обновляем кэш
+        previousProcessCPUTimes = currentProcessCPUTimes
+        lastProcessUpdateTime = now
+        
+        if isFirstRun {
+            return cachedProcesses // При первом запуске возвращаем пустой кэш
+        }
+        
+        // Вычисляем общее CPU time всех процессов
+        let totalProcessCPUTime = processesRaw.reduce(0.0) { $0 + $1.cpuTime }
+        
+        // Получаем текущую системную загрузку CPU в процентах
+        let systemCPUPercent = cpuPercentage // Это значение из hostCPULoadInfo
+        
+        // Распределяем CPU% пропорционально вкладу каждого процесса
+        for processRaw in processesRaw {
+            let cpuUsagePercent: Double
+            
+            if totalProcessCPUTime > 0 {
+                // Вычисляем долю процесса от общего CPU time
+                let processShare = processRaw.cpuTime / totalProcessCPUTime
+                // Умножаем на системную загрузку
+                cpuUsagePercent = processShare * systemCPUPercent
+            } else {
+                cpuUsagePercent = 0.0
+            }
+            
+            // Добавляем процесс с вычисленным CPU%
+            if cpuUsagePercent > 0.05 || processRaw.mem > 0.1 {
+                processes.append(topProcess(
+                    pid: Int(processRaw.pid),
+                    name: processRaw.name,
+                    cpu: round(In: cpuUsagePercent),
+                    mem: round(In: processRaw.mem),
+                    realmem: processRaw.memString
+                ))
+            }
+        }
+        
+        // Сортируем по CPU usage
+        let sortedProcesses = processes.sorted { $0.cpu > $1.cpu }
+        
+        // Сохраняем в кэш
+        cachedProcesses = sortedProcesses
+        
+        return sortedProcesses
     }
     
     private func setupGPUService() {
@@ -292,10 +408,10 @@ class AKservice {
     
     public func update() {
         let load = hostCPULoadInfo()
-        cpuUser = Double(load.cpu_ticks.0 - loadPrevious.cpu_ticks.0)
-        cpuSystem = Double(load.cpu_ticks.1 - loadPrevious.cpu_ticks.1)
-        cpuIdle = Double(load.cpu_ticks.2 - loadPrevious.cpu_ticks.2)
-        cpuNiceD =  Double(load.cpu_ticks.3 - loadPrevious.cpu_ticks.3)
+        let cpuUser = Double(load.cpu_ticks.0 - loadPrevious.cpu_ticks.0)
+        let cpuSystem = Double(load.cpu_ticks.1 - loadPrevious.cpu_ticks.1)
+        let cpuIdle = Double(load.cpu_ticks.2 - loadPrevious.cpu_ticks.2)
+        let cpuNiceD =  Double(load.cpu_ticks.3 - loadPrevious.cpu_ticks.3)
         
         let totalTicks  = cpuUser + cpuSystem + cpuIdle + cpuNiceD
         
@@ -344,7 +460,6 @@ class AKservice {
         memPercentage = round(In: min(99.9, (100.0 * using / cachedMaxMemory)))
         memPressure   = round(In: 100.0 * (wired + compressed) / cachedMaxMemory)
         memApp        = round(In: 100.0 * (using - wired - compressed) / cachedMaxMemory)
-        memWired      = round(In: wired)
         memCompressed = round(In: compressed)
         memInactive = round(In: 100.0 * (inactive) / cachedMaxMemory)
         
@@ -368,27 +483,6 @@ class AKservice {
         update()
     }
     
-}
-
-extension String: @retroactive LocalizedError {
-    public func findAndCrop(pattern: String) -> (cropped: String, remain: String) {
-        do {
-            let regex = try NSRegularExpression(pattern: pattern)
-            let range = NSRange(self.startIndex..., in: self)
-            
-            if let match = regex.firstMatch(in: self, options: [], range: range) {
-                if let range = Range(match.range, in: self) {
-                    let cropped = String(self[range]).trimmingCharacters(in: .whitespaces)
-                    let remaining = self.replacingOccurrences(of: cropped, with: "", options: .regularExpression).trimmingCharacters(in: .whitespaces)
-                    return (cropped, remaining)
-                }
-            }
-        } catch {
-            print("Error creating regex: \(error.localizedDescription)")
-        }
-        
-        return ("", self)
-    }
 }
 
 extension Sequence {
