@@ -261,10 +261,10 @@ class AKservice {
             }
         }
     
-        // get internet adress with delay
         if cachedLocalIP != activeIPAddress {
             let startAfter: DispatchTime = .now() + 15
-            DispatchQueue.main.asyncAfter(deadline: startAfter) {
+            DispatchQueue.global(qos: .utility).asyncAfter(deadline: startAfter) { [weak self] in
+                guard let self = self else { return }
                 URLSession.shared.dataTask(with: URL(string: "https://checkip.dyndns.org")!) { (data, res, err) in
                     guard let data = data else {
                         return

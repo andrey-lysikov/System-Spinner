@@ -59,6 +59,8 @@ class IOServiceData {
     public var systemAdapter: Int = 0
     public var systemBattery: Int = 0
     
+    private var lastSMCUpdate: Date = Date.distantPast
+    
     private struct AppleSMCVers { // 6 bytes
         var major: UInt8 = 0
         var minor: UInt8 = 0
@@ -289,6 +291,12 @@ class IOServiceData {
     }
     
     public func update () {
+        let now = Date()
+        guard now.timeIntervalSince(lastSMCUpdate) >= updateInterval else {
+            return
+        }
+        lastSMCUpdate = now
+        
         // get SMC data
         cpuTemp = cpuTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
         gpuTemp = gpuTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
