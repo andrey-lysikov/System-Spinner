@@ -3,7 +3,6 @@
 
 import Darwin
 import Cocoa
-import SystemConfiguration
 import Foundation
 
 class AKservice {
@@ -20,12 +19,10 @@ class AKservice {
     private var lastOutBytes: UInt64 = 0
     public var loadCpuPreviousHistDetails: [Double] = []
     public var loadMemPreviousHistDetails: [Double] = []
-    private var cachedVmStats: vm_statistics64 = vm_statistics64()
     private var cachedLocalIP: String = ""
     private var cachedInternetIP: String = ""
     private var cpuHistSum: Double = 0.0
     private var gpuHistSum: Double = 0.0
-    private var memHistSum: Double = 0.0
     
     public struct netPacketData {
         public var value: Double
@@ -372,8 +369,6 @@ class AKservice {
     }
     
 }
-
-extension String: @retroactive Error {}
 
 extension String: @retroactive LocalizedError {
     public func findAndCrop(pattern: String) -> (cropped: String, remain: String) {

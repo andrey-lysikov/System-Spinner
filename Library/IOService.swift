@@ -10,7 +10,6 @@ class IOServiceData {
     private var systemPowerKeys: [String] = []
     private var systemAdapterKeys: [String] = []
     private var systemBatteryKeys: [String] = []
-    private let dateFormatter = DateFormatter()
     private let KERNEL_INDEX_SMC: UInt32 = 2
     private let SMC_CMD_READ_BYTES: UInt8 = 5
     private let SMC_CMD_READ_KEYINFO: UInt8 = 9
@@ -58,8 +57,6 @@ class IOServiceData {
     public var systemPower: Int = 0
     public var systemAdapter: Int = 0
     public var systemBattery: Int = 0
-    
-    private var lastSMCUpdate: Date = Date.distantPast
     
     private struct AppleSMCVers { // 6 bytes
         var major: UInt8 = 0
@@ -200,7 +197,6 @@ class IOServiceData {
     }
     
     init() {
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         let mainport: mach_port_t = 0
         let serviceDir = IOServiceMatching("AppleSMC")
         let service = IOServiceGetMatchingService(mainport, serviceDir)
@@ -291,12 +287,6 @@ class IOServiceData {
     }
     
     public func update () {
-        let now = Date()
-        guard now.timeIntervalSince(lastSMCUpdate) >= updateInterval else {
-            return
-        }
-        lastSMCUpdate = now
-        
         // get SMC data
         cpuTemp = cpuTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
         gpuTemp = gpuTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
