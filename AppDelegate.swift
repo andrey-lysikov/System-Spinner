@@ -219,9 +219,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func updateUIElements() {
         if enableStatusText {
-            let newTitle = String(format: "%3d%%", Int(ActivityData.cpuPercentage))
-            if statusItem.button?.title != newTitle {
-                statusItem.button?.title = newTitle
+            if Int(ActivityData.cpuPercentage) == 100 {
+                statusItem.button?.title = "100%"
+            } else {
+                statusItem.button?.title = String(format: "%2d%%", Int(ActivityData.cpuPercentage))
             }
         } else if statusItem.button?.title != "" {
             statusItem.button?.title = ""
