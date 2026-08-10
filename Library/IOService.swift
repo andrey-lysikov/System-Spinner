@@ -1,5 +1,195 @@
 //  Copyright © Serhiy Mytrovtsiy, AndreyLysikov
 //  SPDX-License-Identifier: Apache-2.0
+// imported from https://raw.githubusercontent.com/exelban/stats/refs/heads/master/Modules/Sensors/values.swift
+
+internal enum SensorType: String {
+    case CPU = "CPU"
+    case GPU = "GPU"
+    case FAN = "FAN"
+    case FAN_SPEED = "FAN SPEED"
+    case POWER = "POWER"
+    case BATTERY = "BATTERY"
+    case ADAPTER = "ADAPTER"
+}
+
+internal enum CPU_MODEL: String {
+    case M1 = "M1"
+    case M2 = "M2"
+    case M3 = "M3"
+    case M4 = "M4"
+    case M5 = "M5"
+}
+
+internal struct SensorsList_s {
+    var key: String
+    var value: String
+}
+
+internal struct FanlessConfiguration {
+    static let models: [String] = [
+        "MACBOOK AIR",
+        "MAC MINI M1",
+        "IMAC 24",
+    ]
+    
+    static func isFanless(modelName: String) -> Bool {
+        let upperModel = modelName.uppercased()
+        return models.contains { upperModel.contains($0) }
+    }
+}
+
+private let defaultSensors: [SensorType: [SensorsList_s]] = [
+    .FAN: [
+        SensorsList_s(key: "TaLP", value: "Airflow left"),
+        SensorsList_s(key: "TaRF", value: "Airflow right"),
+    ],
+    .FAN_SPEED: [
+        SensorsList_s(key: "F0Ac", value: "Fan 0"),
+        SensorsList_s(key: "F1Ac", value: "Fan 1")
+    ],
+    .POWER: [
+        SensorsList_s(key: "PSTR", value: "System total"),
+    ],
+    .BATTERY: [
+        SensorsList_s(key: "PPBR", value: "Battery rail"),
+    ],
+    .ADAPTER: [
+        SensorsList_s(key: "PDTR", value: "DC In total"),
+    ]
+]
+
+internal let SensorsList: [CPU_MODEL: [SensorType: [SensorsList_s]]] = [
+    .M1: [
+        .CPU: [
+            SensorsList_s(key: "Tp09", value: "CPU efficiency core 1"),
+            SensorsList_s(key: "Tp0T", value: "CPU efficiency core 2"),
+            SensorsList_s(key: "Tp01", value: "CPU performance core 1"),
+            SensorsList_s(key: "Tp05", value: "CPU performance core 2"),
+            SensorsList_s(key: "Tp0D", value: "CPU performance core 3"),
+            SensorsList_s(key: "Tp0H", value: "CPU performance core 4"),
+            SensorsList_s(key: "Tp0L", value: "CPU performance core 5"),
+            SensorsList_s(key: "Tp0P", value: "CPU performance core 6"),
+            SensorsList_s(key: "Tp0X", value: "CPU performance core 7"),
+            SensorsList_s(key: "Tp0b", value: "CPU performance core 8"),
+        ],
+        .GPU: [
+            SensorsList_s(key: "Tg05", value: "GPU 1"),
+            SensorsList_s(key: "Tg0D", value: "GPU 2"),
+            SensorsList_s(key: "Tg0L", value: "GPU 3"),
+            SensorsList_s(key: "Tg0T", value: "GPU 4"),
+        ],
+    ],
+    .M2: [
+        .CPU: [
+            SensorsList_s(key: "Tp1h", value: "CPU efficiency core 1"),
+            SensorsList_s(key: "Tp1t", value: "CPU efficiency core 2"),
+            SensorsList_s(key: "Tp1p", value: "CPU efficiency core 3"),
+            SensorsList_s(key: "Tp1l", value: "CPU efficiency core 4"),
+            SensorsList_s(key: "Tp01", value: "CPU performance core 1"),
+            SensorsList_s(key: "Tp05", value: "CPU performance core 2"),
+            SensorsList_s(key: "Tp09", value: "CPU performance core 3"),
+            SensorsList_s(key: "Tp0D", value: "CPU performance core 4"),
+            SensorsList_s(key: "Tp0X", value: "CPU performance core 5"),
+            SensorsList_s(key: "Tp0b", value: "CPU performance core 6"),
+            SensorsList_s(key: "Tp0f", value: "CPU performance core 7"),
+            SensorsList_s(key: "Tp0j", value: "CPU performance core 8"),
+        ],
+        .GPU: [
+            SensorsList_s(key: "Tg0f", value: "GPU 1"),
+            SensorsList_s(key: "Tg0j", value: "GPU 2"),
+        ],
+    ],
+    .M3: [
+        .CPU: [
+            SensorsList_s(key: "Te05", value: "CPU efficiency core 1"),
+            SensorsList_s(key: "Te0L", value: "CPU efficiency core 2"),
+            SensorsList_s(key: "Te0P", value: "CPU efficiency core 3"),
+            SensorsList_s(key: "Te0S", value: "CPU efficiency core 4"),
+            SensorsList_s(key: "Tf04", value: "CPU performance core 1"),
+            SensorsList_s(key: "Tf09", value: "CPU performance core 2"),
+            SensorsList_s(key: "Tf0A", value: "CPU performance core 3"),
+            SensorsList_s(key: "Tf0B", value: "CPU performance core 4"),
+            SensorsList_s(key: "Tf0D", value: "CPU performance core 5"),
+            SensorsList_s(key: "Tf0E", value: "CPU performance core 6"),
+            SensorsList_s(key: "Tf44", value: "CPU performance core 7"),
+            SensorsList_s(key: "Tf49", value: "CPU performance core 8"),
+            SensorsList_s(key: "Tf4A", value: "CPU performance core 9"),
+            SensorsList_s(key: "Tf4B", value: "CPU performance core 10"),
+            SensorsList_s(key: "Tf4D", value: "CPU performance core 11"),
+            SensorsList_s(key: "Tf4E", value: "CPU performance core 12"),
+        ],
+        .GPU: [
+            SensorsList_s(key: "Tf14", value: "GPU 1"),
+            SensorsList_s(key: "Tf18", value: "GPU 2"),
+            SensorsList_s(key: "Tf19", value: "GPU 3"),
+            SensorsList_s(key: "Tf1A", value: "GPU 4"),
+            SensorsList_s(key: "Tf24", value: "GPU 5"),
+            SensorsList_s(key: "Tf28", value: "GPU 6"),
+            SensorsList_s(key: "Tf29", value: "GPU 7"),
+            SensorsList_s(key: "Tf2A", value: "GPU 8"),
+        ],
+    ],
+    .M4: [
+        .CPU: [
+            SensorsList_s(key: "Te05", value: "CPU efficiency core 1"),
+            SensorsList_s(key: "Te0S", value: "CPU efficiency core 2"),
+            SensorsList_s(key: "Te09", value: "CPU efficiency core 3"),
+            SensorsList_s(key: "Te0H", value: "CPU efficiency core 4"),
+            SensorsList_s(key: "Tp01", value: "CPU performance core 1"),
+            SensorsList_s(key: "Tp05", value: "CPU performance core 2"),
+            SensorsList_s(key: "Tp09", value: "CPU performance core 3"),
+            SensorsList_s(key: "Tp0D", value: "CPU performance core 4"),
+            SensorsList_s(key: "Tp0V", value: "CPU performance core 5"),
+            SensorsList_s(key: "Tp0Y", value: "CPU performance core 6"),
+            SensorsList_s(key: "Tp0b", value: "CPU performance core 7"),
+            SensorsList_s(key: "Tp0e", value: "CPU performance core 8"),
+        ],
+        .GPU: [
+            SensorsList_s(key: "Tg0G", value: "GPU 1"),
+            SensorsList_s(key: "Tg0H", value: "GPU 2"),
+            SensorsList_s(key: "Tg1U", value: "GPU 3"),
+            SensorsList_s(key: "Tg1k", value: "GPU 4"),
+            SensorsList_s(key: "Tg0K", value: "GPU 5"),
+            SensorsList_s(key: "Tg0L", value: "GPU 6"),
+            SensorsList_s(key: "Tg0d", value: "GPU 7"),
+            SensorsList_s(key: "Tg0e", value: "GPU 8"),
+            SensorsList_s(key: "Tg0j", value: "GPU 9"),
+            SensorsList_s(key: "Tg0k", value: "GPU 10"),
+        ],
+    ],
+    .M5: [
+        .CPU: [
+            SensorsList_s(key: "Tp00", value: "CPU performance core 1"),
+            SensorsList_s(key: "Tp04", value: "CPU performance core 2"),
+            SensorsList_s(key: "Tp08", value: "CPU performance core 3"),
+            SensorsList_s(key: "Tp0C", value: "CPU performance core 4"),
+            SensorsList_s(key: "Tp0G", value: "CPU performance core 5"),
+            SensorsList_s(key: "Tp0K", value: "CPU performance core 6"),
+            SensorsList_s(key: "Tp0O", value: "CPU performance core 7"),
+            SensorsList_s(key: "Tp0R", value: "CPU performance core 8"),
+            SensorsList_s(key: "Tp0U", value: "CPU performance core 9"),
+            SensorsList_s(key: "Tp0X", value: "CPU performance core 10"),
+            SensorsList_s(key: "Tp0a", value: "CPU performance core 11"),
+            SensorsList_s(key: "Tp0d", value: "CPU performance core 12"),
+            SensorsList_s(key: "Tp0g", value: "CPU performance core 13"),
+            SensorsList_s(key: "Tp0j", value: "CPU performance core 14"),
+            SensorsList_s(key: "Tp0m", value: "CPU performance core 15"),
+            SensorsList_s(key: "Tp0p", value: "CPU performance core 16"),
+            SensorsList_s(key: "Tp0u", value: "CPU efficiency core 1"),
+            SensorsList_s(key: "Tp0y", value: "CPU efficiency core 2"),
+        ],
+        .GPU: [
+            SensorsList_s(key: "Tg0U", value: "GPU 1"),
+            SensorsList_s(key: "Tg0X", value: "GPU 2"),
+            SensorsList_s(key: "Tg0d", value: "GPU 3"),
+            SensorsList_s(key: "Tg0g", value: "GPU 4"),
+            SensorsList_s(key: "Tg0j", value: "GPU 5"),
+            SensorsList_s(key: "Tg1Y", value: "GPU 6"),
+            SensorsList_s(key: "Tg1c", value: "GPU 7"),
+            SensorsList_s(key: "Tg1g", value: "GPU 8"),
+        ],
+    ],
+]
 
 class IOServiceData {
     private var con: io_connect_t = 0
@@ -13,41 +203,9 @@ class IOServiceData {
     private let KERNEL_INDEX_SMC: UInt32 = 2
     private let SMC_CMD_READ_BYTES: UInt8 = 5
     private let SMC_CMD_READ_KEYINFO: UInt8 = 9
-    public var isAir: Bool = false
+    public var isFanlessModel: Bool = false  // Indicates if this is a fanless Mac model
     public var presentSMC: Bool = true
-    
-    private let SensorsList: [String: [String:[String]]]  = [
-        // imported from https://raw.githubusercontent.com/exelban/stats/refs/heads/master/Modules/Sensors/values.swift
-        "DEFAULT": [
-            "CPU": ["TC0D","TC0E","TC0F","TC0H","TC0P","TCAD"],
-            "GPU": ["TCGC","TG0D","TGDD","TG0H","TG0P","PCPG","PCGC","PCGM"],
-            "FAN": ["TaLP", "TaRF"],
-            "FAN SPEED": ["F0Ac", "F1Ac"],
-            "POWER": ["PSTR"],
-            "BATTERY": ["PPBR"],
-            "ADAPTER": ["PDTR"]
-        ],
-        "M1": [
-            "CPU": ["Tp09", "Tp0T", "Tp01", "Tp05", "Tp0D", "Tp0H", "Tp0L", "Tp0P", "Tp0X", "Tp0b"],
-            "GPU": ["Tg05", "Tg0D", "Tg0L" ,"Tg0T"],
-        ],
-        "M2": [
-            "CPU": ["Tp1h", "Tp1t", "Tp1p", "Tp1l", "Tp01", "Tp05", "Tp09", "Tp0D", "Tp0X", "Tp0b", "Tp0f", "Tp0j"],
-            "GPU": ["Tg0f", "Tg0j"],
-        ],
-        "M3": [
-            "CPU": ["Te05", "Te0L", "Te0P", "Te0S", "Tf04", "Tf09", "Tf0A", "Tf0B", "Tf0D", "Tf0E", "Tf44", "Tf49", "Tf4A", "Tf4B", "Tf4D", "Tf4E"],
-            "GPU": ["Tf14", "Tf18", "Tf19", "Tf1A", "Tf24", "Tf28", "Tf29", "Tf2A"],
-        ],
-        "M4": [
-            "CPU": ["Te05", "Te0S", "Te09", "Te0H", "Tp01", "Tp05", "Tp09", "Tp0D", "Tp0V", "Tp0Y", "Tp0b", "Tp0e"],
-            "GPU": ["Tg0G", "Tg0H", "Tg1U", "Tg1k", "Tg0K", "Tg0L", "Tg0d", "Tg0e", "Tg0j", "Tg0k"],
-        ],
-        "M5": [
-            "CPU": ["Tp00", "Tp04", "Tp08", "Tp0C", "Tp0G", "Tp0K", "Tp0O", "Tp0R", "Tp0U", "Tp0X", "Tp0a", "Tp0d", "Tp0g", "Tp0j", "Tp0m", "Tp0p", "Tp0u", "Tp0y"],
-            "GPU": ["Tg0U", "Tg0X", "Tg0d", "Tg0g", "Tg0j", "Tg1Y", "Tg1c", "Tg1g"],
-        ]
-    ]
+    public var hasFan: Bool = true  // Assume has fan by default
     
     // data for translate
     public var cpuTemp: Double = 0.0
@@ -166,34 +324,38 @@ class IOServiceData {
         return nil
     }
     
-    private func getCpuModel() -> String {
-        var sizeOfName = 0
-        sysctlbyname("machdep.cpu.brand_string", nil, &sizeOfName, nil, 0)
-        var nameChars = [CChar](repeating: 0, count: sizeOfName)
-        sysctlbyname("machdep.cpu.brand_string", &nameChars, &sizeOfName, nil, 0)
+    private func getCpuModel() -> CPU_MODEL {
+        var size = 0
+        sysctlbyname("machdep.cpu.brand_string", nil, &size, nil, 0)
+        var brandString = [CChar](repeating: 0, count: size)
+        sysctlbyname("machdep.cpu.brand_string", &brandString, &size, nil, 0)
+        let cpuBrand = String(cString: brandString).uppercased()
         
-        if getMacModel()!.uppercased().contains("AIR") {
-            isAir = true
-        }
+        isFanlessModel = FanlessConfiguration.isFanless(modelName: getMacModel() ?? "")
         
-        if String(cString: nameChars).uppercased().contains("M5") {
-            return "M5"
-        } else if String(cString: nameChars).uppercased().contains("M4") {
-            return "M4"
-        } else if String(cString: nameChars).uppercased().contains("M3") {
-            return "M3"
-        } else if String(cString: nameChars).uppercased().contains("M2") {
-            return "M2"
-        } else if String(cString: nameChars).uppercased().contains("M1") {
-            // m1 air is not present SMC :(
-            if isAir {
+        // Check for Apple Silicon chips in reverse order (newest first)
+        if cpuBrand.range(of: "\\bM5\\b", options: .regularExpression) != nil ||
+           cpuBrand.contains("APPLE M5") {
+            return .M5
+        } else if cpuBrand.range(of: "\\bM4\\b", options: .regularExpression) != nil ||
+                  cpuBrand.contains("APPLE M4") {
+            return .M4
+        } else if cpuBrand.range(of: "\\bM3\\b", options: .regularExpression) != nil ||
+                  cpuBrand.contains("APPLE M3") {
+            return .M3
+        } else if cpuBrand.range(of: "\\bM2\\b", options: .regularExpression) != nil ||
+                  cpuBrand.contains("APPLE M2") {
+            return .M2
+        } else if cpuBrand.range(of: "\\bM1\\b", options: .regularExpression) != nil ||
+                  cpuBrand.contains("APPLE M1") {
+            // Some M1 fanless models don't have accessible SMC
+            if isFanlessModel {
                 presentSMC = false
             }
-            return "M1"
-        }  else {
-            return "INTEL"
+            return .M1
         }
         
+        return .M1
     }
     
     init() {
@@ -203,39 +365,59 @@ class IOServiceData {
         IOServiceOpen(service, mach_task_self_ , 0, &con)
         IOObjectRelease(service)
         
-        // let set default values
-        cpuTempKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["CPU"])!)
-        gpuTempKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["GPU"])!)
-        fanTempKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["FAN"])!)
-        fanSpeedKeys = (SensorsList["DEFAULT"]?["FAN SPEED"])!
-        systemPowerKeys = (SensorsList["DEFAULT"]?["POWER"])!
-        systemAdapterKeys = (SensorsList["DEFAULT"]?["ADAPTER"])!
-        systemBatteryKeys = (SensorsList["DEFAULT"]?["BATTERY"])!
-        
-        // let load apple sillicon models custom values
-        for cpuModel in SensorsList {
-            if cpuModel.key ==  getCpuModel() {
-                for sensors in cpuModel.value {
-                    if sensors.key == "CPU" {
-                        cpuTempKeys = checkNulValues(sourceArray: sensors.value)
-                    } else if sensors.key == "GPU" {
-                        gpuTempKeys = checkNulValues(sourceArray: sensors.value)
-                    } else if sensors.key == "FAN" {
-                        fanTempKeys = checkNulValues(sourceArray: sensors.value)
-                    } else if sensors.key == "FAN SPEED" {
-                        fanSpeedKeys = sensors.value
-                    } else if sensors.key == "POWER" {
-                        systemPowerKeys = sensors.value
-                    } else if sensors.key == "ADAPTER" {
-                        systemAdapterKeys = sensors.value
-                    } else if sensors.key == "BATTERY" {
-                        systemBatteryKeys = sensors.value
-                    }
-                }
-            }
+        let cpuModel = getCpuModel()
+        guard let modelSensors = SensorsList[cpuModel] else {
+            // This should never happen, but fallback to M1 if needed
+            let m1Sensors = SensorsList[.M1]!
+            cpuTempKeys = checkNulValues(sourceArray: m1Sensors[.CPU]?.map { $0.key } ?? [])
+            gpuTempKeys = checkNulValues(sourceArray: m1Sensors[.GPU]?.map { $0.key } ?? [])
+            
+            // Always use default power/cooling sensors
+            fanTempKeys = checkNulValues(sourceArray: defaultSensors[.FAN]?.map { $0.key } ?? [])
+            fanSpeedKeys = defaultSensors[.FAN_SPEED]?.map { $0.key } ?? []
+            systemPowerKeys = defaultSensors[.POWER]?.map { $0.key } ?? []
+            systemAdapterKeys = defaultSensors[.ADAPTER]?.map { $0.key } ?? []
+            systemBatteryKeys = defaultSensors[.BATTERY]?.map { $0.key } ?? []
+            
+            self.update()
+            self.detectFan()
+            return
         }
         
+        cpuTempKeys = checkNulValues(sourceArray: modelSensors[.CPU]?.map { $0.key } ?? [])
+        gpuTempKeys = checkNulValues(sourceArray: modelSensors[.GPU]?.map { $0.key } ?? [])
+        fanTempKeys = checkNulValues(sourceArray: defaultSensors[.FAN]?.map { $0.key } ?? [])
+        fanSpeedKeys = defaultSensors[.FAN_SPEED]?.map { $0.key } ?? []
+        systemPowerKeys = defaultSensors[.POWER]?.map { $0.key } ?? []
+        systemAdapterKeys = defaultSensors[.ADAPTER]?.map { $0.key } ?? []
+        systemBatteryKeys = defaultSensors[.BATTERY]?.map { $0.key } ?? []
+        
         self.update()
+        self.detectFan()
+    }
+    
+    // Detect if the Mac has an active cooling fan
+    private func detectFan() {
+        // Check if we have any fan speed sensors
+        guard !fanSpeedKeys.isEmpty else {
+            hasFan = false
+            return
+        }
+        
+        // Check if any fan speed sensor returns a non-zero value
+        let hasActiveFan = fanSpeedKeys.contains { key in
+            let speed = self.read(key)
+            return speed > 0
+        }
+        
+        // If all fan sensors return 0, likely no fan present
+        hasFan = hasActiveFan
+        
+        // Clear fan-related keys if no fan detected
+        if !hasFan {
+            fanTempKeys = []
+            fanSpeedKeys = []
+        }
     }
     
     deinit {
@@ -291,14 +473,19 @@ class IOServiceData {
         cpuTemp = cpuTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
         gpuTemp = gpuTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
         
-        if fanTempKeys.count > 0 {
+        // Only update fan data if fan is present
+        if hasFan && fanTempKeys.count > 0 {
             fanTemp = fanTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
+        } else {
+            fanTemp = 0.0
         }
         
         fanSpeed = []
         
-        for key in fanSpeedKeys {
-           fanSpeed.append(Int(self.read(key)))
+        if hasFan {
+            for key in fanSpeedKeys {
+               fanSpeed.append(Int(self.read(key)))
+            }
         }
         
         systemPower = Int(systemPowerKeys.reduce(0, { sum, sensor in round(sum + self.read(sensor))}))
