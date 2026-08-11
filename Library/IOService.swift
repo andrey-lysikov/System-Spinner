@@ -203,9 +203,8 @@ class IOServiceData {
     private let KERNEL_INDEX_SMC: UInt32 = 2
     private let SMC_CMD_READ_BYTES: UInt8 = 5
     private let SMC_CMD_READ_KEYINFO: UInt8 = 9
-    public var isFanlessModel: Bool = false  // Indicates if this is a fanless Mac model
+    public var isFanlessModel: Bool = false
     public var presentSMC: Bool = true
-    public var hasFan: Bool = true  // Assume has fan by default
     
     // data for translate
     public var cpuTemp: Double = 0.0
@@ -332,7 +331,7 @@ class IOServiceData {
         let cpuBrand = String(cString: brandString).uppercased()
         
         isFanlessModel = FanlessConfiguration.isFanless(modelName: getMacModel() ?? "")
-        
+
         // Check for Apple Silicon chips in reverse order (newest first)
         if cpuBrand.range(of: "\\bM5\\b", options: .regularExpression) != nil ||
            cpuBrand.contains("APPLE M5") {
@@ -366,23 +365,9 @@ class IOServiceData {
         IOObjectRelease(service)
         
         let cpuModel = getCpuModel()
-        guard let modelSensors = SensorsList[cpuModel] else {
-            // This should never happen, but fallback to M1 if needed
-            let m1Sensors = SensorsList[.M1]!
-            cpuTempKeys = checkNulValues(sourceArray: m1Sensors[.CPU]?.map { $0.key } ?? [])
-            gpuTempKeys = checkNulValues(sourceArray: m1Sensors[.GPU]?.map { $0.key } ?? [])
-            
-            // Always use default power/cooling sensors
-            fanTempKeys = checkNulValues(sourceArray: defaultSensors[.FAN]?.map { $0.key } ?? [])
-            fanSpeedKeys = defaultSensors[.FAN_SPEED]?.map { $0.key } ?? []
-            systemPowerKeys = defaultSensors[.POWER]?.map { $0.key } ?? []
-            systemAdapterKeys = defaultSensors[.ADAPTER]?.map { $0.key } ?? []
-            systemBatteryKeys = defaultSensors[.BATTERY]?.map { $0.key } ?? []
-            
-            self.update()
-            self.detectFan()
-            return
-        }
+        
+        // Fallback на M1, если модель не найдена в словаре
+        let modelSensors = SensorsList[cpuModel] ?? SensorsList[.M1]!
         
         cpuTempKeys = checkNulValues(sourceArray: modelSensors[.CPU]?.map { $0.key } ?? [])
         gpuTempKeys = checkNulValues(sourceArray: modelSensors[.GPU]?.map { $0.key } ?? [])
@@ -393,31 +378,6 @@ class IOServiceData {
         systemBatteryKeys = defaultSensors[.BATTERY]?.map { $0.key } ?? []
         
         self.update()
-        self.detectFan()
-    }
-    
-    // Detect if the Mac has an active cooling fan
-    private func detectFan() {
-        // Check if we have any fan speed sensors
-        guard !fanSpeedKeys.isEmpty else {
-            hasFan = false
-            return
-        }
-        
-        // Check if any fan speed sensor returns a non-zero value
-        let hasActiveFan = fanSpeedKeys.contains { key in
-            let speed = self.read(key)
-            return speed > 0
-        }
-        
-        // If all fan sensors return 0, likely no fan present
-        hasFan = hasActiveFan
-        
-        // Clear fan-related keys if no fan detected
-        if !hasFan {
-            fanTempKeys = []
-            fanSpeedKeys = []
-        }
     }
     
     deinit {
@@ -474,7 +434,7 @@ class IOServiceData {
         gpuTemp = gpuTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
         
         // Only update fan data if fan is present
-        if hasFan && fanTempKeys.count > 0 {
+        if !isFanlessModel && fanTempKeys.count > 0 {
             fanTemp = fanTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
         } else {
             fanTemp = 0.0
@@ -482,7 +442,7 @@ class IOServiceData {
         
         fanSpeed = []
         
-        if hasFan {
+        if !isFanlessModel {
             for key in fanSpeedKeys {
                fanSpeed.append(Int(self.read(key)))
             }

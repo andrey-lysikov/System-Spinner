@@ -175,7 +175,7 @@ class UsageViewController: NSViewController {
         self.preferredContentSize = NSMakeSize(self.view.frame.width, 100);
         
         // Fanless models don't have active cooling
-        if !ioService.hasFan {
+        if ioService.isFanlessModel {
             fanStack.removeFromSuperview()
         }
         
@@ -247,7 +247,7 @@ class UsageViewController: NSViewController {
         }
         
         // Only show fan data if fan is present
-        if ioService.hasFan {
+        if !ioService.isFanlessModel {
             var fanLabelValue = "fan \(ioService.fanSpeed.map { String($0) }.joined(separator: " | ")) rpm"
             if ioService.fanSpeed.count > 0 && ioService.fanSpeed[0] == 0 {
                 fanLabelValue = localizedString("fan is stopped")
