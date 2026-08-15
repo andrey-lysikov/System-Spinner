@@ -2,12 +2,33 @@
 //  SPDX-License-Identifier: Apache-2.0
 
 import Cocoa
+import ServiceManagement
 
 protocol AppMenuControllerDelegate: AnyObject {
     func appMenuDidChangeSpinnerAppearance(_ controller: AppMenuController)
     func appMenuDidChangeUpdateInterval(_ controller: AppMenuController)
     func appMenuDidRequestDisplayRefresh(_ controller: AppMenuController)
     func appMenuDidRequestQuit(_ controller: AppMenuController)
+}
+
+enum LoginItemService {
+    static var isEnabled: Bool {
+        get { SMAppService.mainApp.status == .enabled }
+        set {
+            do {
+                if newValue {
+                    if SMAppService.mainApp.status == .enabled {
+                        try? SMAppService.mainApp.unregister()
+                    }
+                    try SMAppService.mainApp.register()
+                } else {
+                    try SMAppService.mainApp.unregister()
+                }
+            } catch {
+                print("Can't use SMAppService: \(error)")
+            }
+        }
+    }
 }
 
 final class AppMenuController: NSObject {
