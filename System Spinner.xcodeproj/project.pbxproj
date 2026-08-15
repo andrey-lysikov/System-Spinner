@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		7F65A9522DAEAD3C0052875D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 7F65A9512DAEAD3C0052875D /* Localizable.xcstrings */; };
-		7F67230A3028712900FCA359 /* dmg-build.sh in Resources */ = {isa = PBXBuildFile; fileRef = 7F6723093028712900FCA359 /* dmg-build.sh */; };
 		7F866E292D1ECAFC00F20488 /* DisplayServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F0D02722D1ECADD0029C507 /* DisplayServices.framework */; };
 		7F866E2C2D1ECAFE00F20488 /* CoreDisplay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F0D026E2D1ECA450029C507 /* CoreDisplay.framework */; };
 		7F904EE52E7A9C1B00450D04 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7F904EE42E7A9C1B00450D04 /* Media.xcassets */; };
@@ -23,7 +22,6 @@
 		7F35E5922B847EBC0032163E /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		7F35E5932B847F230032163E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		7F65A9512DAEAD3C0052875D /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
-		7F6723093028712900FCA359 /* dmg-build.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "dmg-build.sh"; sourceTree = "<group>"; };
 		7F904EE42E7A9C1B00450D04 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		7F904EE62E7AA04500450D04 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		7FB908A72B67B9A400E9EE24 /* System Spinner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "System Spinner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -78,7 +76,6 @@
 				7F35E5922B847EBC0032163E /* LICENSE */,
 				7F904EE42E7A9C1B00450D04 /* Media.xcassets */,
 				7F904EE62E7AA04500450D04 /* AppIcon.icon */,
-				7F6723093028712900FCA359 /* dmg-build.sh */,
 				7F6D12232D1D868100C44FAC /* Pictures */,
 				7FAA10012E77000100AB0001 /* Library */,
 				7F0D025B2D1EADEF0029C507 /* Controllers */,
@@ -166,7 +163,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				7F65A9522DAEAD3C0052875D /* Localizable.xcstrings in Resources */,
-				7F67230A3028712900FCA359 /* dmg-build.sh in Resources */,
 				7F904EE72E7AA04500450D04 /* AppIcon.icon in Resources */,
 				7F904EE52E7A9C1B00450D04 /* Media.xcassets in Resources */,
 			);

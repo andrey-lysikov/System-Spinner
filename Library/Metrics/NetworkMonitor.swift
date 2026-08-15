@@ -52,7 +52,7 @@ final class NetworkMonitor {
         var addresses: UnsafeMutablePointer<ifaddrs>?
         var totalIn: UInt64 = 0
         var totalOut: UInt64 = 0
-        var active = localizedString("no ip found")
+        var active = ""
         var foundIPv4 = false
 
         guard getifaddrs(&addresses) == 0 else { return (0, 0, active) }

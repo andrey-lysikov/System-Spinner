@@ -116,9 +116,13 @@ class UsageViewController: NSViewController {
         applySensors(snapshot.sensors)
         applyMemory(snapshot.memory)
 
-        let network = snapshot.network.address
-            + "\n↓ " + String(Int(snapshot.network.inbound.value)) + snapshot.network.inbound.unit
-            + " | ↑ " + String(Int(snapshot.network.outbound.value)) + snapshot.network.outbound.unit
+        let address = snapshot.network.address.isEmpty
+            ? localizedString("no ip found")
+            : snapshot.network.address
+
+        let network = address
+            + "\n↓ " + String(Int(snapshot.network.inbound.value)) + snapshot.network.inbound.unit.title
+            + " | ↑ " + String(Int(snapshot.network.outbound.value)) + snapshot.network.outbound.unit.title
 
         if forcesFullRefresh || netLabel.stringValue != network {
             netLabel.stringValue = network

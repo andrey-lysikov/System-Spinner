@@ -7,6 +7,7 @@ import Foundation
 final class Stored<Value> {
     private let key: String
     private let defaults: UserDefaults
+    private let lock = NSLock()
     private var cached: Value
 
     init(_ key: String, _ defaultValue: Value, defaults: UserDefaults = .standard) {
@@ -16,9 +17,9 @@ final class Stored<Value> {
     }
 
     var wrappedValue: Value {
-        get { cached }
+        get { lock.withLock { cached } }
         set {
-            cached = newValue
+            lock.withLock { cached = newValue }
             defaults.set(newValue, forKey: key)
         }
     }

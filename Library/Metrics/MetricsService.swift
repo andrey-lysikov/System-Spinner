@@ -4,14 +4,27 @@
 import Foundation
 
 struct Throughput {
+    enum Unit {
+        case kilobytes, megabytes, gigabytes, terabytes
+
+        var title: String {
+            switch self {
+            case .kilobytes: return localizedString("KB/s")
+            case .megabytes: return localizedString("MB/s")
+            case .gigabytes: return localizedString("GB/s")
+            case .terabytes: return localizedString("TB/s")
+            }
+        }
+    }
+
     let bytesPerSecond: Double
 
     static let zero = Throughput(bytesPerSecond: 0)
 
     var value: Double { scaled.value }
-    var unit: String { scaled.unit }
+    var unit: Unit { scaled.unit }
 
-    private var scaled: (value: Double, unit: String) {
+    private var scaled: (value: Double, unit: Unit) {
         let kilobyte = 1024.0
         let megabyte = pow(kilobyte, 2)
         let gigabyte = pow(kilobyte, 3)
@@ -19,13 +32,13 @@ struct Throughput {
 
         switch bytesPerSecond {
         case terabyte...:
-            return (bytesPerSecond / terabyte, localizedString("TB/s"))
+            return (bytesPerSecond / terabyte, .terabytes)
         case gigabyte ..< terabyte:
-            return (bytesPerSecond / gigabyte, localizedString("GB/s"))
+            return (bytesPerSecond / gigabyte, .gigabytes)
         case megabyte ..< gigabyte:
-            return (bytesPerSecond / megabyte, localizedString("MB/s"))
+            return (bytesPerSecond / megabyte, .megabytes)
         default:
-            return (bytesPerSecond / kilobyte, localizedString("KB/s"))
+            return (bytesPerSecond / kilobyte, .kilobytes)
         }
     }
 }
