@@ -1,6 +1,7 @@
 //  Copyright © MonitorControl. JoniVR, theOneyouseek, waydabber, AndreyLysikov
 //  SPDX-License-Identifier: Apache-2.0
 
+@MainActor
 class DisplayManager {
     public static let shared = DisplayManager()
     public let globalDDCQueue = DispatchQueue(label: "Global DDC queue")
@@ -74,8 +75,6 @@ class DisplayManager {
         }
     }
 
-    /// Список дисплеев собирается сразу, а сопоставление DDC-сервисов уходит в
-    /// фон: обход IORegistry занимает заметное время и блокировал интерфейс.
     public func configureDisplays(completion: (([Display]) -> Void)? = nil) {
         self.displays = []
         CGDisplayRestoreColorSyncSettings()
@@ -102,10 +101,10 @@ class DisplayManager {
         completion?(self.displays)
 
         let displayIDs = self.getOtherDisplays().map { $0.identifier }
-        globalDDCQueue.async { [weak self] in
+        globalDDCQueue.async {
             let matches = DDC.getServiceMatches(displayIDs: displayIDs)
-            DispatchQueue.main.async {
-                self?.applyAVServices(matches)
+            Task { @MainActor in
+                DisplayManager.shared.applyAVServices(matches)
             }
         }
     }
@@ -113,8 +112,6 @@ class DisplayManager {
     public func getOtherDisplays() -> [OtherDisplay] {
         self.displays.compactMap { $0 as? OtherDisplay }
     }
-    
-    
     
     public func hasBrightnessControll() -> Bool {
         var brightness = false

@@ -3,6 +3,7 @@
 
 import Foundation
 
+@MainActor
 final class UpdateChecker {
     static let shared = UpdateChecker()
 
@@ -34,29 +35,38 @@ final class UpdateChecker {
         let installed = installedVersion
         let delay: DispatchTime = force ? .now() : .now() + Self.backgroundDelay
 
-        DispatchQueue.main.asyncAfter(deadline: delay) { [self] in
-            URLSession.shared.dataTask(with: Self.apiURL) { [self] data, _, _ in
-                defer { isChecking = false }
-
+        DispatchQueue.main.asyncAfter(deadline: delay) {
+            URLSession.shared.dataTask(with: Self.apiURL) { data, _, _ in
                 let decoder = JSONDecoder()
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
-                guard let data, let release = try? decoder.decode(Release.self, from: data) else { return }
+                let release = data.flatMap { try? decoder.decode(Release.self, from: $0) }
 
-                let latest = Self.versionNumber(release.tagName)
-                let current = Self.versionNumber(installed)
-
-                if latest > 0, current > 0, latest > current {
-                    notifications.send(title: localizedString("System Spinner update"),
-                                       body: localizedString("New version \(release.tagName) is available. Would you like download to update?"),
-                                       action: .download)
-                } else if force {
-                    notifications.send(title: localizedString("System Spinner update"),
-                                       body: localizedString("You version \(installed) is actual version."))
+                // Ответ приходит на очереди URLSession, а дальше работа идёт
+                // с настройками и уведомлениями — им нужен главный поток.
+                Task { @MainActor in
+                    Self.shared.finish(release: release, installed: installed, force: force)
                 }
-
-                preferences.lastVersionCheck = Date()
             }.resume()
         }
+    }
+
+    private func finish(release: Release?, installed: String, force: Bool) {
+        isChecking = false
+        guard let release else { return }
+
+        let latest = Self.versionNumber(release.tagName)
+        let current = Self.versionNumber(installed)
+
+        if latest > 0, current > 0, latest > current {
+            notifications.send(title: localizedString("System Spinner update"),
+                               body: localizedString("New version \(release.tagName) is available. Would you like download to update?"),
+                               action: .download)
+        } else if force {
+            notifications.send(title: localizedString("System Spinner update"),
+                               body: localizedString("You version \(installed) is actual version."))
+        }
+
+        preferences.lastVersionCheck = Date()
     }
 
     private static func versionNumber(_ value: String) -> Int {

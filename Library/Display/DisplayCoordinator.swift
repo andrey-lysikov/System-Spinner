@@ -4,6 +4,7 @@
 import Cocoa
 import AppKit
 
+@MainActor
 final class DisplayCoordinator {
     static let shared = DisplayCoordinator()
 
@@ -16,7 +17,9 @@ final class DisplayCoordinator {
 
     func start() {
         CGDisplayRegisterReconfigurationCallback({ _, _, _ in
-            DisplayCoordinator.shared.setNeedsRefresh()
+            DispatchQueue.main.async {
+                DisplayCoordinator.shared.setNeedsRefresh()
+            }
         }, nil)
         setNeedsRefresh()
     }
@@ -44,6 +47,7 @@ final class DisplayCoordinator {
     }
 }
 
+@MainActor
 final class AppleDisplay: Display {
     private let displayQueue: DispatchQueue
 
@@ -66,6 +70,7 @@ final class AppleDisplay: Display {
     }
 }
 
+@MainActor
 final class OtherDisplay: Display {
     enum Command: UInt8 {
         case luminance = 0x10
@@ -77,9 +82,7 @@ final class OtherDisplay: Display {
     var ddcService: IOAVService?
     var isDiscouraged: Bool = false
 
-    private let writeDDCQueue = DispatchQueue(label: "Local write DDC queue")
-    private var writeDDCNextValue: [Command: UInt16] = [:]
-    private var writeDDCLastSavedValue: [Command: UInt16] = [:]
+    private var lastSentValue: [Command: UInt16] = [:]
 
     override func setBrightness(valueBrightness: Float) {
         writeDDCValues(command: .brightness, value: UInt16(valueBrightness))
@@ -97,30 +100,17 @@ final class OtherDisplay: Display {
         saveCurrentVolume(valueVolume: valueVolume)
     }
 
-    private func writeDDCValues(command: Command, value: UInt16) {
-        writeDDCQueue.async(flags: .barrier) {
-            self.writeDDCNextValue[command] = value
-        }
-        DisplayManager.shared.globalDDCQueue.async(flags: .barrier) {
-            self.performWriteDDCValues(command: command)
-        }
+    private struct ServiceBox: @unchecked Sendable {
+        let service: IOAVService?
     }
 
-    private func performWriteDDCValues(command: Command) {
-        var value = UInt16.max
-        var lastValue = UInt16.max
+    private func writeDDCValues(command: Command, value: UInt16) {
+        guard lastSentValue[command] != value else { return }
+        lastSentValue[command] = value
 
-        writeDDCQueue.sync {
-            value = writeDDCNextValue[command] ?? UInt16.max
-            lastValue = writeDDCLastSavedValue[command] ?? UInt16.max
+        let box = ServiceBox(service: ddcService)
+        DisplayManager.shared.globalDDCQueue.async(flags: .barrier) {
+            _ = DDC.write(service: box.service, command: command.rawValue, value: value)
         }
-
-        guard value != UInt16.max, value != lastValue else { return }
-
-        writeDDCQueue.async(flags: .barrier) {
-            self.writeDDCLastSavedValue[command] = value
-        }
-
-        _ = DDC.write(service: ddcService, command: command.rawValue, value: value)
     }
 }

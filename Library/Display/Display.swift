@@ -4,12 +4,13 @@
 import AppKit
 import AudioToolbox
 
+@MainActor
 class Display: Equatable {
     public let identifier: CGDirectDisplayID
     public var name: String
     public var savedVolume: Float = 0
 
-    public static func == (lhs: Display, rhs: Display) -> Bool {
+    nonisolated public static func == (lhs: Display, rhs: Display) -> Bool {
         lhs.identifier == rhs.identifier
     }
 

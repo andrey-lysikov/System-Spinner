@@ -62,7 +62,6 @@ struct NetworkUsage {
     static let empty = NetworkUsage()
 }
 
-/// Потребители получают копию и не имеют доступа к состоянию мониторов.
 struct MetricsSnapshot {
     var cpuUsage: Double = 0
     var gpuUsage: Double = 0
@@ -79,8 +78,8 @@ func roundedTenth(_ value: Double) -> Double {
     (value * 10).rounded(.up) / 10
 }
 
-final class MetricsService {
-    typealias Observer = (MetricsSnapshot) -> Void
+final class MetricsService: @unchecked Sendable {
+    typealias Observer = @MainActor @Sendable (MetricsSnapshot) -> Void
 
     static let shared = MetricsService()
 
@@ -154,10 +153,10 @@ final class MetricsService {
         }
     }
 
-    func topProcesses(completion: @escaping ([ProcessUsage]) -> Void) {
+    func topProcesses(completion: @escaping @MainActor @Sendable ([ProcessUsage]) -> Void) {
         queue.async { [self] in
             let usage = processes.snapshot(systemCPUUsage: cpu.usage)
-            DispatchQueue.main.async { completion(usage) }
+            Task { @MainActor in completion(usage) }
         }
     }
 
@@ -194,7 +193,7 @@ final class MetricsService {
         }
 
         guard !handlers.isEmpty else { return }
-        DispatchQueue.main.async {
+        Task { @MainActor in
             handlers.forEach { $0(snapshot) }
         }
     }

@@ -9,6 +9,7 @@ enum MediaKeyHandlingResult: Equatable {
     case consumed(didChange: Bool)
 }
 
+@MainActor
 final class MediaKeyMonitor {
     enum MediaKey: Int {
         case soundUp = 0
@@ -84,19 +85,34 @@ final class MediaKeyMonitor {
         CGEvent.tapEnable(tap: tap, enable: true)
     }
 
+    private struct EventBox: @unchecked Sendable {
+        let event: CGEvent
+        let refcon: UnsafeMutableRawPointer
+    }
+
+    private struct ResultBox: @unchecked Sendable {
+        let value: Unmanaged<CGEvent>?
+    }
+
     private static let eventTapCallback: CGEventTapCallBack = { _, type, event, refcon in
         guard let refcon else {
             return Unmanaged.passUnretained(event)
         }
 
-        let monitor = Unmanaged<MediaKeyMonitor>.fromOpaque(refcon).takeUnretainedValue()
+        let box = EventBox(event: event, refcon: refcon)
 
-        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
-            monitor.enableEventTap()
-            return Unmanaged.passUnretained(event)
+        let result = MainActor.assumeIsolated { () -> ResultBox in
+            let monitor = Unmanaged<MediaKeyMonitor>.fromOpaque(box.refcon).takeUnretainedValue()
+
+            if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+                monitor.enableEventTap()
+                return ResultBox(value: Unmanaged.passUnretained(box.event))
+            }
+
+            return ResultBox(value: monitor.handle(box.event))
         }
 
-        return monitor.handle(event)
+        return result.value
     }
 
     private func handle(_ event: CGEvent) -> Unmanaged<CGEvent>? {

@@ -5,6 +5,7 @@ import Cocoa
 import UserNotifications
 
 @main
+@MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let statusItemController = StatusItemController()
 
@@ -34,7 +35,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-extension AppDelegate: UNUserNotificationCenterDelegate {
+extension AppDelegate: @preconcurrency UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {

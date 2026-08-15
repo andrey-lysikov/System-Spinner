@@ -29,7 +29,7 @@ final class MemoryMonitor {
     func update() {
         guard let statistics = vmStatistics() else { return }
 
-        let unit = Double(vm_kernel_page_size) / 1_073_741_824
+        let unit = Double(sysconf(_SC_PAGESIZE)) / 1_073_741_824
         let total = Self.totalMemory
 
         let active = Double(statistics.active_count) * unit

@@ -8,7 +8,7 @@ class DDC: NSObject {
     static let ARM64_DDC_7BIT_ADDRESS: UInt8 = 0x37
     static let ARM64_DDC_DATA_ADDRESS: UInt8 = 0x51
     
-    struct IORegService {
+    struct IORegService: @unchecked Sendable {
         var edidUUID: String = ""
         var manufacturerID: String = ""
         var productName: String = ""
@@ -23,7 +23,7 @@ class DDC: NSObject {
         var displayAttributes: NSDictionary?
     }
     
-    struct ServiceMatch {
+    struct ServiceMatch: @unchecked Sendable {
         var displayID: CGDirectDisplayID = 0
         var service: IOAVService?
         var serviceLocation: Int = 0

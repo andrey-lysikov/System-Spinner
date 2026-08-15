@@ -29,6 +29,7 @@ struct OSDValue: Equatable {
     }
 }
 
+@MainActor
 final class OSDController {
     static let shared = OSDController()
 

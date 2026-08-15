@@ -69,6 +69,7 @@ struct GlassEffectContainer<Content: View>: NSViewRepresentable {
         }
     }
 
+    @MainActor
     final class Coordinator {
         let hostingView: NSHostingView<Content>
 

@@ -3,6 +3,7 @@
 
 import Cocoa
 
+@MainActor
 final class SegmentedLevelView: NSView {
     var value: Double = 0 {
         didSet {
@@ -52,11 +53,13 @@ final class SegmentedLevelView: NSView {
         NSSize(width: NSView.noIntrinsicMetric, height: barHeight)
     }
 
-    override func awakeFromNib() {
+    override nonisolated func awakeFromNib() {
         super.awakeFromNib()
-        setContentHuggingPriority(.init(1), for: .horizontal)
-        setContentCompressionResistancePriority(.init(1), for: .horizontal)
-        setContentHuggingPriority(.defaultHigh, for: .vertical)
+        MainActor.assumeIsolated {
+            setContentHuggingPriority(.init(1), for: .horizontal)
+            setContentCompressionResistancePriority(.init(1), for: .horizontal)
+            setContentHuggingPriority(.defaultHigh, for: .vertical)
+        }
     }
 
     override var isFlipped: Bool { true }

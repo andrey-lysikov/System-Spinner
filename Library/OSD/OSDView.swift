@@ -20,8 +20,6 @@ struct OSDView: View {
 
 struct OSDIndicatorView: View {
     let value: OSDValue
-
-    /// Расстояние между делениями подобрано под ширину шкалы для каждого шага.
     private static let separatorSpacing: [Int: CGFloat] = [8: 23.25, 16: 11.125, 24: 7.1, 32: 5.1]
 
     var body: some View {
@@ -37,6 +35,7 @@ struct OSDIndicatorView: View {
         .frame(width: 280, height: 64)
 
         GlassEffectContainer { content }
+            .frame(width: 280, height: 64)
     }
 
     @ViewBuilder

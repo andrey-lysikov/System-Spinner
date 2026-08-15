@@ -4,6 +4,7 @@
 import Cocoa
 import ServiceManagement
 
+@MainActor
 protocol AppMenuControllerDelegate: AnyObject {
     func appMenuDidChangeSpinnerAppearance(_ controller: AppMenuController)
     func appMenuDidChangeUpdateInterval(_ controller: AppMenuController)
@@ -31,6 +32,7 @@ enum LoginItemService {
     }
 }
 
+@MainActor
 final class AppMenuController: NSObject {
     weak var delegate: AppMenuControllerDelegate?
 

@@ -3,6 +3,7 @@
 
 import Cocoa
 
+@MainActor
 final class SpinnerAnimator {
     var onFrame: ((NSImage) -> Void)?
 
@@ -56,7 +57,7 @@ final class SpinnerAnimator {
 
         timer?.invalidate()
         let timer = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
-            self?.advance()
+            MainActor.assumeIsolated { self?.advance() }
         }
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer

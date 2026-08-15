@@ -89,6 +89,10 @@ class UsageViewController: NSViewController {
             level?.needsDisplay = true
         }
 
+        // Холостой замер процессов: их загрузка считается по разнице с предыдущим,
+        // и без него список в графике окажется пустым при первом открытии.
+        metrics.topProcesses { _ in }
+
         popupChart.animates = Preferences.shared.usesPopUpAnimation
         view.window?.makeKey()
     }

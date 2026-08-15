@@ -2,30 +2,38 @@
 //  SPDX-License-Identifier: Apache-2.0
 
 import Foundation
+import Synchronization
 
+/// Значение живёт в памяти под Mutex, поэтому читать его можно из любого потока.
 @propertyWrapper
-final class Stored<Value> {
+final class Stored<Value: Sendable>: Sendable {
     private let key: String
-    private let defaults: UserDefaults
-    private let lock = NSLock()
-    private var cached: Value
+    private let cached: Mutex<Value>
 
-    init(_ key: String, _ defaultValue: Value, defaults: UserDefaults = .standard) {
+    init(_ key: String, _ defaultValue: Value) {
         self.key = key
-        self.defaults = defaults
-        cached = defaults.object(forKey: key) as? Value ?? defaultValue
+        cached = Mutex(UserDefaults.standard.object(forKey: key) as? Value ?? defaultValue)
     }
 
     var wrappedValue: Value {
-        get { lock.withLock { cached } }
+        get { cached.withLock { $0 } }
         set {
-            lock.withLock { cached = newValue }
-            defaults.set(newValue, forKey: key)
+            cached.withLock { $0 = newValue }
+            UserDefaults.standard.set(newValue, forKey: key)
         }
     }
 }
 
-final class Preferences {
+extension String {
+    init(cBuffer: [CChar]) {
+        let bytes = cBuffer.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }
+        self = String(decoding: bytes, as: UTF8.self)
+    }
+}
+
+/// Все поля — обёртки Stored, потокобезопасные сами по себе; изменяемыми их
+/// объявляет генератор property wrapper, отсюда unchecked.
+final class Preferences: @unchecked Sendable {
     static let shared = Preferences()
 
     private init() {}

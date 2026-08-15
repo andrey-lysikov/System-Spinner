@@ -1,8 +1,8 @@
 //  Copyright © AndreyLysikov
 //  SPDX-License-Identifier: Apache-2.0
 
-import UserNotifications
-import ApplicationServices
+@preconcurrency import UserNotifications
+@preconcurrency import ApplicationServices
 
 enum AccessibilityPermission {
     static var isTrusted: Bool {
@@ -10,7 +10,6 @@ enum AccessibilityPermission {
         return AXIsProcessTrustedWithOptions(options)
     }
 
-    /// Проверяет доступ и, если его нет, показывает уведомление с кнопкой запроса.
     @discardableResult
     static func check() -> Bool {
         guard isTrusted else {
@@ -44,7 +43,7 @@ enum NotificationAction: String {
     }
 }
 
-final class NotificationService {
+final class NotificationService: Sendable {
     static let shared = NotificationService()
 
     private static let categoryIdentifier = "ACTION"

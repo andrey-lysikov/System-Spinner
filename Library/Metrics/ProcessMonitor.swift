@@ -90,7 +90,7 @@ final class ProcessMonitor {
     private func processName(for pid: pid_t) -> String? {
         var pathBuffer = [CChar](repeating: 0, count: Int(Self.pathInfoMaxSize))
         if proc_pidpath(pid, &pathBuffer, UInt32(Self.pathInfoMaxSize)) > 0 {
-            return (String(cString: pathBuffer) as NSString).lastPathComponent
+            return (String(cBuffer: pathBuffer) as NSString).lastPathComponent
         }
 
         var bsd = proc_bsdinfo()

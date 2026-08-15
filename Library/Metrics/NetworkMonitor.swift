@@ -4,7 +4,7 @@
 import Darwin
 import Foundation
 
-final class NetworkMonitor {
+final class NetworkMonitor: @unchecked Sendable {
     private let queue: DispatchQueue
     private var previousInBytes: UInt64 = 0
     private var previousOutBytes: UInt64 = 0
@@ -81,10 +81,10 @@ final class NetworkMonitor {
                               nil, 0, NI_NUMERICHOST) == 0 else { continue }
 
             if family == UInt8(AF_INET) {
-                active = String(cString: hostname)
+                active = String(cBuffer: hostname)
                 foundIPv4 = true
             } else if !foundIPv4 {
-                active = String(cString: hostname)
+                active = String(cBuffer: hostname)
             }
         }
 

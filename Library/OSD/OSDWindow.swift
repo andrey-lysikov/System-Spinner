@@ -3,6 +3,7 @@
 
 import SwiftUI
 
+@MainActor
 final class OSDWindow: NSPanel {
     private let hostingView: NSHostingView<OSDView>
     private static let windowSize = NSSize(width: 376, height: 376)
@@ -39,6 +40,7 @@ final class OSDWindow: NSPanel {
 
     func showWithAnimation() {
         updatePosition()
+        hostingView.layoutSubtreeIfNeeded()
 
         guard Preferences.shared.usesPopUpAnimation else {
             orderFrontRegardless()

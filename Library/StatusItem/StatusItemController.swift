@@ -3,6 +3,7 @@
 
 import Cocoa
 
+@MainActor
 final class StatusItemController: NSObject {
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let popover = NSPopover()
