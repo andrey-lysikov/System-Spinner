@@ -5,7 +5,8 @@ class DisplayManager {
     public static let shared = DisplayManager()
     public let globalDDCQueue = DispatchQueue(label: "Global DDC queue")
     public var displays: [Display] = []
-    private let osd = OSD()
+    private let osd = OSDController.shared
+    private let preferences = Preferences.shared
     
     static func getDisplayNameByID(displayID: CGDirectDisplayID) -> String {
         if let dictionary = (CoreDisplay_DisplayCreateInfoDictionary(displayID)?.takeRetainedValue() as NSDictionary?), let nameList = dictionary["DisplayProductName"] as? [String: String], var name = nameList[Locale.current.identifier] ?? nameList["en_US"] ?? nameList.first?.value {
@@ -61,69 +62,59 @@ class DisplayManager {
         return CGDisplayIsBuiltin(displayID) != 0
     }
     
-    private func updateAVServices() {
-            var displayIDs: [CGDirectDisplayID] = []
-            for otherDisplay in self.getOtherDisplays() {
-                displayIDs.append(otherDisplay.identifier)
-            }
-            for serviceMatch in DDC.getServiceMatches(displayIDs: displayIDs) {
-                for otherDisplay in self.getOtherDisplays() where otherDisplay.identifier == serviceMatch.displayID && serviceMatch.service != nil {
-                    otherDisplay.ddcService = serviceMatch.service
-                    if serviceMatch.discouraged {
-                        otherDisplay.isDiscouraged = true
-                    } else if serviceMatch.dummy {
-                        otherDisplay.isDiscouraged = true
-                    }
+    private func applyAVServices(_ serviceMatches: [DDC.ServiceMatch]) {
+        for serviceMatch in serviceMatches {
+            for otherDisplay in self.getOtherDisplays()
+            where otherDisplay.identifier == serviceMatch.displayID && serviceMatch.service != nil {
+                otherDisplay.ddcService = serviceMatch.service
+                if serviceMatch.discouraged || serviceMatch.dummy {
+                    otherDisplay.isDiscouraged = true
                 }
             }
+        }
     }
-    
-    public func configureDisplays() {
+
+    /// Список дисплеев собирается сразу, а сопоставление DDC-сервисов уходит в
+    /// фон: обход IORegistry занимает заметное время и блокировал интерфейс.
+    public func configureDisplays(completion: (([Display]) -> Void)? = nil) {
         self.displays = []
         CGDisplayRestoreColorSyncSettings()
         var onlineDisplayIDs = [CGDirectDisplayID](repeating: 0, count: 16)
         var displayCount: UInt32 = 0
         guard CGGetOnlineDisplayList(16, &onlineDisplayIDs, &displayCount) == .success else {
+            completion?([])
             return
         }
-        
+
         for onlineDisplayID in onlineDisplayIDs where onlineDisplayID != 0 {
             let name = DisplayManager.getDisplayNameByID(displayID: onlineDisplayID)
             let id = onlineDisplayID
-            
+
             if !DisplayManager.isDummy(displayID: onlineDisplayID) && !DisplayManager.isVirtual(displayID: onlineDisplayID) {
                 if DisplayManager.isAppleDisplay(displayID: onlineDisplayID) {
-                    let appleDisplay = AppleDisplay(id, name: "Apple " + name)
-                    self.displays.append(appleDisplay)
+                    self.displays.append(AppleDisplay(id, name: "Apple " + name))
                 } else {
-                    let otherDisplay = OtherDisplay(id, name: name)
-                    self.displays.append(otherDisplay)
+                    self.displays.append(OtherDisplay(id, name: name))
                 }
             }
         }
-        updateAVServices()
+
+        completion?(self.displays)
+
+        let displayIDs = self.getOtherDisplays().map { $0.identifier }
+        globalDDCQueue.async { [weak self] in
+            let matches = DDC.getServiceMatches(displayIDs: displayIDs)
+            DispatchQueue.main.async {
+                self?.applyAVServices(matches)
+            }
+        }
     }
     
     public func getOtherDisplays() -> [OtherDisplay] {
         self.displays.compactMap { $0 as? OtherDisplay }
     }
     
-    private func normalizedName(_ name: String) -> String {
-        var normalizedName = name.replacingOccurrences(of: "(", with: "")
-        normalizedName = normalizedName.replacingOccurrences(of: ")", with: "")
-        normalizedName = normalizedName.replacingOccurrences(of: " ", with: "")
-        for i in 0 ... 9 {
-            normalizedName = normalizedName.replacingOccurrences(of: String(i), with: "")
-        }
-        return normalizedName
-    }
     
-    public func isAppleDisplayPresent() -> Bool {
-        for display in displays where display.isBuiltIn() {
-            return true
-        }
-        return false
-    }
     
     public func hasBrightnessControll() -> Bool {
         var brightness = false
@@ -145,9 +136,9 @@ class DisplayManager {
                 volumeValue = 0
             }
             
-            if display.hasVolumeControl() || alwaysUseCustomOSD {
+            if display.hasVolumeControl() || preferences.alwaysUsesCustomOSD {
                 returnControl = .consumed(didChange: true)
-                osd.showOSD(value: Float(volumeValue),isDisplay: false, separators: adjSteps)
+                osd.show(value: Float(volumeValue), isDisplay: false, separators: preferences.adjustmentSteps)
             }
             
             display.setVolume(valueVolume: Float(volumeValue))
@@ -157,7 +148,7 @@ class DisplayManager {
     }
     
     public func setVolume(isUp: Bool) -> MediaKeyHandlingResult {
-        let step:Float = 100 / Float(adjSteps)
+        let step:Float = 100 / Float(preferences.adjustmentSteps)
         var returnControl: MediaKeyHandlingResult = .passThrough
         
         for display in displays {
@@ -169,9 +160,9 @@ class DisplayManager {
                 volumeValue = 100
             }
             
-            if display.hasVolumeControl() || alwaysUseCustomOSD {
+            if display.hasVolumeControl() || preferences.alwaysUsesCustomOSD {
                 returnControl = .consumed(didChange: true)
-                osd.showOSD(value: Float(volumeValue),isDisplay: false, separators: adjSteps)
+                osd.show(value: Float(volumeValue), isDisplay: false, separators: preferences.adjustmentSteps)
             }
             
             display.setVolume(valueVolume: Float(volumeValue))
@@ -181,9 +172,9 @@ class DisplayManager {
     }
     
     public func setBrightness(isUp: Bool) -> MediaKeyHandlingResult {
-        let step:Float = 100 / Float(adjSteps)
+        let step:Float = 100 / Float(preferences.adjustmentSteps)
         
-        if !hasBrightnessControll() && !alwaysUseCustomOSD {
+        if !hasBrightnessControll() && !preferences.alwaysUsesCustomOSD {
             return .passThrough
         }
         
@@ -195,7 +186,7 @@ class DisplayManager {
                 brightnessValue = 100
             }
             
-            osd.showOSD(value: Float(brightnessValue),isDisplay: true, separators: adjSteps)
+            osd.show(value: Float(brightnessValue), isDisplay: true, separators: preferences.adjustmentSteps)
             display.setBrightness(valueBrightness: Float(brightnessValue))
         }
         return .consumed(didChange: true)

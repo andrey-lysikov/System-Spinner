@@ -67,16 +67,15 @@
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
                                             </stackView>
-                                            <levelIndicator clipsToBounds="NO" focusRingType="none" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" translatesAutoresizingMaskIntoConstraints="NO" id="wUp-SH-GmE">
+                                            <customView clipsToBounds="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wUp-SH-GmE" customClass="SegmentedLevelView" customModule="System_Spinner" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="58" width="134" height="24"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="22" id="Rqa-hS-0rA"/>
                                                 </constraints>
-                                                <levelIndicatorCell key="cell" enabled="NO" focusRingType="none" alignment="left" doubleValue="2" maxValue="20" warningValue="15" criticalValue="18" id="vGN-J4-AfQ"/>
                                                 <color key="fillColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="warningFillColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="criticalFillColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
-                                            </levelIndicator>
+                                            </customView>
                                             <textField identifier="gpuUsageLabel" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BqC-Vq-w6v">
                                                 <rect key="frame" x="-2" y="40" width="38" height="16"/>
                                                 <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" title="Label" id="7yq-6O-1yo">
@@ -85,13 +84,12 @@
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <levelIndicator identifier="gpuUsageBar" clipsToBounds="NO" focusRingType="none" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" translatesAutoresizingMaskIntoConstraints="NO" id="NLO-AB-93k">
+                                            <customView clipsToBounds="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NLO-AB-93k" customClass="SegmentedLevelView" customModule="System_Spinner" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="17" width="96" height="18"/>
-                                                <levelIndicatorCell key="cell" enabled="NO" focusRingType="none" alignment="left" doubleValue="2" maxValue="20" warningValue="15" criticalValue="18" id="CMO-L1-5XP"/>
                                                 <color key="fillColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="warningFillColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="criticalFillColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
-                                            </levelIndicator>
+                                            </customView>
                                             <textField focusRingType="none" horizontalHuggingPriority="247" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HhM-HC-1yU">
                                                 <rect key="frame" x="-2" y="0.0" width="158" height="15"/>
                                                 <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" alignment="center" title="Power" id="zkR-kh-ICT">
@@ -133,16 +131,15 @@
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <levelIndicator clipsToBounds="NO" focusRingType="none" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" translatesAutoresizingMaskIntoConstraints="NO" id="RLA-xZ-kZB">
+                                            <customView clipsToBounds="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RLA-xZ-kZB" customClass="SegmentedLevelView" customModule="System_Spinner" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="17" width="134" height="22"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="20" id="kIG-to-l0y" userLabel="height = 22"/>
                                                 </constraints>
-                                                <levelIndicatorCell key="cell" enabled="NO" focusRingType="none" alignment="left" doubleValue="2" maxValue="20" warningValue="12" criticalValue="18" id="FCa-5r-wuf"/>
                                                 <color key="fillColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="warningFillColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="criticalFillColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
-                                            </levelIndicator>
+                                            </customView>
                                             <stackView distribution="fill" orientation="vertical" alignment="centerX" spacing="0.0" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1dw-Sk-g0u">
                                                 <rect key="frame" x="0.0" y="0.0" width="154" height="15"/>
                                                 <subviews>
@@ -219,13 +216,12 @@
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
                                             </stackView>
-                                            <levelIndicator clipsToBounds="NO" focusRingType="none" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" translatesAutoresizingMaskIntoConstraints="NO" id="9YX-qF-SoU">
+                                            <customView clipsToBounds="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9YX-qF-SoU" customClass="SegmentedLevelView" customModule="System_Spinner" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="77" width="134" height="18"/>
-                                                <levelIndicatorCell key="cell" enabled="NO" focusRingType="none" alignment="left" doubleValue="2" maxValue="20" warningValue="15" criticalValue="18" id="9wu-jN-5ah"/>
                                                 <color key="fillColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="warningFillColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="criticalFillColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
-                                            </levelIndicator>
+                                            </customView>
                                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OvO-2T-Xut">
                                                 <rect key="frame" x="-2" y="58" width="66" height="19"/>
                                                 <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" title="Pressure" id="k4h-eo-uKa">
@@ -234,13 +230,12 @@
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <levelIndicator clipsToBounds="NO" focusRingType="none" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" translatesAutoresizingMaskIntoConstraints="NO" id="aua-ud-mmF">
+                                            <customView clipsToBounds="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aua-ud-mmF" customClass="SegmentedLevelView" customModule="System_Spinner" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="38" width="134" height="18"/>
-                                                <levelIndicatorCell key="cell" enabled="NO" focusRingType="none" alignment="left" doubleValue="2" maxValue="20" warningValue="15" criticalValue="18" id="ZqK-9O-ZYv"/>
                                                 <color key="fillColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="warningFillColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="criticalFillColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
-                                            </levelIndicator>
+                                            </customView>
                                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9Xs-Wr-r9u">
                                                 <rect key="frame" x="-2" y="18" width="109" height="19"/>
                                                 <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" title="Swap Pressure" id="ZYK-4G-XZK">
@@ -249,13 +244,12 @@
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <levelIndicator clipsToBounds="NO" focusRingType="none" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" translatesAutoresizingMaskIntoConstraints="NO" id="CXz-rc-KwB">
+                                            <customView clipsToBounds="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CXz-rc-KwB" customClass="SegmentedLevelView" customModule="System_Spinner" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="-2" width="96" height="18"/>
-                                                <levelIndicatorCell key="cell" enabled="NO" focusRingType="none" alignment="left" doubleValue="2" maxValue="20" warningValue="15" criticalValue="18" id="hqF-v7-0kX"/>
                                                 <color key="fillColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="warningFillColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="criticalFillColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
-                                            </levelIndicator>
+                                            </customView>
                                         </subviews>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="120" id="Mbh-ll-7Sg"/>
@@ -285,7 +279,7 @@
                                             <stackView distribution="fill" orientation="horizontal" alignment="top" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="M1E-bX-RzO">
                                                 <rect key="frame" x="0.0" y="33" width="123" height="13"/>
                                                 <subviews>
-                                                    <progressIndicator clipsToBounds="NO" wantsLayer="YES" focusRingType="none" maxValue="100" doubleValue="50" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="mcU-Jz-gB3">
+                                                    <progressIndicator indeterminate="NO" usesThreadedAnimation="NO" clipsToBounds="NO" wantsLayer="YES" focusRingType="none" maxValue="100" doubleValue="50" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="mcU-Jz-gB3">
                                                         <rect key="frame" x="0.0" y="5" width="90" height="3"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="3" id="F6K-vS-NmQ"/>
@@ -316,7 +310,7 @@
                                             <stackView distribution="fill" orientation="horizontal" alignment="top" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="i7W-Ti-1mb">
                                                 <rect key="frame" x="0.0" y="17" width="123" height="13"/>
                                                 <subviews>
-                                                    <progressIndicator clipsToBounds="NO" wantsLayer="YES" focusRingType="none" maxValue="100" doubleValue="50" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="gfz-pY-0xN">
+                                                    <progressIndicator indeterminate="NO" usesThreadedAnimation="NO" clipsToBounds="NO" wantsLayer="YES" focusRingType="none" maxValue="100" doubleValue="50" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="gfz-pY-0xN">
                                                         <rect key="frame" x="0.0" y="5" width="90" height="3"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="90" id="gSE-Bv-dQb"/>
@@ -347,7 +341,7 @@
                                             <stackView distribution="fill" orientation="horizontal" alignment="top" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dmm-7H-9gt">
                                                 <rect key="frame" x="0.0" y="0.0" width="123" height="13"/>
                                                 <subviews>
-                                                    <progressIndicator clipsToBounds="NO" wantsLayer="YES" focusRingType="none" maxValue="100" doubleValue="50" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="qWB-bf-6CP">
+                                                    <progressIndicator indeterminate="NO" usesThreadedAnimation="NO" clipsToBounds="NO" wantsLayer="YES" focusRingType="none" maxValue="100" doubleValue="50" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="qWB-bf-6CP">
                                                         <rect key="frame" x="0.0" y="5" width="90" height="3"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="3" id="5SV-Zt-YuU"/>

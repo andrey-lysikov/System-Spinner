@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+*.moved-aside
+*.hmap
+*.xcscmblueprint
+*.xccheckout
+
+# Сборка дистрибутива
+*.dmg
+*.ipa
+*.dSYM
+*.dSYM.zip

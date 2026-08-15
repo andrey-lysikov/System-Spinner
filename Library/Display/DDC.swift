@@ -8,7 +8,7 @@ class DDC: NSObject {
     static let ARM64_DDC_7BIT_ADDRESS: UInt8 = 0x37
     static let ARM64_DDC_DATA_ADDRESS: UInt8 = 0x51
     
-    struct IOregService {
+    struct IORegService {
         var edidUUID: String = ""
         var manufacturerID: String = ""
         var productName: String = ""
@@ -23,26 +23,26 @@ class DDC: NSObject {
         var displayAttributes: NSDictionary?
     }
     
-    struct ddcService {
+    struct ServiceMatch {
         var displayID: CGDirectDisplayID = 0
         var service: IOAVService?
         var serviceLocation: Int = 0
         var discouraged: Bool = false
         var dummy: Bool = false
-        var serviceDetails: IOregService
+        var serviceDetails: IORegService
         var matchScore: Int = 0
     }
     
-    static func getServiceMatches(displayIDs: [CGDirectDisplayID]) -> [ddcService] {
+    static func getServiceMatches(displayIDs: [CGDirectDisplayID]) -> [ServiceMatch] {
         let ioregServicesForMatching = self.getIoregServicesForMatching()
-        var matchedDisplayServices: [ddcService] = []
-        var scoredCandidateDisplayServices: [Int: [ddcService]] = [:]
+        var matchedDisplayServices: [ServiceMatch] = []
+        var scoredCandidateDisplayServices: [Int: [ServiceMatch]] = [:]
         for displayID in displayIDs {
             for ioregServiceForMatching in ioregServicesForMatching {
                 let score = self.ioregMatchScore(displayID: displayID, ioregEdidUUID: ioregServiceForMatching.edidUUID, ioDisplayLocation: ioregServiceForMatching.ioDisplayLocation, ioregProductName: ioregServiceForMatching.productName, ioregSerialNumber: ioregServiceForMatching.serialNumber, serviceLocation: ioregServiceForMatching.serviceLocation)
                 let discouraged = self.checkIfDiscouraged(ioregService: ioregServiceForMatching)
                 let dummy = self.checkIfDummy(ioregService: ioregServiceForMatching)
-                let displayService = ddcService(displayID: displayID, service: ioregServiceForMatching.service, serviceLocation: ioregServiceForMatching.serviceLocation, discouraged: discouraged, dummy: dummy, serviceDetails: ioregServiceForMatching, matchScore: score)
+                let displayService = ServiceMatch(displayID: displayID, service: ioregServiceForMatching.service, serviceLocation: ioregServiceForMatching.serviceLocation, discouraged: discouraged, dummy: dummy, serviceDetails: ioregServiceForMatching, matchScore: score)
                 if scoredCandidateDisplayServices[score] == nil {
                     scoredCandidateDisplayServices[score] = []
                 }
@@ -177,8 +177,8 @@ class DDC: NSObject {
         return nil
     }
     
-    static func getIORegServiceAppleCDC2Properties(entry: io_service_t) -> IOregService {
-        var ioregService = IOregService()
+    static func getIORegServiceAppleCDC2Properties(entry: io_service_t) -> IORegService {
+        var ioregService = IORegService()
         if let unmanagedEdidUUID = IORegistryEntryCreateCFProperty(entry, "EDID UUID" as CFString, kCFAllocatorDefault, IOOptionBits(kIORegistryIterateRecursively)), let edidUUID = unmanagedEdidUUID.takeRetainedValue() as? String {
             ioregService.edidUUID = edidUUID
         }
@@ -213,7 +213,7 @@ class DDC: NSObject {
         return ioregService
     }
     
-    static func setIORegServiceDCPAVServiceProxy(entry: io_service_t, ioregService: inout IOregService) {
+    static func setIORegServiceDCPAVServiceProxy(entry: io_service_t, ioregService: inout IORegService) {
         if let unmanagedLocation = IORegistryEntryCreateCFProperty(entry, "Location" as CFString, kCFAllocatorDefault, IOOptionBits(kIORegistryIterateRecursively)), let location = unmanagedLocation.takeRetainedValue() as? String {
             ioregService.location = location
             if location == "External" {
@@ -222,9 +222,9 @@ class DDC: NSObject {
         }
     }
     
-    static func getIoregServicesForMatching() -> [IOregService] {
+    static func getIoregServicesForMatching() -> [IORegService] {
         var serviceLocation = 0
-        var ioregServicesForMatching: [IOregService] = []
+        var ioregServicesForMatching: [IORegService] = []
         let ioregRoot: io_registry_entry_t = IORegistryGetRootEntry(kIOMainPortDefault)
         defer {
             IOObjectRelease(ioregRoot)
@@ -233,7 +233,7 @@ class DDC: NSObject {
         defer {
             IOObjectRelease(iterator)
         }
-        var ioregService = IOregService()
+        var ioregService = IORegService()
         guard IORegistryEntryCreateIterator(ioregRoot, "IOService", IOOptionBits(kIORegistryIterateRecursively), &iterator) == KERN_SUCCESS else {
             return ioregServicesForMatching
         }
@@ -255,14 +255,14 @@ class DDC: NSObject {
         return ioregServicesForMatching
     }
     
-    static func checkIfDummy(ioregService: IOregService) -> Bool {
+    static func checkIfDummy(ioregService: IORegService) -> Bool {
         if ioregService.manufacturerID == "AOC", ioregService.productName == "28E850" {
             return true
         }
         return false
     }
     
-    static func checkIfDiscouraged(ioregService _: IOregService) -> Bool {
+    static func checkIfDiscouraged(ioregService _: IORegService) -> Bool {
         false
     }
 }

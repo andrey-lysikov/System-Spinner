@@ -3,124 +3,22 @@
 
 import Cocoa
 import SwiftUI
-import Charts
-
-struct chartData: Identifiable {
-    let id = UUID()
-    let time: Int
-    let usage: Double
-}
-
-struct tableData: Identifiable {
-    let id = UUID()
-    let pid: Int
-    let icon: NSImage
-    let name: String
-    let usage: String
-}
-
-@Observable class chartDataManager {
-    var chartPoints: [chartData] = []
-    var tablePoints: [tableData] = []
-    var title: String = ""
-}
-
-struct ChartContentView: View {
-    var chartItems: chartDataManager
-    var body: some View {
-            VStack(alignment: .leading) {
-                Text(chartItems.title)
-                    .font(.headline)
-                    .fontWeight(.heavy)
-                Chart(chartItems.chartPoints) { item in
-                    AreaMark(
-                        x: .value("Name", item.time),
-                        y: .value("Usage", item.usage)
-                    )
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [
-                                .blue.opacity(1),
-                                .blue.opacity(0.4)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                }
-                .frame(height: 100)
-                .chartYScale(domain: 0...100)
-                .chartXScale(domain: 0...chartItems.chartPoints.count - 1)
-                .chartXAxis { AxisMarks() { _ in
-                    AxisGridLine()
-                    AxisTick()
-                }}
-                Grid(alignment: .leading, horizontalSpacing: 20, verticalSpacing: 0) {
-                    GridRow {
-                        Text(localizedString("PID"))
-                            .bold()
-                            .frame(width: 38, alignment: .leading)
-                        Text(localizedString("Name"))
-                            .bold()
-                            .frame(minWidth: 140, alignment: .leading)
-                        Spacer()
-                        Text(localizedString("Usage"))
-                            .bold()
-                            .frame(width: 120, alignment: .trailing)
-                    }
-                }
-                ScrollView(.vertical, showsIndicators: false) {
-                    Grid(alignment: .leading, horizontalSpacing: 5, verticalSpacing: 1) {
-                        ForEach(chartItems.tablePoints) { item in
-                            Divider()
-                            GridRow {
-                                Text(String(item.pid))
-                                    .font(.system(size: 11, design: .monospaced))
-                                    .foregroundStyle(.secondary)
-                                    .frame(width: 50, alignment: .leading)
-                                
-                                HStack(spacing: 6) {
-                                    Image(nsImage: item.icon)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 18, height: 18)
-                                    
-                                    Text(item.name)
-                                        .lineLimit(1)
-                                        .truncationMode(.tail)
-                                }
-                                .frame(minWidth: 150, alignment: .leading)
-                                
-                                Spacer()
-                                
-                                Text(item.usage)
-                                    .frame(width: 100, alignment: .trailing)
-                            }
-                            .font(.system(size: 11))
-                            .padding(.vertical, 2)
-                        }
-                        Divider()
-                    }
-                }
-                .frame(height: 230)
-            }
-            .padding()
-        }
-}
 
 class UsageViewController: NSViewController {
-    private var dataTimer: Timer? = nil
-    private var cpuProcessMenu: NSMenu!
-    private var memProcessMenu: NSMenu!
-    private let ioService = IOServiceData()
+    private let metrics = MetricsService.shared
+    private var metricsObserver: UUID?
+
     private let popupChart = NSPopover()
-    private let dataManager = chartDataManager()
+    private let dataModel = ChartDataModel()
     private var lastClickButton: NSButton? = nil
-    private var chartDataItems = [chartData(time: 0, usage: 0)]
-    private var tableDataItems = [tableData(pid: 0, icon: NSImage(), name: "", usage: "")]
+    private var powerHistory: String = ""
     private var fanHistory: String = ""
-    private var pwrHistory: String = ""
-    
+    private var lastPopupUpdate: Date = .distantPast
+    private var forcesFullRefresh = false
+
+    private static let popupUpdateInterval: TimeInterval = 2
+    private static let chartPointLimit = 500
+
     @IBOutlet var fanStack: NSStackView!
     @IBOutlet var cpuTempStack: NSStackView!
     @IBOutlet var cpuLabel: NSTextField!
@@ -128,215 +26,214 @@ class UsageViewController: NSViewController {
     @IBOutlet var cpuTempLabel: NSTextField!
     @IBOutlet var fanLabel: NSTextField!
     @IBOutlet var memSwapLabel: NSTextField!
-    
+
     @IBOutlet var memPercentage: NSTextField!
     @IBOutlet var memPressure: NSTextField!
     @IBOutlet var memApp: NSTextField!
     @IBOutlet var memInactive: NSTextField!
     @IBOutlet var memComp: NSTextField!
     @IBOutlet var powerComp: NSTextField!
-    
-    @IBOutlet var cpuLevel: NSLevelIndicator!
-    @IBOutlet var gpuLevel: NSLevelIndicator!
-    @IBOutlet var tempLevel: NSLevelIndicator!
-    @IBOutlet var memLevel: NSLevelIndicator!
-    @IBOutlet var pressureLevel: NSLevelIndicator!
-    @IBOutlet var memSwapLevel: NSLevelIndicator!
-    
+
+    @IBOutlet var cpuLevel: SegmentedLevelView!
+    @IBOutlet var gpuLevel: SegmentedLevelView!
+    @IBOutlet var tempLevel: SegmentedLevelView!
+    @IBOutlet var memLevel: SegmentedLevelView!
+    @IBOutlet var pressureLevel: SegmentedLevelView!
+    @IBOutlet var memSwapLevel: SegmentedLevelView!
+
     @IBOutlet var memAppBar: NSProgressIndicator!
     @IBOutlet var memInactiveBar: NSProgressIndicator!
     @IBOutlet var memCompBar: NSProgressIndicator!
-    
+
     @IBOutlet var netLabel: NSTextField!
-    
+
     @IBOutlet var cpuChartPopupButton: NSButton!
     @IBOutlet var memChartPopupButton: NSButton!
- 
+
     @IBAction func cpuPopupButtonAction(_ sender: NSButton) {
-        if popupChart.isShown {
-            popupChart.performClose(sender)
-        }
-        lastClickButton = sender
-        updatePopupData()
-        popupChart.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
+        showChart(from: sender)
     }
-    
+
     @IBAction func memPopupButtonAction(_ sender: NSButton) {
-        if popupChart.isShown {
-            popupChart.performClose(sender)
-        }
-        lastClickButton = sender
-        updatePopupData()
-        popupChart.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
+        showChart(from: sender)
     }
-    
+
     override func viewDidLoad() {
-        //for autoresize
-        self.preferredContentSize = NSMakeSize(self.view.frame.width, 100);
-        
-        // Fanless models don't have active cooling
-        if ioService.isFanlessModel {
+        super.viewDidLoad()
+        self.preferredContentSize = NSMakeSize(self.view.frame.width, 100)
+
+        if !metrics.hasFans {
             fanStack.removeFromSuperview()
         }
-        
-        // if no SMC, remove CPU temp data
-        if !ioService.presentSMC {
+
+        if !metrics.sensorsAvailable {
             cpuTempStack.removeFromSuperview()
         }
-      
-        // create chart data view
-        let hostingController = NSHostingController(rootView: ChartContentView(chartItems: dataManager))
-        let exactSize = NSSize(width: 420, height: 400)
-        hostingController.preferredContentSize = exactSize
+
+        let hostingController = NSHostingController(rootView: ChartContentView(chartItems: dataModel))
+        hostingController.preferredContentSize = NSSize(width: 420, height: 400)
         popupChart.contentViewController = hostingController
         popupChart.behavior = .transient
-        
-        super.viewDidLoad()
     }
-    
-    override func viewWillDisappear() {
-        dataTimer?.invalidate()
-        super.viewWillDisappear()
-    }
-    
+
     override func viewDidAppear() {
-        dataTimer?.invalidate()
-        dataTimer = Timer(timeInterval: updateInterval * 2, repeats: true, block: { [weak self] _ in
-            self?.updateData()
-        })
-        RunLoop.main.add(dataTimer!, forMode: .common)
-        
-        let _ = ActivityData.getTopProcess() // разово вызываем чтобы наполнить историю данных
-        
-        popupChart.animates = usePopUpAnimation
-        updateData()
-        
         super.viewDidAppear()
+
+        metrics.setDetailedMetricsEnabled(true)
+        metricsObserver = metrics.addObserver { [weak self] snapshot in
+            self?.apply(snapshot)
+        }
+        forcesFullRefresh = true
+        apply(metrics.snapshot)
+        for level in [cpuLevel, gpuLevel, tempLevel, memLevel, pressureLevel, memSwapLevel] {
+            level?.needsDisplay = true
+        }
+
+        popupChart.animates = Preferences.shared.usesPopUpAnimation
         view.window?.makeKey()
     }
-    
-    private func updateData() {
-        ioService.update()
-        ActivityData.update()
-        
-        // CPU data
-        if round(cpuLevel.doubleValue) != round(ActivityData.cpuPercentage) {
-            cpuLabel.stringValue = localizedString("CPU Usage") + " " + Int(ActivityData.cpuPercentage).formatted(.percent)
-            cpuLevel.doubleValue = ActivityData.cpuPercentage / 5
+
+    override func viewWillDisappear() {
+        if let metricsObserver {
+            metrics.removeObserver(metricsObserver)
         }
-        
-        //GPU data
-        if round(gpuLabel.doubleValue) != round(ActivityData.gpuPercentage) {
-            gpuLabel.stringValue = localizedString("GPU Usage") + " " + Int(ActivityData.gpuPercentage).formatted(.percent)
-            gpuLevel.doubleValue = ActivityData.gpuPercentage / 5
+        metricsObserver = nil
+        metrics.setDetailedMetricsEnabled(false)
+        super.viewWillDisappear()
+    }
+
+    private func apply(_ snapshot: MetricsSnapshot) {
+        if forcesFullRefresh || round(cpuLevel.value) != round(snapshot.cpuUsage) {
+            cpuLabel.stringValue = localizedString("CPU Usage") + " " + Int(snapshot.cpuUsage).formatted(.percent)
+            cpuLevel.value = snapshot.cpuUsage
         }
-        
-        // power data
-        var pwrLabelValue: String = ""
-        if ioService.systemAdapter > 0 {
-            pwrLabelValue = "PWR: " + String(ioService.systemPower) + "w, DC: " + String(ioService.systemAdapter) + "w"
-        } else if (ioService.systemBattery > 0 && ioService.systemAdapter > 0)  {
-            pwrLabelValue = "PWR: " + String(ioService.systemPower) + "w, BAT: " + String(ioService.systemBattery) + "w, DC: " + String(ioService.systemAdapter) + "w"
-        } else {
-            pwrLabelValue = "PWR: " + String(ioService.systemPower) + "w, BAT: " + String(ioService.systemBattery) + "w"
+
+        if forcesFullRefresh || round(gpuLevel.value) != round(snapshot.gpuUsage) {
+            gpuLabel.stringValue = localizedString("GPU Usage") + " " + Int(snapshot.gpuUsage).formatted(.percent)
+            gpuLevel.value = snapshot.gpuUsage
         }
-        
-        if pwrHistory != pwrLabelValue {
-            powerComp.stringValue = pwrLabelValue
-            pwrHistory = pwrLabelValue
+
+        applySensors(snapshot.sensors)
+        applyMemory(snapshot.memory)
+
+        let network = snapshot.network.address
+            + "\n↓ " + String(Int(snapshot.network.inbound.value)) + snapshot.network.inbound.unit
+            + " | ↑ " + String(Int(snapshot.network.outbound.value)) + snapshot.network.outbound.unit
+
+        if forcesFullRefresh || netLabel.stringValue != network {
+            netLabel.stringValue = network
         }
-        
-        // Only show fan data if fan is present
-        if !ioService.isFanlessModel {
-            var fanLabelValue = "fan \(ioService.fanSpeed.map { String($0) }.joined(separator: " | ")) rpm"
-            if ioService.fanSpeed.count > 0 && ioService.fanSpeed[0] == 0 {
-                fanLabelValue = localizedString("fan is stopped")
-            }
-            fanLabel.stringValue = fanLabelValue
-        }
-        
-        // if presentSMC
-        if ioService.presentSMC {
-            // temp data
-            if round(tempLevel.doubleValue) != round(ioService.cpuTemp) {
-                cpuTempLabel.stringValue = localizedString("CPU Temp") + " " + String(Int(ioService.cpuTemp)) + "°С"
-                tempLevel.doubleValue = ioService.cpuTemp / 5
-            }
-        }
-        
-        // memory data
-        if round(memLevel.doubleValue) != round(ActivityData.memPercentage) {
-            memPercentage.stringValue =  localizedString("MEM Usage") + " " + Int(ActivityData.memPercentage).formatted(.percent)
-            memLevel.doubleValue = ActivityData.memPercentage / 5
-        }
-        
-        if round(pressureLevel.doubleValue) != round(ActivityData.memPressure) {
-            memPressure.stringValue = localizedString("Pressure") + " " + Int(ActivityData.memPressure).formatted(.percent)
-            pressureLevel.doubleValue = ActivityData.memPressure / 5
-            
-            memApp.stringValue = String(Int(round(ActivityData.memApp))) + "% (App)"
-            memAppBar.doubleValue = ActivityData.memApp
-            
-            memInactive.stringValue = String(Int(round(ActivityData.memInactive))) + "% (NAct)"
-            memInactiveBar.doubleValue = ActivityData.memInactive
-            
-            memComp.stringValue = String(Int(round(ActivityData.memCompressed))) + "% (Comp)"
-            memCompBar.doubleValue = ActivityData.memCompressed
-        }
-        
-        if round(memSwapLevel.doubleValue) != Double(ActivityData.memSwap) {
-            memSwapLabel.stringValue = localizedString("Swap") + " " + ActivityData.memSwap.formatted(.percent)
-            memSwapLevel.doubleValue = Double(ActivityData.memSwap) / 5
-        }
-        
-        netLabel.stringValue = ActivityData.netIp + "\n↓ " + String(Int(ActivityData.netIn.value)) + ActivityData.netIn.unit + " | ↑ " + String(Int(ActivityData.netOut.value)) + ActivityData.netOut.unit
-   
-        
-        if popupChart.isShown {
+
+        if popupChart.isShown, Date().timeIntervalSince(lastPopupUpdate) >= Self.popupUpdateInterval {
             updatePopupData()
         }
+
+        forcesFullRefresh = false
     }
-    
+
+    private func applySensors(_ sensors: SensorsSnapshot) {
+        let power: String
+        if sensors.adapterPower > 0 && sensors.batteryPower > 0 {
+            power = "PWR: \(sensors.systemPower)w, BAT: \(sensors.batteryPower)w, DC: \(sensors.adapterPower)w"
+        } else if sensors.adapterPower > 0 {
+            power = "PWR: \(sensors.systemPower)w, DC: \(sensors.adapterPower)w"
+        } else {
+            power = "PWR: \(sensors.systemPower)w, BAT: \(sensors.batteryPower)w"
+        }
+
+        if forcesFullRefresh || powerHistory != power {
+            powerComp.stringValue = power
+            powerHistory = power
+        }
+
+        if metrics.hasFans, !sensors.fanSpeeds.isEmpty {
+            let fans = sensors.fanSpeeds.first == 0
+                ? localizedString("fan is stopped")
+                : "fan " + sensors.fanSpeeds.map(String.init).joined(separator: " | ") + " rpm"
+
+            if forcesFullRefresh || fanHistory != fans {
+                fanLabel.stringValue = fans
+                fanHistory = fans
+            }
+        }
+
+        if metrics.sensorsAvailable, forcesFullRefresh || round(tempLevel.value) != round(sensors.cpuTemperature) {
+            cpuTempLabel.stringValue = localizedString("CPU Temp") + " " + String(Int(sensors.cpuTemperature)) + "°С"
+            tempLevel.value = sensors.cpuTemperature
+        }
+    }
+
+    private func applyMemory(_ memory: MemoryUsage) {
+        if forcesFullRefresh || round(memLevel.value) != round(memory.used) {
+            memPercentage.stringValue = localizedString("MEM Usage") + " " + Int(memory.used).formatted(.percent)
+            memLevel.value = memory.used
+        }
+
+        if forcesFullRefresh || round(pressureLevel.value) != round(memory.pressure) {
+            memPressure.stringValue = localizedString("Pressure") + " " + Int(memory.pressure).formatted(.percent)
+            pressureLevel.value = memory.pressure
+
+            memApp.stringValue = String(Int(memory.app.rounded())) + "% (App)"
+            memAppBar.doubleValue = memory.app
+
+            memInactive.stringValue = String(Int(memory.inactive.rounded())) + "% (NAct)"
+            memInactiveBar.doubleValue = memory.inactive
+
+            memComp.stringValue = String(Int(memory.compressed.rounded())) + "% (Comp)"
+            memCompBar.doubleValue = memory.compressed
+        }
+
+        if forcesFullRefresh || round(memSwapLevel.value) != Double(memory.swap) {
+            memSwapLabel.stringValue = localizedString("Swap") + " " + memory.swap.formatted(.percent)
+            memSwapLevel.value = Double(memory.swap)
+        }
+    }
+
+    private static func chartPoints(from history: [Double]) -> [ChartPoint] {
+        guard history.count > chartPointLimit else {
+            return history.enumerated().map { ChartPoint(time: $0.offset, usage: $0.element) }
+        }
+
+        let bucket = Int((Double(history.count) / Double(chartPointLimit)).rounded(.up))
+        return stride(from: 0, to: history.count, by: bucket).enumerated().map { index, start in
+            let end = min(start + bucket, history.count)
+            return ChartPoint(time: index, usage: history[start ..< end].max() ?? 0)
+        }
+    }
+
+    private func showChart(from sender: NSButton) {
+        if popupChart.isShown {
+            popupChart.performClose(sender)
+        }
+        lastClickButton = sender
+        updatePopupData()
+        popupChart.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
+    }
+
     private func updatePopupData() {
-        chartDataItems.removeAll()
-        tableDataItems.removeAll()
-        
-        if lastClickButton == cpuChartPopupButton {
-            dataManager.title = localizedString("CPU usage details:")
-            for (key, usage) in ActivityData.loadCpuPreviousHistDetails.enumerated() {
-                chartDataItems.append(chartData(time: key, usage: usage))
-            }
-            dataManager.chartPoints = chartDataItems
-            
-            for item in ActivityData.getTopProcess().sorted(by: \.cpu) {
-                if item.cpu > 0 {
-                    tableDataItems.append(tableData(
-                        pid: item.pid,
-                        icon: item.icon,
-                        name: item.name,
-                        usage: String(item.cpu) + "%"
-                    ))
-                }
-            }
-            dataManager.tablePoints = tableDataItems
-        } else if lastClickButton == memChartPopupButton{
-            dataManager.title = localizedString("Memory usage details:")
-            for (key, usage) in ActivityData.loadMemPreviousHistDetails.enumerated() {
-                chartDataItems.append(chartData(time: key, usage: usage))
-            }
-            dataManager.chartPoints = chartDataItems
-            
-            for item in ActivityData.getTopProcess().sorted(by: \.mem) {
-                if item.mem > 0.1 {
-                    tableDataItems.append(tableData(
-                        pid: item.pid,
-                        icon: item.icon,
-                        name: item.name,
-                        usage: item.realmem
-                    ))
-                }
-            }
-            dataManager.tablePoints = tableDataItems
+        let snapshot = metrics.snapshot
+        let showsCPU = lastClickButton == cpuChartPopupButton
+
+        guard showsCPU || lastClickButton == memChartPopupButton else { return }
+
+        lastPopupUpdate = Date()
+
+        let history = showsCPU ? snapshot.cpuHistory : snapshot.memoryHistory
+        dataModel.title = localizedString(showsCPU ? "CPU usage details:" : "Memory usage details:")
+        dataModel.chartPoints = Self.chartPoints(from: history)
+
+        metrics.topProcesses { [weak self] processes in
+            guard let self else { return }
+
+            let rows = showsCPU
+                ? processes.filter { $0.cpu > 0 }
+                    .sorted { $0.cpu > $1.cpu }
+                    .map { ProcessRow(pid: $0.pid, icon: $0.icon, name: $0.name, usage: String($0.cpu) + "%") }
+                : processes.filter { $0.memory > 0.1 }
+                    .sorted { $0.memory > $1.memory }
+                    .map { ProcessRow(pid: $0.pid, icon: $0.icon, name: $0.name, usage: $0.memoryText) }
+
+            self.dataModel.tablePoints = rows
         }
     }
 }

@@ -9,10 +9,6 @@ enum MediaKeyHandlingResult: Equatable {
     case consumed(didChange: Bool)
 }
 
-protocol BrightnessKeyHandling: AnyObject {
-    func handle(_ key: MediaKeyMonitor.MediaKey, fineStep: Bool) -> MediaKeyHandlingResult
-}
-
 final class MediaKeyMonitor {
     enum MediaKey: Int {
         case soundUp = 0
