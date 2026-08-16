@@ -3,6 +3,13 @@
 Section headings must match `MARKETING_VERSION` in the project — the release
 workflow looks up release notes by this heading.
 
+## 5.0.1
+
+- Fix bugs
+- Update pictures
+- Add test
+- Update actions for build
+
 ## 5.0.0
 
 - Custom level indicators instead of the system ones: GPU load with the stats
