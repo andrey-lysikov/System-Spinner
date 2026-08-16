@@ -14,6 +14,8 @@ final class SpinnerAnimator {
     private var currentFrame = 0
     private var currentInterval: Double = -1
     private static let minimumInterval = 1.0 / 120.0
+    private static let speedTolerance = 0.15
+    private var lastFrameDate = Date.distantPast
 
     func load(style: SpinnerStyle, effect: SpinnerEffect) {
         self.style = style
@@ -53,12 +55,17 @@ final class SpinnerAnimator {
         let load = max(1.0, min(100.0, cpuUsage / Double(frames.count)))
         let interval = max(Self.minimumInterval, 0.25 / load * Double(style.speedCoefficient))
 
-        guard Int(interval * 100) != Int(currentInterval * 100) else { return }
+        guard currentInterval <= 0 || abs(interval - currentInterval) > currentInterval * Self.speedTolerance else {
+            return
+        }
 
         timer?.invalidate()
         let timer = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.advance() }
         }
+        
+        timer.fireDate = max(lastFrameDate.addingTimeInterval(interval), Date())
+
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
         currentInterval = interval
@@ -73,6 +80,7 @@ final class SpinnerAnimator {
     private func advance() {
         guard !frames.isEmpty else { return }
 
+        lastFrameDate = Date()
         currentFrame += preferences.invertsRotation ? -1 : 1
         if currentFrame >= frames.count {
             currentFrame = 0
