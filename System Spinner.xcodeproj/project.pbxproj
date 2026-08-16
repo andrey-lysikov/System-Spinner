@@ -15,6 +15,16 @@
 		7FB908C62B67B9FD00E9EE24 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		7FBB10082E88000100BB0008 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7FB9089F2B67B9A400E9EE24 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7FB908A62B67B9A400E9EE24;
+			remoteInfo = "System Spinner";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		7F07C82D2FB458A2007C3DBC /* System_Spinner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = System_Spinner.entitlements; sourceTree = "<group>"; };
 		7F0D026E2D1ECA450029C507 /* CoreDisplay.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreDisplay.framework; path = ../../../../System/Library/Frameworks/CoreDisplay.framework; sourceTree = "<group>"; };
@@ -27,6 +37,7 @@
 		7FAA20012E77000200AB0002 /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		7FB908A72B67B9A400E9EE24 /* System Spinner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "System Spinner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		7FBB10022E88000100BB0002 /* SystemSpinnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SystemSpinnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -43,6 +54,7 @@
 		7F0D025B2D1EADEF0029C507 /* Controllers */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Controllers; sourceTree = "<group>"; };
 		7F6D12232D1D868100C44FAC /* Pictures */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (7F6D12242D1D868C00C44FAC /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Pictures; sourceTree = "<group>"; };
 		7FAA10012E77000100AB0001 /* Library */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Library; sourceTree = "<group>"; };
+		7FBB10032E88000100BB0003 /* SystemSpinnerTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = SystemSpinnerTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +64,13 @@
 			files = (
 				7F866E2C2D1ECAFE00F20488 /* CoreDisplay.framework in Frameworks */,
 				7F866E292D1ECAFC00F20488 /* DisplayServices.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7FBB10052E88000100BB0005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,6 +100,7 @@
 				7F6D12232D1D868100C44FAC /* Pictures */,
 				7FAA10012E77000100AB0001 /* Library */,
 				7F0D025B2D1EADEF0029C507 /* Controllers */,
+				7FBB10032E88000100BB0003 /* SystemSpinnerTests */,
 				7F0D026D2D1ECA450029C507 /* Frameworks */,
 				7FB908A82B67B9A400E9EE24 /* Products */,
 			);
@@ -90,6 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				7FB908A72B67B9A400E9EE24 /* System Spinner.app */,
+				7FBB10022E88000100BB0002 /* SystemSpinnerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -121,6 +142,29 @@
 			productReference = 7FB908A72B67B9A400E9EE24 /* System Spinner.app */;
 			productType = "com.apple.product-type.application";
 		};
+		7FBB10012E88000100BB0001 /* SystemSpinnerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7FBB10092E88000100BB0009 /* Build configuration list for PBXNativeTarget "SystemSpinnerTests" */;
+			buildPhases = (
+				7FBB10042E88000100BB0004 /* Sources */,
+				7FBB10052E88000100BB0005 /* Frameworks */,
+				7FBB10062E88000100BB0006 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7FBB10072E88000100BB0007 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				7FBB10032E88000100BB0003 /* SystemSpinnerTests */,
+			);
+			name = SystemSpinnerTests;
+			packageProductDependencies = (
+			);
+			productName = SystemSpinnerTests;
+			productReference = 7FBB10022E88000100BB0002 /* SystemSpinnerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -129,7 +173,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1520;
-				LastUpgradeCheck = 2640;
+				LastUpgradeCheck = 2660;
 				TargetAttributes = {
 					7FB908A62B67B9A400E9EE24 = {
 						CreatedOnToolsVersion = 15.2;
@@ -155,6 +199,7 @@
 			projectRoot = "";
 			targets = (
 				7FB908A62B67B9A400E9EE24 /* System Spinner */,
+				7FBB10012E88000100BB0001 /* SystemSpinnerTests */,
 			);
 		};
 /* End PBXProject section */
@@ -170,6 +215,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7FBB10062E88000100BB0006 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -181,7 +233,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7FBB10042E88000100BB0004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		7FBB10072E88000100BB0007 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7FB908A62B67B9A400E9EE24 /* System Spinner */;
+			targetProxy = 7FBB10082E88000100BB0008 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		7FB908B42B67B9A500E9EE24 /* Debug */ = {
@@ -353,6 +420,46 @@
 			};
 			name = Release;
 		};
+		7FBB100A2E88000100BB000A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = SystemSpinnerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/System Spinner.app/Contents/MacOS/System Spinner";
+			};
+			name = Debug;
+		};
+		7FBB100B2E88000100BB000B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = SystemSpinnerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/System Spinner.app/Contents/MacOS/System Spinner";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -370,6 +477,15 @@
 			buildConfigurations = (
 				7FB908B72B67B9A500E9EE24 /* Debug */,
 				7FB908B82B67B9A500E9EE24 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7FBB10092E88000100BB0009 /* Build configuration list for PBXNativeTarget "SystemSpinnerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7FBB100A2E88000100BB000A /* Debug */,
+				7FBB100B2E88000100BB000B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
