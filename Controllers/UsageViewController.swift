@@ -41,9 +41,9 @@ class UsageViewController: NSViewController {
     @IBOutlet var pressureLevel: SegmentedLevelView!
     @IBOutlet var memSwapLevel: SegmentedLevelView!
 
-    @IBOutlet var memAppBar: NSProgressIndicator!
-    @IBOutlet var memInactiveBar: NSProgressIndicator!
-    @IBOutlet var memCompBar: NSProgressIndicator!
+    @IBOutlet var memAppBar: SegmentedLevelView!
+    @IBOutlet var memInactiveBar: SegmentedLevelView!
+    @IBOutlet var memCompBar: SegmentedLevelView!
 
     @IBOutlet var netLabel: NSTextField!
 
@@ -70,6 +70,11 @@ class UsageViewController: NSViewController {
             cpuTempStack.removeFromSuperview()
         }
 
+        // Полосы памяти тоньше основных шкал — высота задана их ограничениями в storyboard.
+        for bar in [memAppBar, memInactiveBar, memCompBar] {
+            bar?.barHeight = 3
+        }
+
         let hostingController = NSHostingController(rootView: ChartContentView(chartItems: dataModel))
         hostingController.preferredContentSize = NSSize(width: 420, height: 400)
         popupChart.contentViewController = hostingController
@@ -85,7 +90,8 @@ class UsageViewController: NSViewController {
         }
         forcesFullRefresh = true
         apply(metrics.snapshot)
-        for level in [cpuLevel, gpuLevel, tempLevel, memLevel, pressureLevel, memSwapLevel] {
+        for level in [cpuLevel, gpuLevel, tempLevel, memLevel, pressureLevel, memSwapLevel,
+                      memAppBar, memInactiveBar, memCompBar] {
             level?.needsDisplay = true
         }
 
@@ -182,13 +188,13 @@ class UsageViewController: NSViewController {
             pressureLevel.value = memory.pressure
 
             memApp.stringValue = String(Int(memory.app.rounded())) + "% (App)"
-            memAppBar.doubleValue = memory.app
+            memAppBar.value = memory.app
 
             memInactive.stringValue = String(Int(memory.inactive.rounded())) + "% (NAct)"
-            memInactiveBar.doubleValue = memory.inactive
+            memInactiveBar.value = memory.inactive
 
             memComp.stringValue = String(Int(memory.compressed.rounded())) + "% (Comp)"
-            memCompBar.doubleValue = memory.compressed
+            memCompBar.value = memory.compressed
         }
 
         if forcesFullRefresh || round(memSwapLevel.value) != Double(memory.swap) {
