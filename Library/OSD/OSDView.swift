@@ -20,6 +20,14 @@ struct OSDView: View {
 
 struct OSDIndicatorView: View {
     let value: OSDValue
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var backgroundTint: NSColor {
+        colorScheme == .dark
+            ? NSColor.black.withAlphaComponent(0.5)
+            : NSColor.white.withAlphaComponent(0.5)
+    }
     private static let separatorSpacing: [Int: CGFloat] = [8: 23.25, 16: 11.125, 24: 7.1, 32: 5.1]
 
     var body: some View {
@@ -34,7 +42,7 @@ struct OSDIndicatorView: View {
         .padding(.vertical, 16)
         .frame(width: 280, height: 64)
 
-        GlassEffectContainer { content }
+        GlassEffectContainer(tintColor: backgroundTint) { content }
             .frame(width: 280, height: 64)
     }
 
