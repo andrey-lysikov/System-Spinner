@@ -65,6 +65,9 @@ final class Preferences: @unchecked Sendable {
     @Stored("usePopUpAnimation", true)
     var usesPopUpAnimation: Bool
 
+    @Stored("showExternalAddress", true)
+    var showsExternalAddress: Bool
+
     @Stored("group.lastCheckVersion", Date.distantPast)
     var lastVersionCheck: Date
 

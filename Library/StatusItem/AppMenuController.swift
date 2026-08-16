@@ -91,6 +91,11 @@ final class AppMenuController: NSObject {
                           action: #selector(togglePopUpAnimation),
                           state: preferences.usesPopUpAnimation))
 
+        menu.addItem(item(localizedString("Show external ip address"),
+                          symbol: "globe",
+                          action: #selector(toggleExternalAddress),
+                          state: preferences.showsExternalAddress))
+
         menu.addItem(.separator())
 
         let spinners = item(localizedString("Spinners"), symbol: "checklist.unchecked", action: nil)
@@ -217,6 +222,11 @@ final class AppMenuController: NSObject {
     @objc private func togglePopUpAnimation(sender: NSMenuItem) {
         preferences.usesPopUpAnimation.toggle()
         sender.state = preferences.usesPopUpAnimation ? .on : .off
+    }
+
+    @objc private func toggleExternalAddress(sender: NSMenuItem) {
+        preferences.showsExternalAddress.toggle()
+        sender.state = preferences.showsExternalAddress ? .on : .off
     }
 
     @objc private func toggleRotation(sender: NSMenuItem) {

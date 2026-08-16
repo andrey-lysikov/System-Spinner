@@ -12,6 +12,7 @@ final class NetworkMonitor: @unchecked Sendable {
     private var localAddress = ""
     private var externalAddress = ""
     private var isLookingUpExternalAddress = false
+    private var wasResolvingExternalAddress = true
 
     private(set) var usage: NetworkUsage = .empty
 
@@ -24,12 +25,24 @@ final class NetworkMonitor: @unchecked Sendable {
 
     func update(interval: TimeInterval) {
         let counters = interfaceCounters()
+        let resolvesExternalAddress = Preferences.shared.showsExternalAddress
+
+        if !resolvesExternalAddress {
+            externalAddress = ""
+        }
 
         if counters.address != localAddress {
             localAddress = counters.address
             externalAddress = ""
+            if resolvesExternalAddress {
+                scheduleExternalAddressLookup()
+            }
+        } else if resolvesExternalAddress, !wasResolvingExternalAddress {
+            // Настройку только что включили — узнаём адрес, не дожидаясь смены сети.
             scheduleExternalAddressLookup()
         }
+
+        wasResolvingExternalAddress = resolvesExternalAddress
 
         let seconds = max(interval, 0.001)
         let inbound = hasBaseline && counters.inBytes >= previousInBytes
@@ -97,6 +110,11 @@ final class NetworkMonitor: @unchecked Sendable {
 
         queue.asyncAfter(deadline: .now() + Self.externalLookupDelay) { [weak self] in
             guard let self else { return }
+
+            guard Preferences.shared.showsExternalAddress else {
+                self.isLookingUpExternalAddress = false
+                return
+            }
 
             URLSession.shared.dataTask(with: Self.externalAddressURL) { [weak self] data, _, _ in
                 guard let self else { return }

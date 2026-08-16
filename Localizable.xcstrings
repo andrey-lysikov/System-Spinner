@@ -1,845 +1,861 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "About" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinnerについて"
+  "sourceLanguage": "en",
+  "strings": {
+    "About": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Spinnerについて"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "О программе"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "О программе"
           }
         }
       }
     },
-    "Activity Monitor" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アクティビティモニタ"
+    "Activity Monitor": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アクティビティモニタ"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Монитор активности"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Монитор активности"
           }
         }
       }
     },
-    "Adjustment steps" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "調整ステップ数"
+    "Adjustment steps": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "調整ステップ数"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Количество шагов регулировки"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Количество шагов регулировки"
           }
         }
       }
     },
-    "Allow" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "許可する"
+    "Allow": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "許可する"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Разрешить"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить"
           }
         }
       }
     },
-    "Always use custom OSD" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "常にカスタムOSDを使用する"
+    "Always use custom OSD": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "常にカスタムOSDを使用する"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Всегда использовать свой OSD"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всегда использовать свой OSD"
           }
         }
       }
     },
-    "Automatic Dark/White mode" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自動ダーク/ホワイトモード"
+    "Automatic Dark/White mode": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動ダーク/ホワイトモード"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Автоматическая подстройка под цвет статус бара"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Автоматическая подстройка под цвет статус бара"
           }
         }
       }
     },
-    "Black shaded" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "黒 80%不透明"
+    "Black shaded": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "黒 80%不透明"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Затемненный с прозрачностью"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Затемненный с прозрачностью"
           }
         }
       }
     },
-    "Check new version" : {
-      "comment" : "Title of an alert button that triggers a check for a new version of the app.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "新しいバージョンを確認する"
+    "CPU Temp": {
+      "comment": "Label for CPU temperature.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 温度"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Проверить обновление"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Температура"
           }
         }
       }
     },
-    "Close" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "閉じる"
+    "CPU Usage": {
+      "comment": "Label for CPU usage percentage.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Закрыть"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU"
           }
         }
       }
     },
-    "CPU Temp" : {
-      "comment" : "Label for CPU temperature.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CPU 温度"
+    "CPU usage details:": {
+      "comment": "Title of the chart and table view when the CPU usage details are displayed.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU使用率の詳細:"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Температура"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Информация о процессах:"
           }
         }
       }
     },
-    "CPU Usage" : {
-      "comment" : "Label for CPU usage percentage.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CPU"
+    "Check new version": {
+      "comment": "Title of an alert button that triggers a check for a new version of the app.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新しいバージョンを確認する"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CPU"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверить обновление"
           }
         }
       }
     },
-    "CPU usage details:" : {
-      "comment" : "Title of the chart and table view when the CPU usage details are displayed.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CPU使用率の詳細:"
+    "Close": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "閉じる"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Информация о процессах:"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрыть"
           }
         }
       }
     },
-    "Data update every" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "データアップデート頻度"
+    "Data update every": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "データアップデート頻度"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Обновлять данные каждые"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновлять данные каждые"
           }
         }
       }
     },
-    "Download" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ダウンロード"
+    "Download": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダウンロード"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Загрузить"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загрузить"
           }
         }
       }
     },
-    "Enable Autostart" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自動スタートを有効にする"
+    "Enable Autostart": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動スタートを有効にする"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Автозапуск"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Автозапуск"
           }
         }
       }
     },
-    "fan is stopped" : {
-      "comment" : "Text displayed when the fan is stopped.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ファン停止中"
+    "For complite work you need to allow System Spinner to use special privileges for keydoard mapping.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完全に動作させるには、キーボードマッピングのためにSystem Spinnerが特別な権限を使うことを許可する必要があります。"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "кулер остановлен"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для корректной работы программе нужны дополнительные разрешения, чтобы можно было управлять подсветкой экрана и громкостью динамиков через HDMI/DVI."
           }
         }
       }
     },
-    "For complite work you need to allow System Spinner to use special privileges for keydoard mapping." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "完全に動作させるには、キーボードマッピングのためにSystem Spinnerが特別な権限を使うことを許可する必要があります。"
+    "GB/s": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GB/秒"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Для корректной работы программе нужны дополнительные разрешения, чтобы можно было управлять подсветкой экрана и громкостью динамиков через HDMI/DVI."
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ГБ/с"
           }
         }
       }
     },
-    "GB/s" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GB/秒"
+    "GPU Usage": {
+      "comment": "Label for the GPU usage percentage.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPU"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ГБ/с"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видеокарта"
           }
         }
       }
     },
-    "Goto site" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "サイトへ移動"
+    "Goto site": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サイトへ移動"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Перейти на сайт"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перейти на сайт"
           }
         }
       }
     },
-    "GPU Usage" : {
-      "comment" : "Label for the GPU usage percentage.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GPU"
+    "HDMI/DVI DDC enabled": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HDMI/DVI DDCを有効にする"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Видеокарта"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Активный HDMI/DVI DDC"
           }
         }
       }
     },
-    "HDMI/DVI DDC enabled" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "HDMI/DVI DDCを有効にする"
+    "Invert rotation": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回転を反転"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Активный HDMI/DVI DDC"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Инвертировать вращение"
           }
         }
       }
     },
-    "Invert rotation" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "回転を反転"
+    "KB/s": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KB/秒"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Инвертировать вращение"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "КБ/с"
           }
         }
       }
     },
-    "KB/s" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "KB/秒"
+    "MB/s": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MB/秒"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "КБ/с"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "МБ/с"
           }
         }
       }
     },
-    "MB/s" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "MB/秒"
+    "MEM Usage": {
+      "comment": "Label for the memory usage percentage.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メモリ使用率"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "МБ/с"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Память"
           }
         }
       }
     },
-    "MEM Usage" : {
-      "comment" : "Label for the memory usage percentage.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "メモリ使用率"
+    "Memory usage details:": {
+      "comment": "Title of the chart and table when the user is looking at the memory usage.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メモリ使用量の詳細:"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Память"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Потребление памяти:"
           }
         }
       }
     },
-    "Memory usage details:" : {
-      "comment" : "Title of the chart and table when the user is looking at the memory usage.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "メモリ使用量の詳細:"
+    "Name": {
+      "comment": "A label displayed in the first column of a chart.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名前"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Потребление памяти:"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Имя процесса"
           }
         }
       }
     },
-    "Name" : {
-      "comment" : "A label displayed in the first column of a chart.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "名前"
+    "New version %@ is available. Would you like download to update?": {
+      "comment": "A notification that a new version of the app is available. The argument is the version number.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@の新しいバージョンがあります。アップデートのためにダウンロードしますか？"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Имя процесса"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доступна новая версия %@ программы, хотите загрузить ее сейчас?"
           }
         }
       }
     },
-    "New version %@ is available. Would you like download to update?" : {
-      "comment" : "A notification that a new version of the app is available. The argument is the version number.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@の新しいバージョンがあります。アップデートのためにダウンロードしますか？"
+    "Original": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オリジナル"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Доступна новая версия %@ программы, хотите загрузить ее сейчас?"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без эффекта"
           }
         }
       }
     },
-    "no ip found" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ipが見つかりません"
+    "PID": {
+      "comment": "Label for the PID column in the chart.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PID"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ip отсутствует"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PID"
           }
         }
       }
     },
-    "Original" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オリジナル"
+    "Pressure": {
+      "comment": "Pressure usage.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "負荷"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Без эффекта"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Занято"
           }
         }
       }
     },
-    "PID" : {
-      "comment" : "Label for the PID column in the chart.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PID"
+    "Quit": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "終了"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PID"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выход"
           }
         }
       }
     },
-    "Pressure" : {
-      "comment" : "Pressure usage.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "負荷"
+    "Second": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "秒"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Занято"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "сек."
           }
         }
       }
     },
-    "Quit" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "終了"
+    "Show CPU usage in menu": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU使用率をメニューに表示"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выход"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать CPU в меню"
           }
         }
       }
     },
-    "Second" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "秒"
+    "Show external ip address": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外部IPアドレスを表示"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "сек."
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать внешний IP-адрес"
           }
         }
       }
     },
-    "Show CPU usage in menu" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CPU使用率をメニューに表示"
+    "Spinners": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スピナー"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Показать CPU в меню"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спиннеры"
           }
         }
       }
     },
-    "Spinners" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スピナー"
+    "Spinners Effects": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スピナーエフェクト"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Спиннеры"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Применить эффект"
           }
         }
       }
     },
-    "Spinners Effects" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スピナーエフェクト"
+    "Swap": {
+      "comment": "Label for the swap memory usage.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スワップ"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Применить эффект"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подкачка"
           }
         }
       }
     },
-    "Swap" : {
-      "comment" : "Label for the swap memory usage.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スワップ"
+    "System Spinner has updated": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Spinnerがアップデートされました"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Подкачка"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Spinner обновился"
           }
         }
       }
     },
-    "System Spinner has updated" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinnerがアップデートされました"
+    "System Spinner need special privileges": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Spinnerは特別な権限を必要としています"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner обновился"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нужны дополнительные разрешения"
           }
         }
       }
     },
-    "System Spinner need special privileges" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinnerは特別な権限を必要としています"
+    "System Spinner provides macOS system information in status bar.\nMinimal, small and light.\n\nAuthor: @Andrey.Lysikov\nVersion: %@": {
+      "comment": "A message displayed in the alert window that shows information about the app.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System SpinnerはmacOSのシステム情報をステータスバーに表示します。ミニマルで小さく、そして軽量です。\n\nAuthor: @Andrey.Lysikov\nVersion: %@"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нужны дополнительные разрешения"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Spinner программа которая показывает утилизацию ресурсов вашего компьютера. Небольшая и легкая.\n\nАвтор: @Andrey.Lysikov\nВерсия: %@"
           }
         }
       }
     },
-    "System Spinner provides macOS system information in status bar.\nMinimal, small and light.\n\nAuthor: @Andrey.Lysikov\nVersion: %@" : {
-      "comment" : "A message displayed in the alert window that shows information about the app.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System SpinnerはmacOSのシステム情報をステータスバーに表示します。ミニマルで小さく、そして軽量です。\n\nAuthor: @Andrey.Lysikov\nVersion: %@"
+    "System Spinner provides macOS system information in status bar. Minimal, small and light": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System SpinnerはmacOSのシステム情報をステータスバーに表示します。ミニマルで小さく、そして軽量です。"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner программа которая показывает утилизацию ресурсов вашего компьютера. Небольшая и легкая.\n\nАвтор: @Andrey.Lysikov\nВерсия: %@"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Spinner программа которая показывает утилизацию ресурсов вашего компьютера, небольшая и легкая"
           }
         }
       }
     },
-    "System Spinner provides macOS system information in status bar. Minimal, small and light" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System SpinnerはmacOSのシステム情報をステータスバーに表示します。ミニマルで小さく、そして軽量です。"
+    "System Spinner update": {
+      "comment": "Notification title when a new version of the app is available.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Spinner アップデート"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner программа которая показывает утилизацию ресурсов вашего компьютера, небольшая и легкая"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновление System Spinner"
           }
         }
       }
     },
-    "System Spinner update" : {
-      "comment" : "Notification title when a new version of the app is available.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner アップデート"
+    "TB/s": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TB/秒"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Обновление System Spinner"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ТБ/с"
           }
         }
       }
     },
-    "TB/s" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "TB/秒"
+    "Usage": {
+      "comment": "A label displayed under the usage of a medication.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用法"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ТБ/с"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Использование"
           }
         }
       }
     },
-    "Usage" : {
-      "comment" : "A label displayed under the usage of a medication.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "使用法"
+    "Use popup animation": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ポップアップアニメーションを使用する"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Использование"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Использовать анимацию в меню"
           }
         }
       }
     },
-    "Use popup animation" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ポップアップアニメーションを使用する"
+    "Use system language": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "システムの言語を使用"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Использовать анимацию в меню"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Использовать язык системы"
           }
         }
       }
     },
-    "Use system language" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "システムの言語を使用"
+    "White shaded": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "白 80%不透明"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Использовать язык системы"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Белый полупрозрачный"
           }
         }
       }
     },
-    "White shaded" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "白 80%不透明"
+    "You version %@ is actual version.": {
+      "comment": "Text displayed in a notification when the current version of the app is the latest version available.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あなたのバージョン%@が現在のバージョンです。"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Белый полупрозрачный"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваша версия приложения %@ не требует обновления."
           }
         }
       }
     },
-    "You version %@ is actual version." : {
-      "comment" : "Text displayed in a notification when the current version of the app is the latest version available.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "あなたのバージョン%@が現在のバージョンです。"
+    "fan is stopped": {
+      "comment": "Text displayed when the fan is stopped.",
+      "isCommentAutoGenerated": true,
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ファン停止中"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ваша версия приложения %@ не требует обновления."
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "кулер остановлен"
+          }
+        }
+      }
+    },
+    "no ip found": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ipが見つかりません"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ip отсутствует"
           }
         }
       }
     }
   },
-  "version" : "1.1"
+  "version": "1.1"
 }
