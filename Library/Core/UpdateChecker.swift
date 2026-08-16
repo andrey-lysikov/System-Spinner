@@ -20,6 +20,8 @@ final class UpdateChecker {
     private let preferences = Preferences.shared
     private let notifications = NotificationService.shared
     private var isChecking = false
+    private var pendingCheck: DispatchWorkItem?
+    private var runningTask: URLSessionDataTask?
 
     private init() {}
 
@@ -28,30 +30,48 @@ final class UpdateChecker {
     }
 
     func check(force: Bool = false) {
-        guard !isChecking, !installedVersion.isEmpty else { return }
-        guard force || !Calendar.current.isDateInToday(preferences.lastVersionCheck) else { return }
+        guard !installedVersion.isEmpty else { return }
+
+        if force {
+            cancelRunningCheck()
+        } else {
+            guard !isChecking else { return }
+            guard !Calendar.current.isDateInToday(preferences.lastVersionCheck) else { return }
+        }
 
         isChecking = true
         let installed = installedVersion
-        let delay: DispatchTime = force ? .now() : .now() + Self.backgroundDelay
 
-        DispatchQueue.main.asyncAfter(deadline: delay) {
-            URLSession.shared.dataTask(with: Self.apiURL) { data, _, _ in
+        let work = DispatchWorkItem { [self] in
+            let task = URLSession.shared.dataTask(with: Self.apiURL) { data, _, _ in
                 let decoder = JSONDecoder()
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
                 let release = data.flatMap { try? decoder.decode(Release.self, from: $0) }
 
-                // Ответ приходит на очереди URLSession, а дальше работа идёт
-                // с настройками и уведомлениями — им нужен главный поток.
                 Task { @MainActor in
                     Self.shared.finish(release: release, installed: installed, force: force)
                 }
-            }.resume()
+            }
+            runningTask = task
+            task.resume()
         }
+
+        pendingCheck = work
+        DispatchQueue.main.asyncAfter(deadline: force ? .now() : .now() + Self.backgroundDelay, execute: work)
+    }
+
+    private func cancelRunningCheck() {
+        pendingCheck?.cancel()
+        pendingCheck = nil
+        runningTask?.cancel()
+        runningTask = nil
+        isChecking = false
     }
 
     private func finish(release: Release?, installed: String, force: Bool) {
         isChecking = false
+        pendingCheck = nil
+        runningTask = nil
         guard let release else { return }
 
         let latest = Self.versionNumber(release.tagName)
