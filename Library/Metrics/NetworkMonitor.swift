@@ -128,7 +128,7 @@ final class NetworkMonitor: @unchecked Sendable {
         }
     }
 
-    private static func parseExternalAddress(from data: Data) -> String? {
+    static func parseExternalAddress(from data: Data) -> String? {
         guard let html = String(data: data, encoding: .utf8),
               let range = html.range(of: "Current IP Address: ") else { return nil }
 

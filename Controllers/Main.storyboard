@@ -46,7 +46,7 @@
                                                             <action selector="cpuPopupButtonAction:" target="xhu-mv-qwE" id="jpT-Lh-rr6"/>
                                                         </connections>
                                                     </button>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HtW-LS-skZ">
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HtW-LS-skZ">
                                                         <rect key="frame" x="23" y="0.0" width="36" height="9"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" alignment="left" title="CPU" id="NZg-BL-gOH">
                                                             <font key="font" metaFont="systemMedium" size="15"/>
@@ -73,7 +73,7 @@
                                                     <constraint firstAttribute="height" constant="22" id="Rqa-hS-0rA"/>
                                                 </constraints>
                                             </customView>
-                                            <textField identifier="gpuUsageLabel" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BqC-Vq-w6v">
+                                            <textField identifier="gpuUsageLabel" horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BqC-Vq-w6v">
                                                 <rect key="frame" x="-2" y="66" width="38" height="0.0"/>
                                                 <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" title="Label" id="7yq-6O-1yo">
                                                     <font key="font" metaFont="systemMedium" size="13"/>
@@ -84,7 +84,7 @@
                                             <customView clipsToBounds="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NLO-AB-93k" customClass="SegmentedLevelView" customModule="System_Spinner" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="19" width="96" height="43"/>
                                             </customView>
-                                            <textField focusRingType="none" horizontalHuggingPriority="247" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HhM-HC-1yU">
+                                            <textField horizontalHuggingPriority="247" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HhM-HC-1yU">
                                                 <rect key="frame" x="-2" y="0.0" width="168" height="15"/>
                                                 <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" alignment="center" title="Power" id="zkR-kh-ICT">
                                                     <font key="font" metaFont="systemMedium" size="12"/>
@@ -117,7 +117,7 @@
                                             <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="anS-Yp-V2H">
                                                 <rect key="frame" x="0.0" y="62" width="120" height="5"/>
                                             </box>
-                                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yxh-Ei-T0i">
+                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yxh-Ei-T0i">
                                                 <rect key="frame" x="-2" y="43" width="41" height="17"/>
                                                 <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" title="Temp" id="bZp-0t-eAG">
                                                     <font key="font" metaFont="systemMedium" size="14"/>
@@ -134,7 +134,7 @@
                                             <stackView distribution="fill" orientation="vertical" alignment="centerX" spacing="0.0" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1dw-Sk-g0u">
                                                 <rect key="frame" x="0.0" y="0.0" width="164" height="15"/>
                                                 <subviews>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="exY-zy-XQf">
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="exY-zy-XQf">
                                                         <rect key="frame" x="54" y="0.0" width="56" height="15"/>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" enabled="NO" allowsUndo="NO" alignment="center" title="fan/data" id="5hb-oL-lsr">
                                                             <font key="font" metaFont="systemMedium" size="12"/>
@@ -186,7 +186,7 @@
                                                             <action selector="memPopupButtonAction:" target="xhu-mv-qwE" id="bRw-YS-Hj3"/>
                                                         </connections>
                                                     </button>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" verticalCompressionResistancePriority="999" verifyAmbiguity="off" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NlV-oa-81H">
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" verticalCompressionResistancePriority="999" verifyAmbiguity="off" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NlV-oa-81H">
                                                         <rect key="frame" x="23" y="0.0" width="39" height="19"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" title="MEM" id="FAO-9u-KAP">
                                                             <font key="font" metaFont="systemMedium" size="15"/>
@@ -210,7 +210,7 @@
                                             <customView clipsToBounds="NO" ambiguous="YES" verifyAmbiguity="ignoreSizes" translatesAutoresizingMaskIntoConstraints="NO" id="9YX-qF-SoU" customClass="SegmentedLevelView" customModule="System_Spinner" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="99" width="134" height="0.0"/>
                                             </customView>
-                                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" verifyAmbiguity="off" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OvO-2T-Xut">
+                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" verifyAmbiguity="off" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OvO-2T-Xut">
                                                 <rect key="frame" x="-2" y="98" width="66" height="0.0"/>
                                                 <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" title="Pressure" id="k4h-eo-uKa">
                                                     <font key="font" metaFont="systemMedium" size="15"/>
@@ -221,7 +221,7 @@
                                             <customView clipsToBounds="NO" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aua-ud-mmF" customClass="SegmentedLevelView" customModule="System_Spinner" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="71" width="134" height="26"/>
                                             </customView>
-                                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" verifyAmbiguity="off" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9Xs-Wr-r9u">
+                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" verifyAmbiguity="off" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9Xs-Wr-r9u">
                                                 <rect key="frame" x="-2" y="51" width="109" height="19"/>
                                                 <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" title="Swap Pressure" id="ZYK-4G-XZK">
                                                     <font key="font" metaFont="systemMedium" size="15"/>
@@ -268,7 +268,7 @@
                                                             <constraint firstAttribute="width" constant="90" id="IXT-WK-xfq"/>
                                                         </constraints>
                                                     </customView>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6UI-uU-yxl">
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6UI-uU-yxl">
                                                         <rect key="frame" x="96" y="0.0" width="29" height="13"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" alignment="left" title="APP" id="qc3-9B-SfP">
                                                             <font key="font" metaFont="systemMedium" size="10"/>
@@ -299,7 +299,7 @@
                                                             <constraint firstAttribute="height" constant="3" id="iKN-B8-7Oo"/>
                                                         </constraints>
                                                     </customView>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3CD-CC-aQ5">
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3CD-CC-aQ5">
                                                         <rect key="frame" x="96" y="0.0" width="29" height="13"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" alignment="left" title="WRD" id="5hX-k2-rnS">
                                                             <font key="font" metaFont="systemMedium" size="10"/>
@@ -330,7 +330,7 @@
                                                             <constraint firstAttribute="width" constant="90" id="H5V-j4-jVk"/>
                                                         </constraints>
                                                     </customView>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zhz-4i-eqf">
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zhz-4i-eqf">
                                                         <rect key="frame" x="96" y="0.0" width="29" height="13"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" alignment="left" title="ZIP" id="DG0-lw-Co6">
                                                             <font key="font" metaFont="systemMedium" size="10"/>
@@ -374,7 +374,7 @@
                                             <box verticalHuggingPriority="750" verifyAmbiguity="off" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="mPd-bq-Wc1">
                                                 <rect key="frame" x="22" y="37" width="120" height="5"/>
                                             </box>
-                                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lsQ-vN-vIM">
+                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" mirrorLayoutDirectionWhenInternationalizing="never" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lsQ-vN-vIM">
                                                 <rect key="frame" x="5" y="0.0" width="154" height="15"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="150" id="yC4-wa-zEL"/>

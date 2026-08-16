@@ -95,8 +95,6 @@ class UsageViewController: NSViewController {
             level?.needsDisplay = true
         }
 
-        // Холостой замер процессов: их загрузка считается по разнице с предыдущим,
-        // и без него список в графике окажется пустым при первом открытии.
         metrics.topProcesses { _ in }
 
         popupChart.animates = Preferences.shared.usesPopUpAnimation
@@ -203,17 +201,6 @@ class UsageViewController: NSViewController {
         }
     }
 
-    private static func chartPoints(from history: [Double]) -> [ChartPoint] {
-        guard history.count > chartPointLimit else {
-            return history.enumerated().map { ChartPoint(time: $0.offset, usage: $0.element) }
-        }
-
-        let bucket = Int((Double(history.count) / Double(chartPointLimit)).rounded(.up))
-        return stride(from: 0, to: history.count, by: bucket).enumerated().map { index, start in
-            let end = min(start + bucket, history.count)
-            return ChartPoint(time: index, usage: history[start ..< end].max() ?? 0)
-        }
-    }
 
     private func showChart(from sender: NSButton) {
         if popupChart.isShown {
@@ -234,7 +221,7 @@ class UsageViewController: NSViewController {
 
         let history = showsCPU ? snapshot.cpuHistory : snapshot.memoryHistory
         dataModel.title = localizedString(showsCPU ? "CPU usage details:" : "Memory usage details:")
-        dataModel.chartPoints = Self.chartPoints(from: history)
+        dataModel.chartPoints = ChartPoint.series(from: history, limit: Self.chartPointLimit)
 
         metrics.topProcesses { [weak self] processes in
             guard let self else { return }

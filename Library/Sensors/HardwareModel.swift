@@ -46,7 +46,7 @@ struct HardwareModel {
         chip = Self.chipFamily(from: Self.sysctlString("machdep.cpu.brand_string"))
     }
 
-    private static func chipFamily(from brand: String) -> ChipFamily {
+    static func chipFamily(from brand: String) -> ChipFamily {
         let uppercased = brand.uppercased()
         
         for family in ChipFamily.allCases.reversed()

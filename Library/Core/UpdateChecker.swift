@@ -89,7 +89,7 @@ final class UpdateChecker {
         preferences.lastVersionCheck = Date()
     }
 
-    private static func versionNumber(_ value: String) -> Int {
+    nonisolated static func versionNumber(_ value: String) -> Int {
         Int(value.filter("0123456789".contains)) ?? 0
     }
 }

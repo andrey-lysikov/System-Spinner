@@ -11,6 +11,20 @@ struct ChartPoint: Identifiable {
     var id: Int { time }
 }
 
+extension ChartPoint {
+    static func series(from history: [Double], limit: Int) -> [ChartPoint] {
+        guard limit > 0, history.count > limit else {
+            return history.enumerated().map { ChartPoint(time: $0.offset, usage: $0.element) }
+        }
+
+        let bucket = Int((Double(history.count) / Double(limit)).rounded(.up))
+        return stride(from: 0, to: history.count, by: bucket).enumerated().map { index, start in
+            let end = min(start + bucket, history.count)
+            return ChartPoint(time: index, usage: history[start ..< end].max() ?? 0)
+        }
+    }
+}
+
 struct ProcessRow: Identifiable {
     let pid: Int
     let icon: NSImage
