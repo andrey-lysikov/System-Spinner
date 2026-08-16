@@ -24,6 +24,7 @@
 		7F65A9512DAEAD3C0052875D /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		7F904EE42E7A9C1B00450D04 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		7F904EE62E7AA04500450D04 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		7FAA20012E77000200AB0002 /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		7FB908A72B67B9A400E9EE24 /* System Spinner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "System Spinner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -73,6 +74,7 @@
 				7F65A9512DAEAD3C0052875D /* Localizable.xcstrings */,
 				7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */,
 				7F35E5932B847F230032163E /* README.md */,
+				7FAA20012E77000200AB0002 /* CHANGELOG.md */,
 				7F35E5922B847EBC0032163E /* LICENSE */,
 				7F904EE42E7A9C1B00450D04 /* Media.xcassets */,
 				7F904EE62E7AA04500450D04 /* AppIcon.icon */,
@@ -293,7 +295,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.7.0;
+				MARKETING_VERSION = 5.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "System-Spinner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -337,7 +339,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.7.0;
+				MARKETING_VERSION = 5.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "System-Spinner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

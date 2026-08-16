@@ -1,0 +1,101 @@
+name: Release
+
+# A release is published when MARKETING_VERSION is raised in the project.
+# The app is built on every push to main, but published only for a new version.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build environment
+        run: |
+          xcodebuild -version
+          xcodebuild -showsdks | grep macosx || true
+
+      - name: Project version and latest release
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(grep -m1 'MARKETING_VERSION' "System Spinner.xcodeproj/project.pbxproj" \
+                    | sed 's/.*= *//; s/;//' | tr -d ' ')
+          latest=$(gh release view --json tagName -q .tagName 2>/dev/null || echo "0.0.0")
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Project: $version, latest release: $latest"
+
+          # publish only when the version is strictly greater than the released one
+          highest=$(printf '%s\n%s\n' "$latest" "$version" | sort -V | tail -1)
+          if [ "$version" != "$latest" ] && [ "$highest" = "$version" ]; then
+            echo "release=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=no" >> "$GITHUB_OUTPUT"
+            echo "Version was not raised — skipping publication"
+          fi
+
+      - name: Build and export the app
+        run: |
+          xcodebuild -project "System Spinner.xcodeproj" \
+                     -scheme "System Spinner" \
+                     -configuration Release \
+                     -archivePath "build/System Spinner.xcarchive" \
+                     archive
+
+          xcodebuild -exportArchive \
+                     -archivePath "build/System Spinner.xcarchive" \
+                     -exportPath build \
+                     -exportOptionsPlist ExportOptions.plist
+
+      - name: Package dmg
+        if: steps.version.outputs.release == 'yes'
+        run: |
+          version="${{ steps.version.outputs.version }}"
+
+          # create-dmg renders the window background and icon layout
+          brew list graphicsmagick >/dev/null 2>&1 || brew install graphicsmagick
+          brew list imagemagick >/dev/null 2>&1 || brew install imagemagick
+
+          cd build
+          npx --yes create-dmg "System Spinner.app" . --overwrite --no-code-sign
+
+          # create-dmg names the file after the app and its version
+          mv "System Spinner $version.dmg" "../System-Spinner-$version.dmg"
+
+      - name: Release notes
+        if: steps.version.outputs.release == 'yes'
+        run: |
+          version="${{ steps.version.outputs.version }}"
+
+          # section for this version from CHANGELOG.md; empty when there is none
+          awk -v v="## $version" '
+            $0 == v { found = 1; next }
+            /^## / { found = 0 }
+            found { print }
+          ' CHANGELOG.md > notes.md || true
+
+          if [ ! -s notes.md ]; then
+            echo "No \"## $version\" section in CHANGELOG.md — notes will contain the generated list only"
+          fi
+
+      - name: Publish
+        if: steps.version.outputs.release == 'yes'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          gh release create "$version" "System-Spinner-$version.dmg" \
+             --title "Version $version" \
+             --notes-file notes.md \
+             --generate-notes
