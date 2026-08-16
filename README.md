@@ -24,9 +24,12 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 *WARNING: The application is not officially signed, you will need to allow it to run in "Settings" -> "Security" when you first launch it.*
 
 ## Screenshots
-<img src="Pictures/main_window.jpg" height="410"><nobr>
-<img src="Pictures/spin_menu.jpg" height="410"><nobr>
-<img src="Pictures/main_detail_window.jpg" height="410">
+
+<p align="top">
+  <img src="Pictures/main_window.jpg" height="380">
+  <img src="Pictures/spin_menu.jpg" height="380">
+  <img src="Pictures/main_detail_window.jpg" height="380">
+</p>
 
 ## Tech
 Written in Swift 6, Apple Silicon Only for MacOS 26 Tahoe
