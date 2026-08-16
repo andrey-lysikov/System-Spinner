@@ -19,7 +19,7 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 - CMS Information for Cpu Temp and Fan
 - Full MacOS 26 Tahoe Liquid Glass support
 - Spinner overlay effects
-- Localization (English, Japanese, Russian)
+- Localization (English, Arabic, Chinese, French, German, Italian, Japanese, Russian)
 
 *WARNING: The application is not officially signed, you will need to allow it to run in "Settings" -> "Security" when you first launch it.*
 
