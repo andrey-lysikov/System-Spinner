@@ -14,8 +14,8 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 - Custom OSD for MacOs Tahoe for volume and brightness control
 - Custom choice for adjustments (more accurate volume and brightness control)
 - Top CPU/MEM process in popup window
-- Memory statistics performance
-- Network utilisation and ip address
+- Memory statistics with swap
+- Network utilisation and extrnal ip address (use checkip.dyndns.org, you can turn off showing external ip)
 - CMS Information for Cpu Temp and Fan
 - Full MacOS 26 Tahoe Liquid Glass support
 - Spinner overlay effects
@@ -29,7 +29,7 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 <img src="Pictures/main_detail_window.jpg" height="410">
 
 ## Tech
-Written in Swift 5, Apple Silicon Only for MacOS 26 Tahoe
+Written in Swift 6, Apple Silicon Only for MacOS 26 Tahoe
 
 
 Thanks for language translate:
