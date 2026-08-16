@@ -190,6 +190,11 @@
 				Base,
 				ru,
 				ja,
+				de,
+				fr,
+				it,
+				"zh-Hans",
+				ar,
 			);
 			mainGroup = 7FB9089E2B67B9A400E9EE24;
 			packageReferences = (

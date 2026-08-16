@@ -4,8 +4,7 @@
 import Darwin
 import Foundation
 
-final class NetworkMonitor: @unchecked Sendable {
-    private let queue: DispatchQueue
+final class NetworkMonitor {
     private var previousInBytes: UInt64 = 0
     private var previousOutBytes: UInt64 = 0
     private var hasBaseline = false
@@ -16,12 +15,11 @@ final class NetworkMonitor: @unchecked Sendable {
 
     private(set) var usage: NetworkUsage = .empty
 
-    private static let externalAddressURL = URL(string: "https://checkip.dyndns.org")!
-    private static let externalLookupDelay: TimeInterval = 15
+    /// Внешний адрес неизвестен и его стоит запросить.
+    private(set) var needsExternalLookup = false
 
-    init(queue: DispatchQueue) {
-        self.queue = queue
-    }
+    private static let externalAddressURL = URL(string: "https://checkip.dyndns.org")!
+    static let externalLookupDelay: TimeInterval = 15
 
     func update(interval: TimeInterval) {
         let counters = interfaceCounters()
@@ -34,12 +32,10 @@ final class NetworkMonitor: @unchecked Sendable {
         if counters.address != localAddress {
             localAddress = counters.address
             externalAddress = ""
-            if resolvesExternalAddress {
-                scheduleExternalAddressLookup()
-            }
+            requestExternalLookup(if: resolvesExternalAddress)
         } else if resolvesExternalAddress, !wasResolvingExternalAddress {
             // Настройку только что включили — узнаём адрес, не дожидаясь смены сети.
-            scheduleExternalAddressLookup()
+            requestExternalLookup(if: true)
         }
 
         wasResolvingExternalAddress = resolvesExternalAddress
@@ -59,6 +55,27 @@ final class NetworkMonitor: @unchecked Sendable {
             inbound: Throughput(bytesPerSecond: inbound),
             outbound: Throughput(bytesPerSecond: outbound)
         )
+    }
+
+    private func requestExternalLookup(if enabled: Bool) {
+        guard enabled, !isLookingUpExternalAddress else { return }
+        isLookingUpExternalAddress = true
+        needsExternalLookup = true
+    }
+
+    func externalLookupStarted() {
+        needsExternalLookup = false
+    }
+
+    func externalLookupFinished(address: String?) {
+        isLookingUpExternalAddress = false
+        guard let address, Preferences.shared.showsExternalAddress else { return }
+        externalAddress = address
+    }
+
+    static func fetchExternalAddress() async -> String? {
+        guard let (data, _) = try? await URLSession.shared.data(from: externalAddressURL) else { return nil }
+        return parseExternalAddress(from: data)
     }
 
     private func interfaceCounters() -> (inBytes: UInt64, outBytes: UInt64, address: String) {
@@ -102,30 +119,6 @@ final class NetworkMonitor: @unchecked Sendable {
         }
 
         return (totalIn, totalOut, active)
-    }
-
-    private func scheduleExternalAddressLookup() {
-        guard !isLookingUpExternalAddress else { return }
-        isLookingUpExternalAddress = true
-
-        queue.asyncAfter(deadline: .now() + Self.externalLookupDelay) { [weak self] in
-            guard let self else { return }
-
-            guard Preferences.shared.showsExternalAddress else {
-                self.isLookingUpExternalAddress = false
-                return
-            }
-
-            URLSession.shared.dataTask(with: Self.externalAddressURL) { [weak self] data, _, _ in
-                guard let self else { return }
-
-                let address = data.flatMap { Self.parseExternalAddress(from: $0) }
-                self.queue.async {
-                    self.isLookingUpExternalAddress = false
-                    if let address { self.externalAddress = address }
-                }
-            }.resume()
-        }
     }
 
     static func parseExternalAddress(from data: Data) -> String? {

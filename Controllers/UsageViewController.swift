@@ -15,6 +15,7 @@ class UsageViewController: NSViewController {
     private var fanHistory: String = ""
     private var lastPopupUpdate: Date = .distantPast
     private var forcesFullRefresh = false
+    private var lastSnapshot: MetricsSnapshot = .empty
 
     private static let popupUpdateInterval: TimeInterval = 2
     private static let chartPointLimit = 500
@@ -84,33 +85,46 @@ class UsageViewController: NSViewController {
     override func viewDidAppear() {
         super.viewDidAppear()
 
-        metrics.setDetailedMetricsEnabled(true)
-        metricsObserver = metrics.addObserver { [weak self] snapshot in
-            self?.apply(snapshot)
+        Task { [weak self] in
+            guard let self else { return }
+
+            await metrics.setDetailedMetricsEnabled(true)
+            metricsObserver = await metrics.addObserver { [weak self] snapshot in
+                self?.apply(snapshot)
+            }
+
+            forcesFullRefresh = true
+            apply(await metrics.snapshot)
+
+            // Холостой замер процессов: их загрузка считается по разнице с предыдущим,
+            // и без него список в графике окажется пустым при первом открытии.
+            _ = await metrics.topProcesses()
         }
-        forcesFullRefresh = true
-        apply(metrics.snapshot)
         for level in [cpuLevel, gpuLevel, tempLevel, memLevel, pressureLevel, memSwapLevel,
                       memAppBar, memInactiveBar, memCompBar] {
             level?.needsDisplay = true
         }
-
-        metrics.topProcesses { _ in }
 
         popupChart.animates = Preferences.shared.usesPopUpAnimation
         view.window?.makeKey()
     }
 
     override func viewWillDisappear() {
-        if let metricsObserver {
-            metrics.removeObserver(metricsObserver)
-        }
+        let token = metricsObserver
         metricsObserver = nil
-        metrics.setDetailedMetricsEnabled(false)
+
+        Task { [metrics] in
+            if let token {
+                await metrics.removeObserver(token)
+            }
+            await metrics.setDetailedMetricsEnabled(false)
+        }
         super.viewWillDisappear()
     }
 
     private func apply(_ snapshot: MetricsSnapshot) {
+        lastSnapshot = snapshot
+
         if forcesFullRefresh || round(cpuLevel.value) != round(snapshot.cpuUsage) {
             cpuLabel.stringValue = localizedString("CPU Usage") + " " + Int(snapshot.cpuUsage).formatted(.percent)
             cpuLevel.value = snapshot.cpuUsage
@@ -212,7 +226,7 @@ class UsageViewController: NSViewController {
     }
 
     private func updatePopupData() {
-        let snapshot = metrics.snapshot
+        let snapshot = lastSnapshot
         let showsCPU = lastClickButton == cpuChartPopupButton
 
         guard showsCPU || lastClickButton == memChartPopupButton else { return }
@@ -223,8 +237,9 @@ class UsageViewController: NSViewController {
         dataModel.title = localizedString(showsCPU ? "CPU usage details:" : "Memory usage details:")
         dataModel.chartPoints = ChartPoint.series(from: history, limit: Self.chartPointLimit)
 
-        metrics.topProcesses { [weak self] processes in
+        Task { [weak self] in
             guard let self else { return }
+            let processes = await metrics.topProcesses()
 
             let rows = showsCPU
                 ? processes.filter { $0.cpu > 0 }

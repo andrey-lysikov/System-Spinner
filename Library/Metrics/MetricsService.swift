@@ -78,92 +78,93 @@ func roundedTenth(_ value: Double) -> Double {
     (value * 10).rounded(.up) / 10
 }
 
-final class MetricsService: @unchecked Sendable {
+/// Единственный владелец системных показаний: состояние изолировано актором,
+/// наружу отдаётся только неизменяемый снимок.
+actor MetricsService {
     typealias Observer = @MainActor @Sendable (MetricsSnapshot) -> Void
 
     static let shared = MetricsService()
 
-    private let queue = DispatchQueue(label: "com.system-spinner.metrics", qos: .utility)
-    private let lock = NSLock()
+    /// Доступно без ожидания: значения известны сразу после запуска.
+    nonisolated let sensorsAvailable: Bool
+    nonisolated let hasFans: Bool
 
     private let cpu = CPUMonitor()
     private let gpu = GPUMonitor()
     private let memory = MemoryMonitor()
     private let processes = ProcessMonitor()
-    private lazy var network = NetworkMonitor(queue: queue)
-    private let sensors = SensorService()
+    private let network = NetworkMonitor()
+    private let sensors: SensorService
 
-    private var timer: DispatchSourceTimer?
+    private var pollingTask: Task<Void, Never>?
+    private var externalAddressTask: Task<Void, Never>?
     private var interval: TimeInterval = 1
     private var readsDetailedMetrics = false
     private var skipsGPUSample = false
     private var observers: [UUID: Observer] = [:]
-    private var storage: MetricsSnapshot = .empty
 
-    private init() {}
+    private(set) var snapshot: MetricsSnapshot = .empty
 
-    var snapshot: MetricsSnapshot {
-        lock.withLock { storage }
+    private init() {
+        let service = SensorService()
+        sensors = service
+        sensorsAvailable = service.isAvailable
+        hasFans = service.hasFans
     }
 
-    var sensorsAvailable: Bool { sensors.isAvailable }
-    var hasFans: Bool { sensors.hasFans }
-
     func start(interval: TimeInterval) {
-        queue.async { [self] in
-            self.interval = interval
-            timer?.cancel()
+        self.interval = interval
+        pollingTask?.cancel()
 
-            let source = DispatchSource.makeTimerSource(queue: queue)
-            source.schedule(deadline: .now(), repeating: interval, leeway: .milliseconds(100))
-            source.setEventHandler { [weak self] in self?.tick() }
-            timer = source
-            source.resume()
+        pollingTask = Task { [weak self] in
+            while !Task.isCancelled {
+                await self?.tick()
+                try? await Task.sleep(for: .seconds(interval))
+            }
         }
     }
 
     func stop() {
-        queue.async { [self] in
-            timer?.cancel()
-            timer = nil
-        }
+        pollingTask?.cancel()
+        pollingTask = nil
+        externalAddressTask?.cancel()
+        externalAddressTask = nil
     }
 
     @discardableResult
     func addObserver(_ observer: @escaping Observer) -> UUID {
         let token = UUID()
-        lock.withLock { observers[token] = observer }
+        observers[token] = observer
         return token
     }
 
     func removeObserver(_ token: UUID) {
-        lock.withLock { _ = observers.removeValue(forKey: token) }
+        observers.removeValue(forKey: token)
     }
 
+    /// Датчики SMC и загрузка видеокарты нужны только на экране статистики.
     func setDetailedMetricsEnabled(_ enabled: Bool) {
-        queue.async { [self] in
-            readsDetailedMetrics = enabled
-            gpu.reset()
-            skipsGPUSample = enabled
-            
-            guard enabled, sensors.isAvailable else { return }
-            var updated = lock.withLock { storage }
-            updated.sensors = sensors.read()
-            publish(updated)
-        }
+        readsDetailedMetrics = enabled
+        gpu.reset()
+        // Первый замер пришёлся бы на отрисовку самого окна статистики,
+        // и этот пик держался бы в сглаженном показании ещё много секунд.
+        skipsGPUSample = enabled
+
+        guard enabled, sensors.isAvailable else { return }
+        var updated = snapshot
+        updated.sensors = sensors.read()
+        publish(updated)
     }
 
-    func topProcesses(completion: @escaping @MainActor @Sendable ([ProcessUsage]) -> Void) {
-        queue.async { [self] in
-            let usage = processes.snapshot(systemCPUUsage: cpu.usage)
-            Task { @MainActor in completion(usage) }
-        }
+    func topProcesses() -> [ProcessUsage] {
+        processes.snapshot(systemCPUUsage: cpu.usage)
     }
 
     private func tick() {
         cpu.update()
         memory.update()
         network.update(interval: interval)
+        resolveExternalAddressIfNeeded()
 
         if readsDetailedMetrics {
             if skipsGPUSample {
@@ -186,13 +187,28 @@ final class MetricsService: @unchecked Sendable {
         publish(updated)
     }
 
-    private func publish(_ snapshot: MetricsSnapshot) {
-        let handlers: [Observer] = lock.withLock {
-            storage = snapshot
-            return Array(observers.values)
-        }
+    private func resolveExternalAddressIfNeeded() {
+        guard network.needsExternalLookup, externalAddressTask == nil else { return }
+        network.externalLookupStarted()
 
+        externalAddressTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(NetworkMonitor.externalLookupDelay))
+            let address = await NetworkMonitor.fetchExternalAddress()
+            await self?.finishExternalLookup(address: address)
+        }
+    }
+
+    private func finishExternalLookup(address: String?) {
+        externalAddressTask = nil
+        network.externalLookupFinished(address: address)
+    }
+
+    private func publish(_ snapshot: MetricsSnapshot) {
+        self.snapshot = snapshot
+
+        let handlers = Array(observers.values)
         guard !handlers.isEmpty else { return }
+
         Task { @MainActor in
             handlers.forEach { $0(snapshot) }
         }

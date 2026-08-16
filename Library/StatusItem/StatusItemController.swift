@@ -13,6 +13,7 @@ final class StatusItemController: NSObject {
     private let preferences = Preferences.shared
 
     private var metricsObserver: UUID?
+    private var lastCPUUsage: Double = 0
     private var clickMonitor: Any?
 
     func start() {
@@ -56,19 +57,26 @@ final class StatusItemController: NSObject {
     }
     
     @objc private func resume() {
-        if metricsObserver == nil {
-            metricsObserver = metrics.addObserver { [weak self] snapshot in
-                self?.apply(snapshot)
+        let interval = preferences.updateInterval
+
+        Task { [weak self] in
+            guard let self else { return }
+
+            if metricsObserver == nil {
+                metricsObserver = await metrics.addObserver { [weak self] snapshot in
+                    self?.apply(snapshot)
+                }
             }
+            await metrics.start(interval: interval)
         }
-        metrics.start(interval: preferences.updateInterval)
+
         DisplayCoordinator.shared.setNeedsRefresh()
     }
 
     @objc private func pause() {
         closePopover()
         animator.stop()
-        metrics.stop()
+        Task { await metrics.stop() }
     }
 
     private func apply(_ snapshot: MetricsSnapshot) {
@@ -78,6 +86,7 @@ final class StatusItemController: NSObject {
             statusItem.button?.title = ""
         }
 
+        lastCPUUsage = snapshot.cpuUsage
         animator.updateSpeed(cpuUsage: snapshot.cpuUsage)
     }
 
@@ -85,7 +94,7 @@ final class StatusItemController: NSObject {
         let style = SpinnerCatalog.style(validating: preferences.spinnerName)
         let effect = SpinnerEffect(rawValue: preferences.spinnerEffect) ?? .original
         animator.load(style: style, effect: effect)
-        animator.updateSpeed(cpuUsage: metrics.snapshot.cpuUsage)
+        animator.updateSpeed(cpuUsage: lastCPUUsage)
     }
 
     @objc private func handleClick() {
@@ -133,7 +142,8 @@ extension StatusItemController: AppMenuControllerDelegate {
     }
 
     func appMenuDidChangeUpdateInterval(_ controller: AppMenuController) {
-        metrics.start(interval: preferences.updateInterval)
+        let interval = preferences.updateInterval
+        Task { await metrics.start(interval: interval) }
     }
 
     func appMenuDidRequestDisplayRefresh(_ controller: AppMenuController) {
