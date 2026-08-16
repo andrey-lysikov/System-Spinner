@@ -27,6 +27,16 @@ jobs:
           xcodebuild -version
           xcodebuild -showsdks | grep macosx || true
 
+      # Failing tests stop the job, so a broken build never gets published.
+      - name: Test
+        run: |
+          xcodebuild -project "System Spinner.xcodeproj" \
+                     -scheme "System Spinner" \
+                     -configuration Debug \
+                     -derivedDataPath build-tests \
+                     CODE_SIGNING_ALLOWED=NO \
+                     test
+
       - name: Project version and latest release
         id: version
         env:
