@@ -10,27 +10,18 @@ class DDC: NSObject {
     
     struct IORegService: @unchecked Sendable {
         var edidUUID: String = ""
-        var manufacturerID: String = ""
         var productName: String = ""
         var serialNumber: Int64 = 0
-        var alphanumericSerialNumber: String = ""
         var location: String = ""
         var ioDisplayLocation: String = ""
-        var transportUpstream: String = ""
-        var transportDownstream: String = ""
         var service: IOAVService?
         var serviceLocation: Int = 0
-        var displayAttributes: NSDictionary?
     }
     
     struct ServiceMatch: @unchecked Sendable {
         var displayID: CGDirectDisplayID = 0
         var service: IOAVService?
         var serviceLocation: Int = 0
-        var discouraged: Bool = false
-        var dummy: Bool = false
-        var serviceDetails: IORegService
-        var matchScore: Int = 0
     }
     
     static func getServiceMatches(displayIDs: [CGDirectDisplayID]) -> [ServiceMatch] {
@@ -40,9 +31,7 @@ class DDC: NSObject {
         for displayID in displayIDs {
             for ioregServiceForMatching in ioregServicesForMatching {
                 let score = self.ioregMatchScore(displayID: displayID, ioregEdidUUID: ioregServiceForMatching.edidUUID, ioDisplayLocation: ioregServiceForMatching.ioDisplayLocation, ioregProductName: ioregServiceForMatching.productName, ioregSerialNumber: ioregServiceForMatching.serialNumber, serviceLocation: ioregServiceForMatching.serviceLocation)
-                let discouraged = self.checkIfDiscouraged(ioregService: ioregServiceForMatching)
-                let dummy = self.checkIfDummy(ioregService: ioregServiceForMatching)
-                let displayService = ServiceMatch(displayID: displayID, service: ioregServiceForMatching.service, serviceLocation: ioregServiceForMatching.serviceLocation, discouraged: discouraged, dummy: dummy, serviceDetails: ioregServiceForMatching, matchScore: score)
+                let displayService = ServiceMatch(displayID: displayID, service: ioregServiceForMatching.service, serviceLocation: ioregServiceForMatching.serviceLocation)
                 if scoredCandidateDisplayServices[score] == nil {
                     scoredCandidateDisplayServices[score] = []
                 }
@@ -63,27 +52,12 @@ class DDC: NSObject {
         return matchedDisplayServices
     }
     
-    static func read(service: IOAVService?, command: UInt8, writeSleepTime: UInt32? = nil, numOfWriteCycles: UInt8? = nil, readSleepTime: UInt32? = nil, numOfRetryAttemps: UInt8? = nil, retrySleepTime: UInt32? = nil) -> (current: UInt16, max: UInt16)? {
-        var values: (UInt16, UInt16)?
-        var send: [UInt8] = [command]
-        var reply = [UInt8](repeating: 0, count: 11)
-        if Self.performDDCCommunication(service: service, send: &send, reply: &reply, writeSleepTime: writeSleepTime, numOfWriteCycles: numOfWriteCycles, readSleepTime: readSleepTime, numOfRetryAttemps: numOfRetryAttemps, retrySleepTime: retrySleepTime) {
-            let max = UInt16(reply[6]) * 256 + UInt16(reply[7])
-            let current = UInt16(reply[8]) * 256 + UInt16(reply[9])
-            values = (current, max)
-        } else {
-            values = nil
-        }
-        return values
-    }
-    
     static func write(service: IOAVService?, command: UInt8, value: UInt16, writeSleepTime: UInt32? = nil, numOfWriteCycles: UInt8? = nil, numOfRetryAttemps: UInt8? = nil, retrySleepTime: UInt32? = nil) -> Bool {
         var send: [UInt8] = [command, UInt8(value >> 8), UInt8(value & 255)]
-        var reply: [UInt8] = []
-        return Self.performDDCCommunication(service: service, send: &send, reply: &reply, writeSleepTime: writeSleepTime, numOfWriteCycles: numOfWriteCycles, numOfRetryAttemps: numOfRetryAttemps, retrySleepTime: retrySleepTime)
+        return Self.performDDCCommunication(service: service, send: &send, writeSleepTime: writeSleepTime, numOfWriteCycles: numOfWriteCycles, numOfRetryAttemps: numOfRetryAttemps, retrySleepTime: retrySleepTime)
     }
     
-    static func performDDCCommunication(service: IOAVService?, send: inout [UInt8], reply: inout [UInt8], writeSleepTime: UInt32? = nil, numOfWriteCycles: UInt8? = nil, readSleepTime: UInt32? = nil, numOfRetryAttemps: UInt8? = nil, retrySleepTime: UInt32? = nil) -> Bool {
+    static func performDDCCommunication(service: IOAVService?, send: inout [UInt8], writeSleepTime: UInt32? = nil, numOfWriteCycles: UInt8? = nil, numOfRetryAttemps: UInt8? = nil, retrySleepTime: UInt32? = nil) -> Bool {
         let dataAddress = ARM64_DDC_DATA_ADDRESS
         var success = false
         guard service != nil else {
@@ -95,12 +69,6 @@ class DDC: NSObject {
             for _ in 1 ... max((numOfWriteCycles ?? 2) + 0, 1) {
                 usleep(writeSleepTime ?? 10000)
                 success = IOAVServiceWriteI2C(service, UInt32(ARM64_DDC_7BIT_ADDRESS), UInt32(dataAddress), &packet, UInt32(packet.count)) == 0
-            }
-            if !reply.isEmpty {
-                usleep(readSleepTime ?? 50000)
-                if IOAVServiceReadI2C(service, UInt32(ARM64_DDC_7BIT_ADDRESS), 0, &reply, UInt32(reply.count)) == 0 {
-                    success = self.checksum(chk: 0x50, data: &reply, start: 0, end: reply.count - 2) == reply[reply.count - 1]
-                }
             }
             if success {
                 return success
@@ -186,28 +154,13 @@ class DDC: NSObject {
         IORegistryEntryGetPath(entry, kIOServicePlane, cpath)
         ioregService.ioDisplayLocation = String(cString: cpath)
         if let unmanagedDisplayAttrs = IORegistryEntryCreateCFProperty(entry, "DisplayAttributes" as CFString, kCFAllocatorDefault, IOOptionBits(kIORegistryIterateRecursively)), let displayAttrs = unmanagedDisplayAttrs.takeRetainedValue() as? NSDictionary {
-            ioregService.displayAttributes = displayAttrs
             if let productAttrs = displayAttrs.value(forKey: "ProductAttributes") as? NSDictionary {
-                if let manufacturerID = productAttrs.value(forKey: "ManufacturerID") as? String {
-                    ioregService.manufacturerID = manufacturerID
-                }
                 if let productName = productAttrs.value(forKey: "ProductName") as? String {
                     ioregService.productName = productName
                 }
                 if let serialNumber = productAttrs.value(forKey: "SerialNumber") as? Int64 {
                     ioregService.serialNumber = serialNumber
                 }
-                if let alphanumericSerialNumber = productAttrs.value(forKey: "AlphanumericSerialNumber") as? String {
-                    ioregService.alphanumericSerialNumber = alphanumericSerialNumber
-                }
-            }
-        }
-        if let unmanagedTransport = IORegistryEntryCreateCFProperty(entry, "Transport" as CFString, kCFAllocatorDefault, IOOptionBits(kIORegistryIterateRecursively)), let transport = unmanagedTransport.takeRetainedValue() as? NSDictionary {
-            if let upstream = transport.value(forKey: "Upstream") as? String {
-                ioregService.transportUpstream = upstream
-            }
-            if let downstream = transport.value(forKey: "Downstream") as? String {
-                ioregService.transportDownstream = downstream
             }
         }
         return ioregService
@@ -255,14 +208,4 @@ class DDC: NSObject {
         return ioregServicesForMatching
     }
     
-    static func checkIfDummy(ioregService: IORegService) -> Bool {
-        if ioregService.manufacturerID == "AOC", ioregService.productName == "28E850" {
-            return true
-        }
-        return false
-    }
-    
-    static func checkIfDiscouraged(ioregService _: IORegService) -> Bool {
-        false
-    }
 }

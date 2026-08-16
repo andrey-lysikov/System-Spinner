@@ -6,7 +6,7 @@ import ApplicationServices
 
 enum MediaKeyHandlingResult: Equatable {
     case passThrough
-    case consumed(didChange: Bool)
+    case consumed
 }
 
 @MainActor
@@ -29,7 +29,7 @@ final class MediaKeyMonitor {
     private static let brightnessDownKeyCode: Int64 = 145
 
     @discardableResult
-    func start(promptAccessibility: Bool = false) -> Bool {
+    func start() -> Bool {
         if eventTap != nil {
             return true
         }
@@ -135,8 +135,7 @@ final class MediaKeyMonitor {
             return Unmanaged.passUnretained(event)
         }
 
-        let modifiers = NSEvent.ModifierFlags(rawValue: UInt(event.flags.rawValue))
-        return applyResult(handleMediaKey(mediaKey, modifiers: modifiers), event: event)
+        return applyResult(handleMediaKey(mediaKey), event: event)
     }
 
     private func handleSystemDefinedMediaKey(_ event: CGEvent) -> Unmanaged<CGEvent>? {
@@ -159,7 +158,7 @@ final class MediaKeyMonitor {
             return Unmanaged.passUnretained(event)
         }
 
-        return applyResult(handleMediaKey(mk, modifiers: nsEvent.modifierFlags), event: event)
+        return applyResult(handleMediaKey(mk), event: event)
     }
 
     private func applyResult(_ result: MediaKeyHandlingResult, event: CGEvent) -> Unmanaged<CGEvent>? {
@@ -171,7 +170,7 @@ final class MediaKeyMonitor {
         }
     }
 
-    private func handleMediaKey(_ key: MediaKey, modifiers: NSEvent.ModifierFlags) -> MediaKeyHandlingResult {
+    private func handleMediaKey(_ key: MediaKey) -> MediaKeyHandlingResult {
         switch key {
             case .soundUp:
                 return DisplayManager.shared.setVolume(isUp: true)

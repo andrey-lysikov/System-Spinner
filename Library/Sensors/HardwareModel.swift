@@ -25,10 +25,6 @@ enum SMCKeys {
         cpuTemperatureKeys[chip] ?? cpuTemperatureKeys[.m1] ?? []
     }
 
-    static func gpuTemperature(for chip: ChipFamily) -> [String] {
-        gpuTemperatureKeys[chip] ?? gpuTemperatureKeys[.m1] ?? []
-    }
-
     private static let cpuTemperatureKeys: [ChipFamily: [String]] = [
         .m1: ["Tp09", "Tp0T", "Tp01", "Tp05", "Tp0D", "Tp0H", "Tp0L", "Tp0P", "Tp0X", "Tp0b"],
         .m2: ["Tp1h", "Tp1t", "Tp1p", "Tp1l", "Tp01", "Tp05", "Tp09", "Tp0D", "Tp0X", "Tp0b", "Tp0f", "Tp0j"],
@@ -39,26 +35,15 @@ enum SMCKeys {
               "Tp0a", "Tp0d", "Tp0g", "Tp0j", "Tp0m", "Tp0p", "Tp0u", "Tp0y"],
     ]
 
-    private static let gpuTemperatureKeys: [ChipFamily: [String]] = [
-        .m1: ["Tg05", "Tg0D", "Tg0L", "Tg0T"],
-        .m2: ["Tg0f", "Tg0j"],
-        .m3: ["Tf14", "Tf18", "Tf19", "Tf1A", "Tf24", "Tf28", "Tf29", "Tf2A"],
-        .m4: ["Tg0G", "Tg0H", "Tg1U", "Tg1k", "Tg0K", "Tg0L", "Tg0d", "Tg0e", "Tg0j", "Tg0k"],
-        .m5: ["Tg0U", "Tg0X", "Tg0d", "Tg0g", "Tg0j", "Tg1Y", "Tg1c", "Tg1g"],
-    ]
 }
 
 struct HardwareModel {
-    let identifier: String
-    let brand: String
     let chip: ChipFamily
 
     static let current = HardwareModel()
 
     private init() {
-        identifier = Self.sysctlString("hw.model")
-        brand = Self.sysctlString("machdep.cpu.brand_string")
-        chip = Self.chipFamily(from: brand)
+        chip = Self.chipFamily(from: Self.sysctlString("machdep.cpu.brand_string"))
     }
 
     private static func chipFamily(from brand: String) -> ChipFamily {

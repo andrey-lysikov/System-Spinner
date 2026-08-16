@@ -57,10 +57,6 @@ final class OSDController {
         }
     }
 
-    func hide() {
-        hideTask?.cancel()
-        window.orderOut(nil)
-    }
 
     private func scheduleHide() {
         hideTask?.cancel()

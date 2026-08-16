@@ -80,7 +80,6 @@ final class OtherDisplay: Display {
     }
 
     var ddcService: IOAVService?
-    var isDiscouraged: Bool = false
 
     private var lastSentValue: [Command: UInt16] = [:]
 

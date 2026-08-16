@@ -68,9 +68,6 @@ class DisplayManager {
             for otherDisplay in self.getOtherDisplays()
             where otherDisplay.identifier == serviceMatch.displayID && serviceMatch.service != nil {
                 otherDisplay.ddcService = serviceMatch.service
-                if serviceMatch.discouraged || serviceMatch.dummy {
-                    otherDisplay.isDiscouraged = true
-                }
             }
         }
     }
@@ -134,7 +131,7 @@ class DisplayManager {
             }
             
             if display.hasVolumeControl() || preferences.alwaysUsesCustomOSD {
-                returnControl = .consumed(didChange: true)
+                returnControl = .consumed
                 osd.show(value: Float(volumeValue), isDisplay: false, separators: preferences.adjustmentSteps)
             }
             
@@ -158,7 +155,7 @@ class DisplayManager {
             }
             
             if display.hasVolumeControl() || preferences.alwaysUsesCustomOSD {
-                returnControl = .consumed(didChange: true)
+                returnControl = .consumed
                 osd.show(value: Float(volumeValue), isDisplay: false, separators: preferences.adjustmentSteps)
             }
             
@@ -186,6 +183,6 @@ class DisplayManager {
             osd.show(value: Float(brightnessValue), isDisplay: true, separators: preferences.adjustmentSteps)
             display.setBrightness(valueBrightness: Float(brightnessValue))
         }
-        return .consumed(didChange: true)
+        return .consumed
     }
 }
