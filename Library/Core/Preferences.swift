@@ -88,10 +88,13 @@ final class Preferences: @unchecked Sendable {
     }
 }
 
+private let englishLocalizationPath = Bundle.main.path(forResource: "en", ofType: "lproj")
+
 func localizedString(_ key: String.LocalizationValue) -> String {
     if Preferences.shared.usesSystemLanguage {
         return String(localized: key)
-    } else {
-        return String(localized: key, table: "English")
     }
+
+    let bundle = englishLocalizationPath.flatMap(Bundle.init(path:)) ?? .main
+    return String(localized: key, bundle: bundle, locale: Locale(identifier: "en"))
 }
