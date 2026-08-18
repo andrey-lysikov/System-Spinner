@@ -28,6 +28,11 @@ struct OSDIndicatorView: View {
             ? NSColor.black.withAlphaComponent(0.5)
             : NSColor.white.withAlphaComponent(0.5)
     }
+
+    private var foregroundTint: Color {
+        colorScheme == .dark ? .white : .black
+    }
+
     private static let separatorSpacing: [Int: CGFloat] = [8: 23.25, 16: 11.125, 24: 7.1, 32: 5.1]
 
     var body: some View {
@@ -51,7 +56,7 @@ struct OSDIndicatorView: View {
         let image = Image(systemName: value.iconName)
             .font(.system(size: 24, weight: .medium))
             .frame(width: 28)
-            .foregroundStyle(.primary.opacity(0.8))
+            .foregroundStyle(foregroundTint.opacity(0.8))
 
         if Preferences.shared.usesPopUpAnimation {
             image.contentTransition(.symbolEffect(.replace))
@@ -63,10 +68,10 @@ struct OSDIndicatorView: View {
     private var bar: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
-                Capsule().fill(.primary.opacity(0.8))
+                Capsule().fill(foregroundTint.opacity(0.25))
                 if value.value > 0 {
                     Capsule()
-                        .fill(Color(.secondaryLabelColor))
+                        .fill(foregroundTint)
                         .frame(width: geometry.size.width * CGFloat(value.value / 100))
                 }
             }
@@ -80,7 +85,7 @@ struct OSDIndicatorView: View {
                 VStack {
                     Spacer()
                     Rectangle()
-                        .fill(.primary.opacity(0.8))
+                        .fill(foregroundTint.opacity(0.8))
                         .frame(width: 1, height: index % 4 == 0 ? 6 : 3)
                 }
                 if index < value.separatorSteps {
