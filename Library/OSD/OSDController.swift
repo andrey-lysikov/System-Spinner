@@ -33,8 +33,9 @@ struct OSDValue: Equatable {
 final class OSDController {
     static let shared = OSDController()
 
-    let valuePublisher = PassthroughSubject<OSDValue, Never>()
-    private(set) var currentValue = OSDValue()
+    /// CurrentValueSubject, чтобы подписчик сразу получал актуальное значение.
+    let valuePublisher = CurrentValueSubject<OSDValue, Never>(OSDValue())
+    var currentValue: OSDValue { valuePublisher.value }
 
     private lazy var window = OSDWindow()
     private var hideTask: Task<Void, Never>?
@@ -43,8 +44,7 @@ final class OSDController {
     private init() {}
 
     func show(value: Float, isDisplay: Bool, separators: Int = 16, autoHide: Bool = true) {
-        currentValue = OSDValue(value: value, isDisplay: isDisplay, separatorSteps: separators)
-        valuePublisher.send(currentValue)
+        valuePublisher.send(OSDValue(value: value, isDisplay: isDisplay, separatorSteps: separators))
 
         if autoHide {
             scheduleHide()
@@ -52,9 +52,7 @@ final class OSDController {
             hideTask?.cancel()
         }
 
-        if !window.isVisible {
-            window.showWithAnimation()
-        }
+        window.showWithAnimation()
     }
 
 
@@ -65,9 +63,5 @@ final class OSDController {
             guard !Task.isCancelled else { return }
             self?.window.hideWithAnimation()
         }
-    }
-
-    deinit {
-        hideTask?.cancel()
     }
 }

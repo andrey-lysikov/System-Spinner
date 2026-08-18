@@ -36,7 +36,7 @@ final class UpdateChecker {
             cancelRunningCheck()
         } else {
             guard !isChecking else { return }
-            guard !Calendar.current.isDateInToday(preferences.lastVersionCheck) else { return }
+            if let last = preferences.lastVersionCheck, Calendar.current.isDateInToday(last) { return }
         }
 
         isChecking = true

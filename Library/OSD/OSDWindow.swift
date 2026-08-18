@@ -30,6 +30,7 @@ final class OSDWindow: NSPanel {
         isMovableByWindowBackground = false
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         hidesOnDeactivate = false
+        ignoresMouseEvents = true
 
         hostingView.wantsLayer = true
         hostingView.layer?.backgroundColor = NSColor.clear.cgColor
@@ -40,9 +41,25 @@ final class OSDWindow: NSPanel {
 
     func showWithAnimation() {
         updatePosition()
+
+        let animates = Preferences.shared.usesPopUpAnimation
+
+        if isVisible {
+            // Показ мог прийти во время затухания — прерываем его.
+            if alphaValue < 1.0 {
+                if animates {
+                    animator().alphaValue = 1.0
+                } else {
+                    alphaValue = 1.0
+                }
+            }
+            return
+        }
+
         hostingView.layoutSubtreeIfNeeded()
 
-        guard Preferences.shared.usesPopUpAnimation else {
+        guard animates else {
+            alphaValue = 1.0
             orderFrontRegardless()
             return
         }
@@ -69,7 +86,8 @@ final class OSDWindow: NSPanel {
             self.animator().alphaValue = 0.0
         } completionHandler: {
             Task { @MainActor [weak self] in
-                self?.orderOut(nil)
+                guard let self, alphaValue == 0.0 else { return }
+                orderOut(nil)
             }
         }
     }

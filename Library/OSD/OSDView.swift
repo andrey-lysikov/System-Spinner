@@ -4,15 +4,17 @@
 import SwiftUI
 
 struct OSDView: View {
-    @State private var value = OSDValue()
+    @State private var value: OSDValue
+
+    @MainActor
+    init() {
+        _value = State(initialValue: OSDController.shared.currentValue)
+    }
 
     var body: some View {
         OSDIndicatorView(value: value)
             .padding(48)
-            .onAppear {
-                value = OSDController.shared.currentValue
-            }
-            .onReceive(OSDController.shared.valuePublisher.receive(on: RunLoop.main)) {
+            .onReceive(OSDController.shared.valuePublisher) {
                 value = $0
             }
     }
@@ -32,8 +34,6 @@ struct OSDIndicatorView: View {
     private var foregroundTint: Color {
         colorScheme == .dark ? .white : .black
     }
-
-    private static let separatorSpacing: [Int: CGFloat] = [8: 23.25, 16: 11.125, 24: 7.1, 32: 5.1]
 
     var body: some View {
         let content = HStack(spacing: 16) {
@@ -80,19 +80,17 @@ struct OSDIndicatorView: View {
     }
 
     private var scale: some View {
-        HStack(spacing: 0) {
-            ForEach(0 ... value.separatorSteps, id: \.self) { index in
-                VStack {
-                    Spacer()
-                    Rectangle()
-                        .fill(foregroundTint.opacity(0.8))
-                        .frame(width: 1, height: index % 4 == 0 ? 6 : 3)
-                }
-                if index < value.separatorSteps {
-                    if let spacing = Self.separatorSpacing[value.separatorSteps] {
-                        Spacer().frame(width: spacing)
-                    } else {
+        GeometryReader { geometry in
+            let steps = max(value.separatorSteps, 1)
+            let spacing = max((geometry.size.width - CGFloat(steps + 1)) / CGFloat(steps), 0)
+
+            HStack(spacing: spacing) {
+                ForEach(0 ... steps, id: \.self) { index in
+                    VStack {
                         Spacer()
+                        Rectangle()
+                            .fill(foregroundTint.opacity(0.8))
+                            .frame(width: 1, height: index % 4 == 0 ? 6 : 3)
                     }
                 }
             }

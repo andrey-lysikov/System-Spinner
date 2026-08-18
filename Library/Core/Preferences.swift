@@ -36,7 +36,14 @@ extension String {
 final class Preferences: @unchecked Sendable {
     static let shared = Preferences()
 
-    private init() {}
+    /// Ключи, вышедшие из употребления: чистим, чтобы не копить мусор в defaults.
+    private static let obsoleteKeys = ["group.lastCheckVersion"]
+
+    private init() {
+        for key in Self.obsoleteKeys {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+    }
 
     @Stored("spinnerActive", "Loader")
     var spinnerName: String
@@ -68,8 +75,13 @@ final class Preferences: @unchecked Sendable {
     @Stored("showExternalAddress", true)
     var showsExternalAddress: Bool
 
-    @Stored("group.lastCheckVersion", Date.distantPast)
-    var lastVersionCheck: Date
+    @Stored("lastVersionCheckTime", 0.0)
+    private var lastVersionCheckTime: TimeInterval
+
+    var lastVersionCheck: Date? {
+        get { lastVersionCheckTime > 0 ? Date(timeIntervalSince1970: lastVersionCheckTime) : nil }
+        set { lastVersionCheckTime = newValue?.timeIntervalSince1970 ?? 0 }
+    }
 
     func brightness(forDisplay name: String) -> Float? {
         UserDefaults.standard.object(forKey: "brightness." + name) as? Float
