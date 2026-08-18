@@ -1,7 +1,8 @@
 # Changelog
 
-Section headings must match `MARKETING_VERSION` in the project — the release
-workflow looks up release notes by this heading.
+## 5.0.2
+
+- Fix bugs
 
 ## 5.0.1
 

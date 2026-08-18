@@ -42,8 +42,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          version=$(grep -m1 'MARKETING_VERSION' "System Spinner.xcodeproj/project.pbxproj" \
-                    | sed 's/.*= *//; s/;//' | tr -d ' ')
+          # MARKETING_VERSION is defined once at the project level, and the app
+          # target inherits it. Asking the target resolves that inheritance —
+          # a plain grep over the project file would depend on its layout.
+          version=$(xcodebuild -project "System Spinner.xcodeproj" \
+                               -target "System Spinner" \
+                               -configuration Release \
+                               -showBuildSettings 2>/dev/null \
+                    | awk '$1 == "MARKETING_VERSION" { print $3; exit }')
+
+          if [ -z "$version" ]; then
+            echo "MARKETING_VERSION for the \"System Spinner\" target not found" >&2
+            exit 1
+          fi
+
           latest=$(gh release view --json tagName -q .tagName 2>/dev/null || echo "0.0.0")
 
           echo "version=$version" >> "$GITHUB_OUTPUT"
