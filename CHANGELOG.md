@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.1.0
+
+- Fix mute audio bug
+- Return keyboard backlight controll with OSD
+- Update OSD position when screen cursor changes
+- Update key by lastVersionCheckTime
+
 ## 5.0.2
 
 - Fix bugs
