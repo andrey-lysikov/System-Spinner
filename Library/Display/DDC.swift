@@ -124,25 +124,26 @@ class DDC: NSObject {
         return matchScore
     }
     
-    static func ioregIterateToNextObjectOfInterest(interests: [String], iterator: inout io_iterator_t) -> (name: String, entry: io_service_t, preceedingEntry: io_service_t)? {
-        var entry: io_service_t = IO_OBJECT_NULL
-        var preceedingEntry: io_service_t = IO_OBJECT_NULL
+    static func ioregIterateToNextObjectOfInterest(interests: [String], iterator: inout io_iterator_t) -> (name: String, entry: io_service_t)? {
         let name = UnsafeMutablePointer<CChar>.allocate(capacity: MemoryLayout<io_name_t>.size)
         defer {
             name.deallocate()
         }
         while true {
-            preceedingEntry = entry
-            entry = IOIteratorNext(iterator)
-            guard IORegistryEntryGetName(entry, name) == KERN_SUCCESS, entry != MACH_PORT_NULL else {
-                break
+            let entry = IOIteratorNext(iterator)
+            guard entry != IO_OBJECT_NULL else {
+                return nil
+            }
+            guard IORegistryEntryGetName(entry, name) == KERN_SUCCESS else {
+                IOObjectRelease(entry)
+                return nil
             }
             let nameString = String(cString: name)
-            for interest in interests where entry != IO_OBJECT_NULL && nameString.contains(interest) {
-                return (nameString, entry, preceedingEntry)
+            if interests.contains(where: { nameString.contains($0) }) {
+                return (nameString, entry)
             }
+            IOObjectRelease(entry)
         }
-        return nil
     }
     
     static func getIORegServiceAppleCDC2Properties(entry: io_service_t) -> IORegService {
@@ -195,6 +196,9 @@ class DDC: NSObject {
         while true {
             guard let objectOfInterest = ioregIterateToNextObjectOfInterest(interests: [keyDCPAVServiceProxy] + keysFramebuffer, iterator: &iterator) else {
                 break
+            }
+            defer {
+                IOObjectRelease(objectOfInterest.entry)
             }
             if keysFramebuffer.contains(objectOfInterest.name) {
                 ioregService = self.getIORegServiceAppleCDC2Properties(entry: objectOfInterest.entry)

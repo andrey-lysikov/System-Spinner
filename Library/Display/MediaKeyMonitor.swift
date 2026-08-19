@@ -26,7 +26,6 @@ final class MediaKeyMonitor {
     private var eventTap: CFMachPort?
     private var eventTapSource: CFRunLoopSource?
     private var eventTapRunLoop: CFRunLoop?
-
     private static let brightnessUpKeyCode: Int64 = 144
     private static let brightnessDownKeyCode: Int64 = 145
     private static let f5KeyCode: Int64 = 176

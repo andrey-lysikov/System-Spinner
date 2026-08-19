@@ -114,12 +114,8 @@ class DisplayManager {
         self.displays.first { $0.identifier == identifier }
     }
     
-    public func hasBrightnessControll() -> Bool {
-        var brightness = false
-        for display in displays where !display.isBuiltIn() && !display.isHDR() {
-            brightness = true
-        }
-        return brightness
+    public func hasBrightnessControl() -> Bool {
+        displays.contains { !$0.isBuiltIn() && !$0.isHDR() }
     }
     
     private var handlesVolumeKeys: Bool {
@@ -178,7 +174,7 @@ class DisplayManager {
     public func setBrightness(isUp: Bool) -> MediaKeyHandlingResult {
         let step:Float = 100 / Float(preferences.adjustmentSteps)
         
-        if !hasBrightnessControll() && !preferences.alwaysUsesCustomOSD {
+        if !hasBrightnessControl() && !preferences.alwaysUsesCustomOSD {
             return .passThrough
         }
         
