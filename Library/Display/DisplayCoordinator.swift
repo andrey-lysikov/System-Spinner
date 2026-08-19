@@ -40,6 +40,7 @@ final class DisplayCoordinator {
 
             if AccessibilityPermission.check() {
                 MediaKeyMonitor.shared.start()
+                KeyboardBacklight.shared.restoreSavedBrightness()
             }
 
             UpdateChecker.shared.check()

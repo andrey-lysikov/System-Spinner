@@ -27,7 +27,7 @@ struct OSDValueTests {
         (100, "speaker.wave.3.fill"),
     ])
     func volumeIcon(value: Float, expected: String) {
-        #expect(OSDValue(value: value, isDisplay: false).iconName == expected)
+        #expect(OSDValue(value: value, kind: .volume).iconName == expected)
     }
 
     @Test("Brightness icon switches at 80", arguments: [
@@ -37,7 +37,16 @@ struct OSDValueTests {
         (100, "sun.max"),
     ])
     func brightnessIcon(value: Float, expected: String) {
-        #expect(OSDValue(value: value, isDisplay: true).iconName == expected)
+        #expect(OSDValue(value: value, kind: .displayBrightness).iconName == expected)
+    }
+
+    @Test("Keyboard backlight icon is filled while the backlight is on", arguments: [
+        (Float(0), "keyboard"),
+        (1, "keyboard.fill"),
+        (100, "keyboard.fill"),
+    ])
+    func keyboardBacklightIcon(value: Float, expected: String) {
+        #expect(OSDValue(value: value, kind: .keyboardBacklight).iconName == expected)
     }
 
     @Test("Default separator count matches the default preference")

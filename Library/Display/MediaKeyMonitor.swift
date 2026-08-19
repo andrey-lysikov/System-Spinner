@@ -17,6 +17,8 @@ final class MediaKeyMonitor {
         case brightnessUp = 2
         case brightnessDown = 3
         case mute = 7
+        case illuminationUp = 21
+        case illuminationDown = 22
     }
 
     static let shared = MediaKeyMonitor()
@@ -27,6 +29,9 @@ final class MediaKeyMonitor {
 
     private static let brightnessUpKeyCode: Int64 = 144
     private static let brightnessDownKeyCode: Int64 = 145
+    private static let f5KeyCode: Int64 = 176
+    private static let f6KeyCode: Int64 = 178
+    private static let reservingFlags: CGEventFlags = [.maskCommand, .maskControl, .maskAlternate, .maskShift]
 
     @discardableResult
     func start() -> Bool {
@@ -117,13 +122,14 @@ final class MediaKeyMonitor {
 
     private func handle(_ event: CGEvent) -> Unmanaged<CGEvent>? {
         if event.type == .keyDown {
-            return handleBrightnessKeyDown(event)
+            return handleKeyDown(event)
         }
         return handleSystemDefinedMediaKey(event)
     }
 
-    private func handleBrightnessKeyDown(_ event: CGEvent) -> Unmanaged<CGEvent>? {
+    private func handleKeyDown(_ event: CGEvent) -> Unmanaged<CGEvent>? {
         let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
+        let isPlainKey = event.flags.isDisjoint(with: Self.reservingFlags)
 
         let mediaKey: MediaKey
         switch keyCode {
@@ -131,6 +137,10 @@ final class MediaKeyMonitor {
             mediaKey = .brightnessUp
         case Self.brightnessDownKeyCode:
             mediaKey = .brightnessDown
+        case Self.f6KeyCode where isPlainKey:
+            mediaKey = .illuminationUp
+        case Self.f5KeyCode where isPlainKey:
+            mediaKey = .illuminationDown
         default:
             return Unmanaged.passUnretained(event)
         }
@@ -182,6 +192,9 @@ final class MediaKeyMonitor {
                 return DisplayManager.shared.setBrightness(isUp: true)
             case .brightnessDown:
                 return DisplayManager.shared.setBrightness(isUp: false)
+            case .illuminationUp, .illuminationDown:
+                guard Preferences.shared.usesKeyboardBacklightKeys else { return .passThrough }
+                return KeyboardBacklight.shared.adjust(isUp: key == .illuminationUp)
         }
     }
 }

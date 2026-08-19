@@ -81,6 +81,11 @@ final class AppMenuController: NSObject {
                           action: #selector(toggleCustomOSD),
                           state: preferences.alwaysUsesCustomOSD))
 
+        menu.addItem(item(localizedString("Keyboard backlight on F5/F6"),
+                          symbol: "keyboard",
+                          action: KeyboardBacklight.shared.isAvailable ? #selector(toggleKeyboardBacklightKeys) : nil,
+                          state: preferences.usesKeyboardBacklightKeys))
+
         menu.addItem(item(localizedString("Use system language"),
                           symbol: "translate",
                           action: #selector(toggleLocalization),
@@ -211,6 +216,11 @@ final class AppMenuController: NSObject {
         preferences.alwaysUsesCustomOSD.toggle()
         sender.state = preferences.alwaysUsesCustomOSD ? .on : .off
         delegate?.appMenuDidRequestDisplayRefresh(self)
+    }
+
+    @objc private func toggleKeyboardBacklightKeys(sender: NSMenuItem) {
+        preferences.usesKeyboardBacklightKeys.toggle()
+        sender.state = preferences.usesKeyboardBacklightKeys ? .on : .off
     }
 
     @objc private func toggleLocalization(sender: NSMenuItem) {

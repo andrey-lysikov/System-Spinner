@@ -71,6 +71,9 @@ final class Preferences: @unchecked Sendable {
     @Stored("showExternalAddress", true)
     var showsExternalAddress: Bool
 
+    @Stored("keyboardBacklightKeys", false)
+    var usesKeyboardBacklightKeys: Bool
+
     @Stored("lastVersionCheckTime", 0.0)
     private var lastVersionCheckTime: TimeInterval
 
@@ -85,6 +88,11 @@ final class Preferences: @unchecked Sendable {
 
     func setBrightness(_ value: Float, forDisplay name: String) {
         UserDefaults.standard.set(value, forKey: "brightness." + name)
+    }
+
+    var keyboardBacklight: Float? {
+        get { UserDefaults.standard.object(forKey: "keyboardBacklight") as? Float }
+        set { UserDefaults.standard.set(newValue, forKey: "keyboardBacklight") }
     }
 
     func volume(forDisplay name: String) -> Float? {

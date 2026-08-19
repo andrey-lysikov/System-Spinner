@@ -136,7 +136,7 @@ class DisplayManager {
             
             if display.hasVolumeControl() || preferences.alwaysUsesCustomOSD {
                 returnControl = .consumed
-                osd.show(value: Float(volumeValue), isDisplay: false, separators: preferences.adjustmentSteps)
+                osd.show(value: Float(volumeValue), kind: .volume, separators: preferences.adjustmentSteps)
             }
             
             display.setVolume(valueVolume: Float(volumeValue))
@@ -160,7 +160,7 @@ class DisplayManager {
             
             if display.hasVolumeControl() || preferences.alwaysUsesCustomOSD {
                 returnControl = .consumed
-                osd.show(value: Float(volumeValue), isDisplay: false, separators: preferences.adjustmentSteps)
+                osd.show(value: Float(volumeValue), kind: .volume, separators: preferences.adjustmentSteps)
             }
             
             display.setVolume(valueVolume: Float(volumeValue))
@@ -184,7 +184,7 @@ class DisplayManager {
                 brightnessValue = 100
             }
             
-            osd.show(value: Float(brightnessValue), isDisplay: true, separators: preferences.adjustmentSteps)
+            osd.show(value: Float(brightnessValue), kind: .displayBrightness, separators: preferences.adjustmentSteps)
             display.setBrightness(valueBrightness: Float(brightnessValue))
         }
         return .consumed

@@ -5,26 +5,35 @@ import Combine
 import Foundation
 
 struct OSDValue: Equatable {
+    enum Kind {
+        case volume
+        case displayBrightness
+        case keyboardBacklight
+    }
+
     var value: Float
-    var isDisplay: Bool
+    var kind: Kind
     var separatorSteps: Int
 
-    init(value: Float = 0.0, isDisplay: Bool = false, separatorSteps: Int = 16) {
+    init(value: Float = 0.0, kind: Kind = .volume, separatorSteps: Int = 16) {
         self.value = max(0.0, min(100.0, value))
-        self.isDisplay = isDisplay
+        self.kind = kind
         self.separatorSteps = separatorSteps
     }
 
     var iconName: String {
-        if isDisplay {
+        switch kind {
+        case .displayBrightness:
             return value < 80 ? "sun.min" : "sun.max"
-        }
-
-        switch value {
-        case ...0: return "speaker.slash.fill"
-        case ..<33: return "speaker.wave.1.fill"
-        case ..<66: return "speaker.wave.2.fill"
-        default: return "speaker.wave.3.fill"
+        case .keyboardBacklight:
+            return value <= 0 ? "keyboard" : "keyboard.fill"
+        case .volume:
+            switch value {
+            case ...0: return "speaker.slash.fill"
+            case ..<33: return "speaker.wave.1.fill"
+            case ..<66: return "speaker.wave.2.fill"
+            default: return "speaker.wave.3.fill"
+            }
         }
     }
 }
@@ -41,8 +50,8 @@ final class OSDController {
 
     private init() {}
 
-    func show(value: Float, isDisplay: Bool, separators: Int = 16, autoHide: Bool = true) {
-        valuePublisher.send(OSDValue(value: value, isDisplay: isDisplay, separatorSteps: separators))
+    func show(value: Float, kind: OSDValue.Kind, separators: Int = 16, autoHide: Bool = true) {
+        valuePublisher.send(OSDValue(value: value, kind: kind, separatorSteps: separators))
 
         if autoHide {
             scheduleHide()
