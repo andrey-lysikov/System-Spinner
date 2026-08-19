@@ -122,9 +122,22 @@ class DisplayManager {
         return brightness
     }
     
+    private var handlesVolumeKeys: Bool {
+        preferences.alwaysUsesCustomOSD || displays.contains { $0.hasVolumeControl() }
+    }
+
     public func toggleMute() -> MediaKeyHandlingResult {
-        var returnControl: MediaKeyHandlingResult = .passThrough
-        
+        guard handlesVolumeKeys else { return .passThrough }
+
+        let deviceID = AudioOutput.defaultDeviceID
+        let shouldMute = !AudioOutput.isMuted(deviceID)
+
+        if AudioOutput.setMuted(shouldMute, for: deviceID) {
+            let volumeValue = shouldMute ? 0 : (displays.first?.getCurrentVolume() ?? 0)
+            osd.show(value: volumeValue, kind: .volume, separators: preferences.adjustmentSteps)
+            return .consumed
+        }
+
         for display in displays {
             var volumeValue = display.getCurrentVolume()
             if volumeValue == 0 {
@@ -133,40 +146,33 @@ class DisplayManager {
                 display.savedVolume = volumeValue
                 volumeValue = 0
             }
-            
-            if display.hasVolumeControl() || preferences.alwaysUsesCustomOSD {
-                returnControl = .consumed
-                osd.show(value: Float(volumeValue), kind: .volume, separators: preferences.adjustmentSteps)
-            }
-            
+
+            osd.show(value: Float(volumeValue), kind: .volume, separators: preferences.adjustmentSteps)
             display.setVolume(valueVolume: Float(volumeValue))
         }
-        
-        return returnControl
+
+        return .consumed
     }
-    
+
     public func setVolume(isUp: Bool) -> MediaKeyHandlingResult {
+        guard handlesVolumeKeys else { return .passThrough }
+
         let step:Float = 100 / Float(preferences.adjustmentSteps)
-        var returnControl: MediaKeyHandlingResult = .passThrough
-        
+
         for display in displays {
             var volumeValue = (display.getCurrentVolume()/step).rounded() * step + (isUp ? step : -step)
-            
+
             if volumeValue < 0 {
                 volumeValue = 0
             } else if volumeValue > 100 {
                 volumeValue = 100
             }
-            
-            if display.hasVolumeControl() || preferences.alwaysUsesCustomOSD {
-                returnControl = .consumed
-                osd.show(value: Float(volumeValue), kind: .volume, separators: preferences.adjustmentSteps)
-            }
-            
+
+            osd.show(value: Float(volumeValue), kind: .volume, separators: preferences.adjustmentSteps)
             display.setVolume(valueVolume: Float(volumeValue))
         }
-        
-        return returnControl
+
+        return .consumed
     }
     
     public func setBrightness(isUp: Bool) -> MediaKeyHandlingResult {

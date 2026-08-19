@@ -67,6 +67,36 @@ enum AudioOutput {
         return (leftLevel + rightLevel) / 2
     }
 
+    private static func muteAddress() -> AudioObjectPropertyAddress {
+        AudioObjectPropertyAddress(
+            mSelector: AudioObjectPropertySelector(kAudioDevicePropertyMute),
+            mScope: AudioObjectPropertyScope(kAudioDevicePropertyScopeOutput),
+            mElement: AudioObjectPropertyElement(kAudioObjectPropertyElementMain))
+    }
+
+    static func isMuted(_ deviceID: AudioDeviceID) -> Bool {
+        var address = muteAddress()
+        var muted = UInt32(0)
+        var propertySize = UInt32(MemoryLayout<UInt32>.size)
+
+        guard AudioObjectGetPropertyData(deviceID, &address, 0, nil, &propertySize, &muted) == noErr else { return false }
+        return muted != 0
+    }
+
+    @discardableResult
+    static func setMuted(_ muted: Bool, for deviceID: AudioDeviceID) -> Bool {
+        var address = muteAddress()
+        var settable = DarwinBoolean(false)
+
+        guard AudioObjectIsPropertySettable(deviceID, &address, &settable) == noErr, settable.boolValue else {
+            return false
+        }
+
+        var value = muted ? UInt32(1) : UInt32(0)
+        return AudioObjectSetPropertyData(deviceID, &address, 0, nil,
+                                          UInt32(MemoryLayout<UInt32>.size), &value) == noErr
+    }
+
     static func setVolume(_ level: Float, for deviceID: AudioDeviceID) {
         let channelsCount = 2
         var channels = [UInt32](repeating: 0, count: channelsCount)
@@ -91,5 +121,10 @@ enum AudioOutput {
 
         address.mElement = kAudioObjectPropertyElementMain
         AudioObjectSetPropertyData(deviceID, &address, 0, nil, propertySize, &level)
+
+        let shouldMute = level <= 0
+        if isMuted(deviceID) != shouldMute {
+            setMuted(shouldMute, for: deviceID)
+        }
     }
 }
