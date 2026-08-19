@@ -8,6 +8,7 @@ import AudioToolbox
 class Display: Equatable {
     public let identifier: CGDirectDisplayID
     public var name: String
+    public var resolution: CGSize
     public var savedVolume: Float = 0
 
     nonisolated public static func == (lhs: Display, rhs: Display) -> Bool {
@@ -17,6 +18,29 @@ class Display: Equatable {
     init(_ identifier: CGDirectDisplayID, name: String) {
         self.identifier = identifier
         self.name = name
+        self.resolution = Display.pixelResolution(of: identifier)
+    }
+
+    public static func pixelResolution(of identifier: CGDirectDisplayID) -> CGSize {
+        var size: CGSize
+
+        if let mode = CGDisplayCopyDisplayMode(identifier) {
+            size = CGSize(width: mode.pixelWidth, height: mode.pixelHeight)
+        } else {
+            size = CGSize(width: CGDisplayPixelsWide(identifier), height: CGDisplayPixelsHigh(identifier))
+        }
+
+        if abs(CGDisplayRotation(identifier).truncatingRemainder(dividingBy: 180)) > 45 {
+            size = CGSize(width: size.height, height: size.width)
+        }
+
+        return size
+    }
+
+    @discardableResult
+    public func refreshResolution() -> CGSize {
+        resolution = Display.pixelResolution(of: identifier)
+        return resolution
     }
 
     public func isBuiltIn() -> Bool {

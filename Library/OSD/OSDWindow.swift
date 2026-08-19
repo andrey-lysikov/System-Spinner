@@ -6,7 +6,14 @@ import SwiftUI
 @MainActor
 final class OSDWindow: NSPanel {
     private let hostingView: NSHostingView<OSDView>
-    private static let windowSize = NSSize(width: 376, height: 376)
+    private static let pillSize = NSSize(width: 280, height: 64)
+    private static let contentPadding: CGFloat = 48
+    private static let glassMargin: CGFloat = 16
+    private static let pillBottomInset: CGFloat = 156
+
+    private static let windowSize = NSSize(width: pillSize.width + (contentPadding + glassMargin) * 2,
+                                           height: pillSize.height + (contentPadding + glassMargin) * 2)
+    private static let bottomInset = pillBottomInset - contentPadding - glassMargin
 
     @objc(_hasActiveAppearance) dynamic func _hasActiveAppearance() -> Bool { true }
 
@@ -32,6 +39,7 @@ final class OSDWindow: NSPanel {
         hidesOnDeactivate = false
         ignoresMouseEvents = true
 
+        hostingView.sizingOptions = []
         hostingView.wantsLayer = true
         hostingView.layer?.backgroundColor = NSColor.clear.cgColor
         hostingView.frame = NSRect(origin: .zero, size: Self.windowSize)
@@ -92,12 +100,40 @@ final class OSDWindow: NSPanel {
     }
 
     private func updatePosition() {
-        guard let screen = NSScreen.main else { return }
+        guard let screen = Self.activeScreen() else { return }
         let frame = screen.frame
-        setFrame(NSRect(x: frame.minX + (frame.width - Self.windowSize.width) / 2,
-                        y: frame.minY,
+        let size = Self.pointSize(of: screen)
+
+        setFrame(NSRect(x: (frame.minX + (size.width - Self.windowSize.width) / 2).rounded(),
+                        y: frame.minY + Self.bottomInset,
                         width: Self.windowSize.width,
                         height: Self.windowSize.height),
                  display: false)
+    }
+
+    private static func activeScreen() -> NSScreen? {
+        let mouseLocation = NSEvent.mouseLocation
+        return NSScreen.screens.first { $0.frame.contains(mouseLocation) } ?? NSScreen.main
+    }
+
+    private static func pointSize(of screen: NSScreen) -> CGSize {
+        let screenSize = screen.frame.size
+        let scale = screen.backingScaleFactor
+
+        guard scale > 0,
+              let identifier = screen.displayID,
+              let display = DisplayManager.shared.display(withID: identifier)
+        else {
+            return screenSize
+        }
+
+        let resolution = display.refreshResolution()
+        let size = CGSize(width: resolution.width / scale, height: resolution.height / scale)
+
+        guard abs(size.width - screenSize.width) <= 1, abs(size.height - screenSize.height) <= 1 else {
+            return screenSize
+        }
+
+        return size
     }
 }

@@ -109,6 +109,10 @@ class DisplayManager {
     public func getOtherDisplays() -> [OtherDisplay] {
         self.displays.compactMap { $0 as? OtherDisplay }
     }
+
+    public func display(withID identifier: CGDirectDisplayID) -> Display? {
+        self.displays.first { $0.identifier == identifier }
+    }
     
     public func hasBrightnessControll() -> Bool {
         var brightness = false
