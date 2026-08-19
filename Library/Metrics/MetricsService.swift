@@ -78,14 +78,10 @@ func roundedTenth(_ value: Double) -> Double {
     (value * 10).rounded(.up) / 10
 }
 
-/// Единственный владелец системных показаний: состояние изолировано актором,
-/// наружу отдаётся только неизменяемый снимок.
 actor MetricsService {
     typealias Observer = @MainActor @Sendable (MetricsSnapshot) -> Void
 
     static let shared = MetricsService()
-
-    /// Доступно без ожидания: значения известны сразу после запуска.
     nonisolated let sensorsAvailable: Bool
     nonisolated let hasFans: Bool
 
@@ -142,12 +138,10 @@ actor MetricsService {
         observers.removeValue(forKey: token)
     }
 
-    /// Датчики SMC и загрузка видеокарты нужны только на экране статистики.
     func setDetailedMetricsEnabled(_ enabled: Bool) {
         readsDetailedMetrics = enabled
         gpu.reset()
-        // Первый замер пришёлся бы на отрисовку самого окна статистики,
-        // и этот пик держался бы в сглаженном показании ещё много секунд.
+        
         skipsGPUSample = enabled
 
         guard enabled, sensors.isAvailable else { return }

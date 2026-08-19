@@ -71,7 +71,6 @@ class UsageViewController: NSViewController {
             cpuTempStack.removeFromSuperview()
         }
 
-        // Полосы памяти тоньше основных шкал — высота задана их ограничениями в storyboard.
         for bar in [memAppBar, memInactiveBar, memCompBar] {
             bar?.barHeight = 3
         }
@@ -95,9 +94,6 @@ class UsageViewController: NSViewController {
 
             forcesFullRefresh = true
             apply(await metrics.snapshot)
-
-            // Холостой замер процессов: их загрузка считается по разнице с предыдущим,
-            // и без него список в графике окажется пустым при первом открытии.
             _ = await metrics.topProcesses()
         }
         for level in [cpuLevel, gpuLevel, tempLevel, memLevel, pressureLevel, memSwapLevel,
@@ -142,9 +138,9 @@ class UsageViewController: NSViewController {
             ? localizedString("no ip found")
             : snapshot.network.address
 
-        let network = address
-            + "\n↓ " + String(Int(snapshot.network.inbound.value)) + snapshot.network.inbound.unit.title
-            + " | ↑ " + String(Int(snapshot.network.outbound.value)) + snapshot.network.outbound.unit.title
+        let network = "ip: " + address + "\n ▼ "
+            + String(Int(snapshot.network.inbound.value)) + snapshot.network.inbound.unit.title
+            + " | ▲ " + String(Int(snapshot.network.outbound.value)) + snapshot.network.outbound.unit.title
 
         if forcesFullRefresh || netLabel.stringValue != network {
             netLabel.stringValue = network
@@ -159,12 +155,10 @@ class UsageViewController: NSViewController {
 
     private func applySensors(_ sensors: SensorsSnapshot) {
         let power: String
-        if sensors.adapterPower > 0 && sensors.batteryPower > 0 {
-            power = "PWR: \(sensors.systemPower)w, BAT: \(sensors.batteryPower)w, DC: \(sensors.adapterPower)w"
-        } else if sensors.adapterPower > 0 {
-            power = "PWR: \(sensors.systemPower)w, DC: \(sensors.adapterPower)w"
+        if sensors.adapterPower > 0  {
+            power = localizedString("Power on adapter: \(sensors.systemPower) w")
         } else {
-            power = "PWR: \(sensors.systemPower)w, BAT: \(sensors.batteryPower)w"
+            power = localizedString("Power on battery: \(sensors.batteryPower) w")
         }
 
         if forcesFullRefresh || powerHistory != power {

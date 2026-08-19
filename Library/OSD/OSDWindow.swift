@@ -45,7 +45,6 @@ final class OSDWindow: NSPanel {
         let animates = Preferences.shared.usesPopUpAnimation
 
         if isVisible {
-            // Показ мог прийти во время затухания — прерываем его.
             if alphaValue < 1.0 {
                 if animates {
                     animator().alphaValue = 1.0

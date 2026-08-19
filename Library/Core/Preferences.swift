@@ -4,7 +4,6 @@
 import Foundation
 import Synchronization
 
-/// Значение живёт в памяти под Mutex, поэтому читать его можно из любого потока.
 @propertyWrapper
 final class Stored<Value: Sendable>: Sendable {
     private let key: String
@@ -31,12 +30,9 @@ extension String {
     }
 }
 
-/// Все поля — обёртки Stored, потокобезопасные сами по себе; изменяемыми их
-/// объявляет генератор property wrapper, отсюда unchecked.
 final class Preferences: @unchecked Sendable {
     static let shared = Preferences()
-
-    /// Ключи, вышедшие из употребления: чистим, чтобы не копить мусор в defaults.
+    
     private static let obsoleteKeys = ["group.lastCheckVersion"]
 
     private init() {

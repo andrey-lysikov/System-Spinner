@@ -53,7 +53,6 @@ enum SpinnerCatalog {
         all.first { $0.name == name }
     }
 
-    /// Имя приходит из настроек и может не существовать — тогда берётся запасной стиль.
     static func style(validating name: String) -> SpinnerStyle {
         style(named: name) ?? fallback
     }

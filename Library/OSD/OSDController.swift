@@ -32,8 +32,6 @@ struct OSDValue: Equatable {
 @MainActor
 final class OSDController {
     static let shared = OSDController()
-
-    /// CurrentValueSubject, чтобы подписчик сразу получал актуальное значение.
     let valuePublisher = CurrentValueSubject<OSDValue, Never>(OSDValue())
     var currentValue: OSDValue { valuePublisher.value }
 

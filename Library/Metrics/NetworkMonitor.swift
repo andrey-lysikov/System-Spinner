@@ -14,8 +14,6 @@ final class NetworkMonitor {
     private var wasResolvingExternalAddress = true
 
     private(set) var usage: NetworkUsage = .empty
-
-    /// Внешний адрес неизвестен и его стоит запросить.
     private(set) var needsExternalLookup = false
 
     private static let externalAddressURL = URL(string: "https://checkip.dyndns.org")!
@@ -34,7 +32,6 @@ final class NetworkMonitor {
             externalAddress = ""
             requestExternalLookup(if: resolvesExternalAddress)
         } else if resolvesExternalAddress, !wasResolvingExternalAddress {
-            // Настройку только что включили — узнаём адрес, не дожидаясь смены сети.
             requestExternalLookup(if: true)
         }
 

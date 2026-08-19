@@ -61,7 +61,6 @@ final class SMCService {
         try? value(forKey: key)
     }
 
-    /// Отбрасывает ключи, которых нет на этой модели или которые всегда дают ноль.
     func readableKeys(among keys: [String]) -> [String] {
         keys.filter { key in
             guard let value = optionalValue(forKey: key) else { return false }
@@ -69,7 +68,6 @@ final class SMCService {
         }
     }
 
-    /// Количество вентиляторов по данным самого SMC — надёжнее списка моделей.
     var fanCount: Int {
         guard let count = optionalValue(forKey: "FNum") else { return 0 }
         return max(0, Int(count))

@@ -65,8 +65,6 @@ final class SegmentedLevelView: NSView {
     override var isFlipped: Bool { true }
     override var allowsVibrancy: Bool { true }
 
-    /// Значение может не измениться, а содержимое окна к моменту показа уже
-    /// сброшено — после сна или переоткрытия окна шкала осталась бы пустой.
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         needsDisplay = true
