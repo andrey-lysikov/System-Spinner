@@ -1744,7 +1744,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "От адаптера %lld w"
+            "value" : "Питание от адаптера %lld Вт"
           }
         },
         "zh-Hans" : {
@@ -1798,7 +1798,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "От батареи %lld w"
+            "value" : "Питание от батареи %lld Вт"
           }
         },
         "zh-Hans" : {
