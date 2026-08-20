@@ -1,5 +1,11 @@
 # Changelog
 
+
+## 5.1.1
+
+- Fix power text in Russian
+- Now we can use static icons
+
 ## 5.1.0
 
 - Fix mute audio bug
