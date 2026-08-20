@@ -45,6 +45,7 @@ enum SpinnerCatalog {
         SpinnerStyle(name: "Rotation Color Well", frameCount: 24, supportsEffect: false, speedCoefficient: 2),
         SpinnerStyle(name: "Sun", frameCount: 23, supportsEffect: true, speedCoefficient: 1),
         SpinnerStyle(name: "Waves", frameCount: 17, supportsEffect: true, speedCoefficient: 1),
+        SpinnerStyle(name: "App Icon", frameCount: 1, supportsEffect: true, speedCoefficient: 1),
     ]
 
     static let fallback = all.first { $0.name == "Loader" } ?? all[0]

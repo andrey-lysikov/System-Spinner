@@ -183,7 +183,8 @@ final class AppMenuController: NSObject {
             let item = NSMenuItem(title: style.name, action: #selector(changeSpinner(sender:)), keyEquivalent: "")
             item.target = self
             item.state = style.name == preferences.spinnerName ? .on : .off
-            if let image = NSImage(named: style.name + " 1") {
+            let imageName = (style.frameCount == 1) ? (style.name) : (style.name + " 1")
+            if let image = NSImage(named: imageName) {
                 image.size = NSSize(width: 19 / image.size.height * image.size.width, height: 19)
                 item.image = image
             }

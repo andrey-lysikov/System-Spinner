@@ -20,7 +20,9 @@ final class SpinnerAnimator {
     func load(style: SpinnerStyle, effect: SpinnerEffect) {
         self.style = style
         frames = (0 ..< style.frameCount).compactMap { index in
-            guard var image = NSImage(named: style.name + " \(index)") else { return nil }
+            
+            let imageName = (index == 0) ? (style.name) : (style.name + " \(index)")
+            guard var image = NSImage(named: imageName) else { return nil }
 
             let height = NSStatusBar.system.thickness - 2
             image.size = NSSize(width: height / image.size.height * image.size.width, height: height)
@@ -50,7 +52,7 @@ final class SpinnerAnimator {
     }
 
     func updateSpeed(cpuUsage: Double) {
-        guard !frames.isEmpty else { return }
+        if frames.isEmpty || frames.count == 1 { return }
 
         let load = max(1.0, min(100.0, cpuUsage / Double(frames.count)))
         let interval = max(Self.minimumInterval, 0.25 / load * Double(style.speedCoefficient))
@@ -78,7 +80,7 @@ final class SpinnerAnimator {
     }
 
     private func advance() {
-        guard !frames.isEmpty else { return }
+        if frames.isEmpty || frames.count == 1 { return }
 
         lastFrameDate = Date()
         currentFrame += preferences.invertsRotation ? -1 : 1
