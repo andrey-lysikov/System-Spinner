@@ -7,6 +7,8 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 [![Release](https://img.shields.io/github/v/release/andrey-lysikov/System-Spinner)](https://github.com/andrey-lysikov/System-Spinner/releases/latest)
 [![Platform](https://img.shields.io/badge/platform-macOS-blue.svg?style=flat)](https://github.com/andrey-lysikov/System-Spinner/releases/latest)
 
+This is MacOS version, if you looking for Windows go to [System Spinner x64](https://github.com/andrey-lysikov/System-Spinner-x64)
+
 ## Features
 
 - Show CPU usage in system bar
