@@ -41,6 +41,7 @@ final class AppMenuController: NSObject {
 
     private var displaysItem: NSMenuItem?
     private var effectsItem: NSMenuItem?
+    private var rotationItem: NSMenuItem?
 
     private let updateIntervals: [Double] = [0.5, 1.0, 1.5, 2.0]
     private let adjustmentSteps: [Int] = [8, 16, 24, 32]
@@ -52,7 +53,7 @@ final class AppMenuController: NSObject {
                           symbol: "ellipsis.curlybraces",
                           action: #selector(openActivityMonitor)))
 
-        menu.addItem(item(localizedString("Show CPU usage in menu"),
+        menu.addItem(item(localizedString("Show load in menu"),
                           symbol: "cpu",
                           action: #selector(toggleStatusText),
                           state: preferences.showsCPUInMenuBar))
@@ -120,10 +121,12 @@ final class AppMenuController: NSObject {
         menu.addItem(effects)
         effectsItem = effects
 
-        menu.addItem(item(localizedString("Invert rotation"),
-                          symbol: "circle.righthalf.filled.inverse",
-                          action: #selector(toggleRotation),
-                          state: preferences.invertsRotation))
+        let rotation = item(localizedString("Invert rotation"),
+                            symbol: "circle.righthalf.filled.inverse",
+                            action: #selector(toggleRotation),
+                            state: preferences.invertsRotation)
+        menu.addItem(rotation)
+        rotationItem = rotation
 
         menu.addItem(.separator())
 
@@ -156,6 +159,10 @@ final class AppMenuController: NSObject {
         let style = SpinnerCatalog.style(validating: preferences.spinnerName)
         effectsItem?.action = style.supportsEffect ? #selector(changeEffect(sender:)) : nil
         effectsItem?.isEnabled = style.supportsEffect
+
+        let isAnimated = style.frameCount > 1
+        rotationItem?.action = isAnimated ? #selector(toggleRotation(sender:)) : nil
+        rotationItem?.isEnabled = isAnimated
     }
 
     private func item(_ title: String, symbol: String, action: Selector?, state: Bool = false) -> NSMenuItem {
@@ -290,13 +297,12 @@ final class AppMenuController: NSObject {
 
     @objc private func showAbout() {
         let alert = NSAlert()
-        alert.messageText = "System Spinner"
+        alert.messageText = "System Spinner v\(UpdateChecker.shared.installedVersion)"
         alert.informativeText = localizedString("""
                                                 System Spinner provides macOS system information in status bar.
                                                 Minimal, small and light.
 
                                                 Author: @Andrey.Lysikov
-                                                Version: \(UpdateChecker.shared.installedVersion)
                                                 """)
         alert.alertStyle = .informational
         alert.addButton(withTitle: localizedString("Goto site"))

@@ -16,12 +16,6 @@ final class GPUMonitor {
         if service != 0 { IOObjectRelease(service) }
     }
 
-    func reset() {
-        smoothing.removeAll()
-        smoothingSum = 0
-        usage = 0
-    }
-
     func update() {
         let current = currentUtilization() ?? 0
 

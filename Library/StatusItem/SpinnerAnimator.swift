@@ -51,10 +51,13 @@ final class SpinnerAnimator {
         }
     }
 
-    func updateSpeed(cpuUsage: Double) {
-        if frames.isEmpty || frames.count == 1 { return }
+    func updateSpeed(usage: Double) {
+        guard frames.count > 1 else {
+            stop()
+            return
+        }
 
-        let load = max(1.0, min(100.0, cpuUsage / Double(frames.count)))
+        let load = max(1.0, min(100.0, usage / Double(frames.count)))
         let interval = max(Self.minimumInterval, 0.25 / load * Double(style.speedCoefficient))
 
         guard currentInterval <= 0 || abs(interval - currentInterval) > currentInterval * Self.speedTolerance else {

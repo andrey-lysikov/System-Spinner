@@ -96,7 +96,6 @@ actor MetricsService {
     private var externalAddressTask: Task<Void, Never>?
     private var interval: TimeInterval = 1
     private var readsDetailedMetrics = false
-    private var skipsGPUSample = false
     private var observers: [UUID: Observer] = [:]
 
     private(set) var snapshot: MetricsSnapshot = .empty
@@ -140,9 +139,6 @@ actor MetricsService {
 
     func setDetailedMetricsEnabled(_ enabled: Bool) {
         readsDetailedMetrics = enabled
-        gpu.reset()
-        
-        skipsGPUSample = enabled
 
         guard enabled, sensors.isAvailable else { return }
         var updated = snapshot
@@ -160,13 +156,7 @@ actor MetricsService {
         network.update(interval: interval)
         resolveExternalAddressIfNeeded()
 
-        if readsDetailedMetrics {
-            if skipsGPUSample {
-                skipsGPUSample = false
-            } else {
-                gpu.update()
-            }
-        }
+        gpu.update()
 
         var updated = MetricsSnapshot(
             cpuUsage: cpu.usage,

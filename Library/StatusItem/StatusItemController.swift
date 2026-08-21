@@ -13,7 +13,7 @@ final class StatusItemController: NSObject {
     private let preferences = Preferences.shared
 
     private var metricsObserver: UUID?
-    private var lastCPUUsage: Double = 0
+    private var lastUsage: Double = 0
     private var clickMonitor: Any?
 
     func start() {
@@ -86,15 +86,15 @@ final class StatusItemController: NSObject {
             statusItem.button?.title = ""
         }
 
-        lastCPUUsage = snapshot.cpuUsage
-        animator.updateSpeed(cpuUsage: snapshot.cpuUsage)
+        lastUsage = max(snapshot.cpuUsage, snapshot.gpuUsage)
+        animator.updateSpeed(usage: lastUsage)
     }
 
     private func reloadSpinner() {
         let style = SpinnerCatalog.style(validating: preferences.spinnerName)
         let effect = SpinnerEffect(rawValue: preferences.spinnerEffect) ?? .original
         animator.load(style: style, effect: effect)
-        animator.updateSpeed(cpuUsage: lastCPUUsage)
+        animator.updateSpeed(usage: lastUsage)
     }
 
     @objc private func handleClick() {
