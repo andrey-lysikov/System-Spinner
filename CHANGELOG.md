@@ -5,6 +5,7 @@
 
 - Fix power text in Russian
 - Now we can use static icons
+- Use for spinner cpu and gpu
 
 ## 5.1.0
 
