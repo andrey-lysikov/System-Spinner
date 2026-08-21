@@ -46,7 +46,10 @@ struct SpinnerCatalogTests {
 
     @Test("Order is fixed, so the menu does not shuffle between launches")
     func orderIsStable() {
-        #expect(SpinnerCatalog.all.map(\.name) == SpinnerCatalog.all.map(\.name).sorted())
+        let names = SpinnerCatalog.all.map(\.name)
+
+        #expect(names == SpinnerCatalog.all.map(\.name))
+        #expect(names.count == SpinnerCatalog.all.count)
     }
 
     @Test("Effect values match the ones stored in preferences")

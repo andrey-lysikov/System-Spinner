@@ -37,7 +37,7 @@
 		7FAA20012E77000200AB0002 /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		7FB908A72B67B9A400E9EE24 /* System Spinner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "System Spinner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		7FBB10022E88000100BB0002 /* SystemSpinnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SystemSpinnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7FBB10022E88000100BB0002 /* System Spinner Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "System Spinner Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -54,7 +54,7 @@
 		7F0D025B2D1EADEF0029C507 /* Controllers */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Controllers; sourceTree = "<group>"; };
 		7F6D12232D1D868100C44FAC /* Pictures */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (7F6D12242D1D868C00C44FAC /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Pictures; sourceTree = "<group>"; };
 		7FAA10012E77000100AB0001 /* Library */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Library; sourceTree = "<group>"; };
-		7FBB10032E88000100BB0003 /* SystemSpinnerTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = SystemSpinnerTests; sourceTree = "<group>"; };
+		7FBB10032E88000100BB0003 /* System Spinner Tests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "System Spinner Tests"; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,7 +100,7 @@
 				7F6D12232D1D868100C44FAC /* Pictures */,
 				7FAA10012E77000100AB0001 /* Library */,
 				7F0D025B2D1EADEF0029C507 /* Controllers */,
-				7FBB10032E88000100BB0003 /* SystemSpinnerTests */,
+				7FBB10032E88000100BB0003 /* System Spinner Tests */,
 				7F0D026D2D1ECA450029C507 /* Frameworks */,
 				7FB908A82B67B9A400E9EE24 /* Products */,
 			);
@@ -110,7 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				7FB908A72B67B9A400E9EE24 /* System Spinner.app */,
-				7FBB10022E88000100BB0002 /* SystemSpinnerTests.xctest */,
+				7FBB10022E88000100BB0002 /* System Spinner Tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -142,9 +142,9 @@
 			productReference = 7FB908A72B67B9A400E9EE24 /* System Spinner.app */;
 			productType = "com.apple.product-type.application";
 		};
-		7FBB10012E88000100BB0001 /* SystemSpinnerTests */ = {
+		7FBB10012E88000100BB0001 /* System Spinner Tests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7FBB10092E88000100BB0009 /* Build configuration list for PBXNativeTarget "SystemSpinnerTests" */;
+			buildConfigurationList = 7FBB10092E88000100BB0009 /* Build configuration list for PBXNativeTarget "System Spinner Tests" */;
 			buildPhases = (
 				7FBB10042E88000100BB0004 /* Sources */,
 				7FBB10052E88000100BB0005 /* Frameworks */,
@@ -156,13 +156,13 @@
 				7FBB10072E88000100BB0007 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				7FBB10032E88000100BB0003 /* SystemSpinnerTests */,
+				7FBB10032E88000100BB0003 /* System Spinner Tests */,
 			);
-			name = SystemSpinnerTests;
+			name = "System Spinner Tests";
 			packageProductDependencies = (
 			);
-			productName = SystemSpinnerTests;
-			productReference = 7FBB10022E88000100BB0002 /* SystemSpinnerTests.xctest */;
+			productName = "System Spinner Tests";
+			productReference = 7FBB10022E88000100BB0002 /* System Spinner Tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -204,7 +204,7 @@
 			projectRoot = "";
 			targets = (
 				7FB908A62B67B9A400E9EE24 /* System Spinner */,
-				7FBB10012E88000100BB0001 /* SystemSpinnerTests */,
+				7FBB10012E88000100BB0001 /* System Spinner Tests */,
 			);
 		};
 /* End PBXProject section */
@@ -352,7 +352,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = D2GKV4ZUT5;
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Controllers",
@@ -433,11 +433,12 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				PRODUCT_BUNDLE_IDENTIFIER = SystemSpinnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = "System-Spinner-Tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_STRICT_CONCURRENCY = complete;
@@ -452,11 +453,12 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				PRODUCT_BUNDLE_IDENTIFIER = SystemSpinnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = "System-Spinner-Tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_STRICT_CONCURRENCY = complete;
@@ -486,7 +488,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7FBB10092E88000100BB0009 /* Build configuration list for PBXNativeTarget "SystemSpinnerTests" */ = {
+		7FBB10092E88000100BB0009 /* Build configuration list for PBXNativeTarget "System Spinner Tests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7FBB100A2E88000100BB000A /* Debug */,
