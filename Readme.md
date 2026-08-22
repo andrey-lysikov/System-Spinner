@@ -1,4 +1,4 @@
-![spin_menu](Pictures/icon.jpg)
+![System Spinner](Pictures/icon.jpg)
 # System Spinner
 
 System Spinner provides macOS system information in status bar. Minimal, small and light!
@@ -7,34 +7,36 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 [![Release](https://img.shields.io/github/v/release/andrey-lysikov/System-Spinner)](https://github.com/andrey-lysikov/System-Spinner/releases/latest)
 [![Platform](https://img.shields.io/badge/platform-macOS-blue.svg?style=flat)](https://github.com/andrey-lysikov/System-Spinner/releases/latest)
 
-This is MacOS version, if you looking for Windows go to [System Spinner x64](https://github.com/andrey-lysikov/System-Spinner-x64)
+This is the macOS version, if you are looking for Windows go to [System Spinner x64](https://github.com/andrey-lysikov/System-Spinner-x64)
 
 ## Features
 
-- Show CPU usage in system bar
-- Audio and brightness external monitor contol (over HDMI/DVI/USB-C with standart keys)
-- Custom OSD for MacOs Tahoe for volume and brightness control
-- Custom choice for adjustments (more accurate volume and brightness control)
-- Top CPU/MEM process in popup window
+- Spinner speed follows the CPU and GPU load, whichever is higher
+- Show the load in the status bar
+- Animated and static spinners, with overlay effects
+- Audio and brightness control for external monitors (over HDMI/DVI/USB-C with the standard media keys)
+- Keyboard backlight control on F5/F6
+- Custom OSD for macOS Tahoe for volume and brightness control
+- Custom adjustment steps (more accurate volume and brightness control)
+- Top CPU/MEM processes in popup window
 - Memory statistics with swap
-- Network utilisation and extrnal ip address (use checkip.dyndns.org, you can turn off showing external ip)
-- CMS Information for Cpu Temp and Fan
-- Full MacOS 26 Tahoe Liquid Glass support
-- Spinner overlay effects
+- Network utilisation and external ip address (uses checkip.dyndns.org, you can turn off showing external ip)
+- SMC information for CPU temp and fan
+- Full macOS 26 Tahoe Liquid Glass support
 - Localization (English, Arabic, Chinese, French, German, Italian, Japanese, Russian)
 
 *WARNING: The application is not officially signed, you will need to allow it to run in "Settings" -> "Security" when you first launch it.*
 
 ## Screenshots
 
-<p align="top">
+<p align="center">
   <img src="Pictures/main_window.jpg" height="380">
   <img src="Pictures/spin_menu.jpg" height="380">
   <img src="Pictures/main_detail_window.jpg" height="380">
 </p>
 
 ## Tech
-Written in Swift 6, Apple Silicon Only for MacOS 26 Tahoe
+Written in Swift 6, Apple Silicon only, for macOS 26 Tahoe
 
 
 Thanks for language translate:

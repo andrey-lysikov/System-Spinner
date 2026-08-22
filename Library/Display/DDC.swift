@@ -12,7 +12,6 @@ class DDC: NSObject {
         var edidUUID: String = ""
         var productName: String = ""
         var serialNumber: Int64 = 0
-        var location: String = ""
         var ioDisplayLocation: String = ""
         var service: IOAVService?
         var serviceLocation: Int = 0
@@ -52,12 +51,19 @@ class DDC: NSObject {
         return matchedDisplayServices
     }
     
-    static func write(service: IOAVService?, command: UInt8, value: UInt16, writeSleepTime: UInt32? = nil, numOfWriteCycles: UInt8? = nil, numOfRetryAttemps: UInt8? = nil, retrySleepTime: UInt32? = nil) -> Bool {
+    // Timings inherited from MonitorControl. They were tunable per call there;
+    // here every caller took the defaults, so they are fixed.
+    private static let writeSleepTime: UInt32 = 10000
+    private static let numOfWriteCycles = 2
+    private static let numOfRetryAttempts = 4
+    private static let retrySleepTime: UInt32 = 20000
+
+    static func write(service: IOAVService?, command: UInt8, value: UInt16) -> Bool {
         var send: [UInt8] = [command, UInt8(value >> 8), UInt8(value & 255)]
-        return Self.performDDCCommunication(service: service, send: &send, writeSleepTime: writeSleepTime, numOfWriteCycles: numOfWriteCycles, numOfRetryAttemps: numOfRetryAttemps, retrySleepTime: retrySleepTime)
+        return Self.performDDCCommunication(service: service, send: &send)
     }
     
-    static func performDDCCommunication(service: IOAVService?, send: inout [UInt8], writeSleepTime: UInt32? = nil, numOfWriteCycles: UInt8? = nil, numOfRetryAttemps: UInt8? = nil, retrySleepTime: UInt32? = nil) -> Bool {
+    static func performDDCCommunication(service: IOAVService?, send: inout [UInt8]) -> Bool {
         let dataAddress = ARM64_DDC_DATA_ADDRESS
         var success = false
         guard service != nil else {
@@ -65,15 +71,15 @@ class DDC: NSObject {
         }
         var packet: [UInt8] = [UInt8(0x80 | (send.count + 1)), UInt8(send.count)] + send + [0] // Note: the last byte is the place of the checksum, see next line!
         packet[packet.count - 1] = self.checksum(chk: send.count == 1 ? ARM64_DDC_7BIT_ADDRESS << 1 : ARM64_DDC_7BIT_ADDRESS << 1 ^ dataAddress, data: &packet, start: 0, end: packet.count - 2)
-        for _ in 1 ... (numOfRetryAttemps ?? 4) + 1 {
-            for _ in 1 ... max((numOfWriteCycles ?? 2) + 0, 1) {
-                usleep(writeSleepTime ?? 10000)
+        for _ in 1 ... Self.numOfRetryAttempts + 1 {
+            for _ in 1 ... Self.numOfWriteCycles {
+                usleep(Self.writeSleepTime)
                 success = IOAVServiceWriteI2C(service, UInt32(ARM64_DDC_7BIT_ADDRESS), UInt32(dataAddress), &packet, UInt32(packet.count)) == 0
             }
             if success {
                 return success
             }
-            usleep(retrySleepTime ?? 20000)
+            usleep(Self.retrySleepTime)
         }
         return success
     }
@@ -152,6 +158,9 @@ class DDC: NSObject {
             ioregService.edidUUID = edidUUID
         }
         let cpath = UnsafeMutablePointer<CChar>.allocate(capacity: MemoryLayout<io_string_t>.size)
+        defer {
+            cpath.deallocate()
+        }
         IORegistryEntryGetPath(entry, kIOServicePlane, cpath)
         ioregService.ioDisplayLocation = String(cString: cpath)
         if let unmanagedDisplayAttrs = IORegistryEntryCreateCFProperty(entry, "DisplayAttributes" as CFString, kCFAllocatorDefault, IOOptionBits(kIORegistryIterateRecursively)), let displayAttrs = unmanagedDisplayAttrs.takeRetainedValue() as? NSDictionary {
@@ -169,7 +178,6 @@ class DDC: NSObject {
     
     static func setIORegServiceDCPAVServiceProxy(entry: io_service_t, ioregService: inout IORegService) {
         if let unmanagedLocation = IORegistryEntryCreateCFProperty(entry, "Location" as CFString, kCFAllocatorDefault, IOOptionBits(kIORegistryIterateRecursively)), let location = unmanagedLocation.takeRetainedValue() as? String {
-            ioregService.location = location
             if location == "External" {
                 ioregService.service = IOAVServiceCreateWithService(kCFAllocatorDefault, entry)?.takeRetainedValue() as IOAVService
             }

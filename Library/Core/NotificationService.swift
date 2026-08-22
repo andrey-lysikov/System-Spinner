@@ -31,13 +31,11 @@ enum AccessibilityPermission {
 
 enum NotificationAction: String {
     case allowPrivileges = "action.allow"
-    case quit = "action.quit"
     case download = "action.download"
 
     var title: String {
         switch self {
         case .allowPrivileges: return localizedString("Allow")
-        case .quit: return localizedString("Quit")
         case .download: return localizedString("Download")
         }
     }

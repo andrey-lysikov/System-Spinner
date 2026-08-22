@@ -1,6 +1,7 @@
 //  Copyright © AndreyLysikov
 //  SPDX-License-Identifier: Apache-2.0
 
+import AppKit
 import Testing
 @testable import System_Spinner
 
@@ -50,6 +51,20 @@ struct SpinnerCatalogTests {
 
         #expect(names == SpinnerCatalog.all.map(\.name))
         #expect(names.count == SpinnerCatalog.all.count)
+    }
+
+    // A style that declares more frames than it ships loses them silently,
+    // because the loader drops what it cannot resolve — which also skews the
+    // speed, since that divides by the number of frames actually loaded.
+    @Test("Every declared frame has an image")
+    @MainActor
+    func everyFrameResolves() {
+        for style in SpinnerCatalog.all {
+            for index in 0 ..< style.frameCount {
+                let name = style.frameName(at: index)
+                #expect(NSImage(named: name) != nil, "\(name) is missing from the asset catalog")
+            }
+        }
     }
 
     @Test("Effect values match the ones stored in preferences")

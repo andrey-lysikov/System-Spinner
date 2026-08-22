@@ -58,12 +58,18 @@ final class StatusItemController: NSObject {
     
     @objc private func resume() {
         let interval = preferences.updateInterval
+        var newToken: UUID?
+        if metricsObserver == nil {
+            let token = UUID()
+            metricsObserver = token
+            newToken = token
+        }
 
         Task { [weak self] in
             guard let self else { return }
 
-            if metricsObserver == nil {
-                metricsObserver = await metrics.addObserver { [weak self] snapshot in
+            if let newToken {
+                await metrics.addObserver(newToken) { [weak self] snapshot in
                     self?.apply(snapshot)
                 }
             }

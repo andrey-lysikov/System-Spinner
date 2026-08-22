@@ -42,9 +42,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # MARKETING_VERSION is defined once at the project level, and the app
-          # target inherits it. Asking the target resolves that inheritance —
-          # a plain grep over the project file would depend on its layout.
+          # MARKETING_VERSION lives on the app target. Asking the target lets
+          # xcodebuild resolve it — a plain grep over the project file would
+          # depend on its layout.
           version=$(xcodebuild -project "System Spinner.xcodeproj" \
                                -target "System Spinner" \
                                -configuration Release \
@@ -103,15 +103,15 @@ jobs:
         run: |
           version="${{ steps.version.outputs.version }}"
 
-          # section for this version from CHANGELOG.md; empty when there is none
+          # section for this version from Changelog.md; empty when there is none
           awk -v v="## $version" '
             $0 == v { found = 1; next }
             /^## / { found = 0 }
             found { print }
-          ' CHANGELOG.md > notes.md || true
+          ' Changelog.md > notes.md || true
 
           if [ ! -s notes.md ]; then
-            echo "No \"## $version\" section in CHANGELOG.md — notes will contain the generated list only"
+            echo "No \"## $version\" section in Changelog.md — notes will contain the generated list only"
           fi
 
       - name: Publish

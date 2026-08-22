@@ -20,9 +20,7 @@ final class SpinnerAnimator {
     func load(style: SpinnerStyle, effect: SpinnerEffect) {
         self.style = style
         frames = (0 ..< style.frameCount).compactMap { index in
-            
-            let imageName = (index == 0) ? (style.name) : (style.name + " \(index)")
-            guard var image = NSImage(named: imageName) else { return nil }
+            guard var image = NSImage(named: style.frameName(at: index)) else { return nil }
 
             let height = NSStatusBar.system.thickness - 2
             image.size = NSSize(width: height / image.size.height * image.size.width, height: height)

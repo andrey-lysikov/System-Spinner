@@ -4,6 +4,8 @@
 import Darwin
 import Foundation
 
+let machHost = mach_host_self()
+
 final class CPUMonitor {
     private var previous = host_cpu_load_info()
     private var smoothing: [Double] = []
@@ -49,7 +51,7 @@ final class CPUMonitor {
 
         let result = withUnsafeMutablePointer(to: &info) {
             $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
-                host_statistics(mach_host_self(), HOST_CPU_LOAD_INFO, $0, &count)
+                host_statistics(machHost, HOST_CPU_LOAD_INFO, $0, &count)
             }
         }
 

@@ -83,13 +83,21 @@ class UsageViewController: NSViewController {
 
     override func viewDidAppear() {
         super.viewDidAppear()
+        let token = UUID()
+        metricsObserver = token
 
         Task { [weak self] in
             guard let self else { return }
 
             await metrics.setDetailedMetricsEnabled(true)
-            metricsObserver = await metrics.addObserver { [weak self] snapshot in
+            await metrics.addObserver(token) { [weak self] snapshot in
                 self?.apply(snapshot)
+            }
+
+            guard metricsObserver == token else {
+                await metrics.removeObserver(token)
+                await metrics.setDetailedMetricsEnabled(false)
+                return
             }
 
             forcesFullRefresh = true

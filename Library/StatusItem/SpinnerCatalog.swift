@@ -8,6 +8,12 @@ struct SpinnerStyle {
     let frameCount: Int
     let supportsEffect: Bool
     let speedCoefficient: Int
+
+    // Animated styles number their frames from zero — "Cat 0" through "Cat 4".
+    // A static style is a single image named after the style itself.
+    func frameName(at index: Int) -> String {
+        frameCount == 1 ? name : "\(name) \(index)"
+    }
 }
 
 enum SpinnerEffect: Int, CaseIterable {
@@ -43,7 +49,7 @@ enum SpinnerCatalog {
         SpinnerStyle(name: "Rainbow Pie", frameCount: 15, supportsEffect: false, speedCoefficient: 1),
         SpinnerStyle(name: "Recharges", frameCount: 8, supportsEffect: true, speedCoefficient: 1),
         SpinnerStyle(name: "Rotation Color Well", frameCount: 24, supportsEffect: false, speedCoefficient: 2),
-        SpinnerStyle(name: "Sun", frameCount: 23, supportsEffect: true, speedCoefficient: 1),
+        SpinnerStyle(name: "Sun", frameCount: 24, supportsEffect: true, speedCoefficient: 1),
         SpinnerStyle(name: "Waves", frameCount: 17, supportsEffect: true, speedCoefficient: 1),
         SpinnerStyle(name: "App Icon", frameCount: 1, supportsEffect: true, speedCoefficient: 1),
     ]

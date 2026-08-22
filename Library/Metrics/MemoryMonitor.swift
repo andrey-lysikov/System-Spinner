@@ -12,7 +12,7 @@ final class MemoryMonitor {
 
         let result = withUnsafeMutablePointer(to: &info) {
             $0.withMemoryRebound(to: integer_t.self, capacity: Int(size)) {
-                host_info(mach_host_self(), HOST_BASIC_INFO, $0, &size)
+                host_info(machHost, HOST_BASIC_INFO, $0, &size)
             }
         }
 
@@ -62,7 +62,7 @@ final class MemoryMonitor {
 
         let result = withUnsafeMutablePointer(to: &info) {
             $0.withMemoryRebound(to: integer_t.self, capacity: Int(size)) {
-                host_statistics64(mach_host_self(), HOST_VM_INFO64, $0, &size)
+                host_statistics64(machHost, HOST_VM_INFO64, $0, &size)
             }
         }
 

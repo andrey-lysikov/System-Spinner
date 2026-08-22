@@ -2232,59 +2232,6 @@
         }
       }
     },
-    "System Spinner has updated" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تم تحديث System Spinner"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner wurde aktualisiert"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner has updated"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner a été mis à jour"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner è stato aggiornato"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinnerがアップデートされました"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner обновился"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner 已更新"
-          }
-        }
-      }
-    },
     "System Spinner need special privileges" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2388,59 +2335,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "System Spinner 在菜单栏显示 macOS 系统信息。\n简约、小巧、轻量。\n\n作者：@Andrey.Lysikov"
-          }
-        }
-      }
-    },
-    "System Spinner provides macOS system information in status bar. Minimal, small and light" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "يعرض System Spinner معلومات نظام macOS في شريط القوائم. بسيط وصغير وخفيف"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner zeigt Systeminformationen von macOS in der Menüleiste. Schlank, klein und leicht"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner provides macOS system information in status bar. Minimal, small and light"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner affiche les informations système de macOS dans la barre des menus. Minimal, compact et léger"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner mostra le informazioni di sistema di macOS nella barra dei menu. Minimale, piccolo e leggero"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System SpinnerはmacOSのシステム情報をステータスバーに表示します。ミニマルで小さく、そして軽量です。"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner программа которая показывает утилизацию ресурсов вашего компьютера, небольшая и легкая"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner 在菜单栏显示 macOS 系统信息。简约、小巧、轻量"
           }
         }
       }

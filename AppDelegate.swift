@@ -42,8 +42,6 @@ extension AppDelegate: @preconcurrency UNUserNotificationCenterDelegate {
         switch NotificationAction(rawValue: response.actionIdentifier) {
         case .allowPrivileges:
             AccessibilityPermission.request()
-        case .quit:
-            NSApp.terminate(nil)
         case .download:
             NSWorkspace.shared.open(UpdateChecker.latestReleaseURL)
         case nil:

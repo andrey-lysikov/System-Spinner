@@ -1,6 +1,5 @@
 # Changelog
 
-
 ## 5.1.1
 
 - Fix power text in Russian

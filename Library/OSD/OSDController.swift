@@ -50,15 +50,9 @@ final class OSDController {
 
     private init() {}
 
-    func show(value: Float, kind: OSDValue.Kind, separators: Int = 16, autoHide: Bool = true) {
+    func show(value: Float, kind: OSDValue.Kind, separators: Int = 16) {
         valuePublisher.send(OSDValue(value: value, kind: kind, separatorSteps: separators))
-
-        if autoHide {
-            scheduleHide()
-        } else {
-            hideTask?.cancel()
-        }
-
+        scheduleHide()
         window.showWithAnimation()
     }
 

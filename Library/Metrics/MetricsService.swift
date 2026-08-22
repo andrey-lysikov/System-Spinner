@@ -126,11 +126,8 @@ actor MetricsService {
         externalAddressTask = nil
     }
 
-    @discardableResult
-    func addObserver(_ observer: @escaping Observer) -> UUID {
-        let token = UUID()
+    func addObserver(_ token: UUID, _ observer: @escaping Observer) {
         observers[token] = observer
-        return token
     }
 
     func removeObserver(_ token: UUID) {
