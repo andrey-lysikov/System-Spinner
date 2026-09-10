@@ -255,6 +255,13 @@ final class AppMenuController: NSObject {
         menu.addItem(item(localizedString("Quit"), symbol: "xmark", action: #selector(quit)))
 
         self.menu = menu
+        
+        if #available(macOS 27.0, *) {
+            for item in menu.items {
+                item.preferredImageVisibility = .visible
+            }
+        }
+        
         refreshSpinnerState()
         refreshDeviceItems()
     }
@@ -313,6 +320,10 @@ final class AppMenuController: NSObject {
             if let image = NSImage(named: imageName) {
                 image.size = NSSize(width: 19 / image.size.height * image.size.width, height: 19)
                 item.image = image
+                if #available(macOS 27.0, *) {
+                    item.preferredImageVisibility = .visible
+                }
+                
             }
             submenu.addItem(item)
         }

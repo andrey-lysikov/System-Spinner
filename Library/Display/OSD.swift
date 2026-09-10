@@ -156,7 +156,7 @@ final class OSDWindow: NSPanel {
             context.timingFunction = CAMediaTimingFunction(name: .easeIn)
             self.animator().alphaValue = 0.0
         } completionHandler: {
-            Task { @MainActor [weak self] in
+            Task { @MainActor [weak self = self] in
                 guard let self, alphaValue == 0.0 else { return }
                 orderOut(nil)
             }
