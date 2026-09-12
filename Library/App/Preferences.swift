@@ -3,6 +3,7 @@
 
 import Foundation
 import Synchronization
+import AppKit
 
 @propertyWrapper
 final class Stored<Value: Sendable>: Sendable {
@@ -27,6 +28,20 @@ extension String {
     init(cBuffer: [CChar]) {
         let bytes = cBuffer.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }
         self = String(decoding: bytes, as: UTF8.self)
+    }
+}
+
+enum AccentPalette {
+    static var normal: NSColor {
+        Preferences.shared.usesSystemChartColor ? .controlAccentColor : .labelColor
+    }
+
+    static var critical: NSColor {
+        Preferences.shared.usesSystemChartColor ? .controlAccentColor : .systemRed
+    }
+    
+    static var iconTint: NSColor? {
+        Preferences.shared.usesSystemChartColor ? .controlAccentColor : nil
     }
 }
 

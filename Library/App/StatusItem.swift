@@ -7,7 +7,7 @@ import ServiceManagement
 @MainActor
 final class SpinnerAnimator {
     var onFrame: ((NSImage) -> Void)?
-
+    
     private let preferences = Preferences.shared
     private var style = SpinnerCatalog.fallback
     private var frames: [NSImage] = []
@@ -17,7 +17,7 @@ final class SpinnerAnimator {
     private static let minimumInterval = 1.0 / 120.0
     private static let speedTolerance = 0.15
     private var lastFrameDate = Date.distantPast
-
+    
     func load(style: SpinnerStyle, effect: SpinnerEffect) {
         self.style = style
         frames = (0 ..< style.frameCount).compactMap { index in
@@ -255,13 +255,7 @@ final class AppMenuController: NSObject {
         menu.addItem(item(localizedString("Quit"), symbol: "xmark", action: #selector(quit)))
 
         self.menu = menu
-        
-        if #available(macOS 27.0, *) {
-            for item in menu.items {
-                item.preferredImageVisibility = .visible
-            }
-        }
-        
+                
         refreshSpinnerState()
         refreshDeviceItems()
     }
@@ -270,11 +264,9 @@ final class AppMenuController: NSObject {
         let submenu = NSMenu()
 
         for display in displays {
-            let entry = NSMenuItem(title: display.name,
-                                   action: display.isBuiltIn() ? nil : #selector(refreshDisplays),
-                                   keyEquivalent: "")
-            entry.target = self
-            entry.image = AccentPalette.symbol("display", describedBy: display.name)
+            let entry = item(display.name,
+                            symbol: "display",
+                            action: display.isBuiltIn() ? nil : #selector(refreshDisplays))
             submenu.addItem(entry)
         }
 
@@ -291,10 +283,21 @@ final class AppMenuController: NSObject {
         rotationItem?.isEnabled = isAnimated
     }
 
+    private func accentSymbol(_ name: String, describedBy description: String) -> NSImage? {
+        let image = NSImage(systemSymbolName: name, accessibilityDescription: description)
+        guard let tint = AccentPalette.iconTint else { return image }
+        return image?.withSymbolConfiguration(NSImage.SymbolConfiguration(paletteColors: [tint]))
+    }
+    
     private func item(_ title: String, symbol: String, action: Selector?, state: Bool = false) -> NSMenuItem {
         let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
         item.target = self
-        item.image = AccentPalette.symbol(symbol, describedBy: title)
+        item.image = accentSymbol(symbol, describedBy: title)
+        
+        if #available(macOS 27.0, *) {
+            item.preferredImageVisibility = .visible
+        }
+        
         item.state = state ? .on : .off
         return item
     }

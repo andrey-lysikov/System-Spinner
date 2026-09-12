@@ -3,28 +3,9 @@
 
 import Cocoa
 
-enum AccentPalette {
-    static var normal: NSColor {
-        Preferences.shared.usesSystemChartColor ? .controlAccentColor : .labelColor
-    }
-
-    static var critical: NSColor {
-        Preferences.shared.usesSystemChartColor ? .controlAccentColor : .systemRed
-    }
-
-    static var iconTint: NSColor? {
-        Preferences.shared.usesSystemChartColor ? .controlAccentColor : nil
-    }
-
-    static func symbol(_ name: String, describedBy description: String) -> NSImage? {
-        let image = NSImage(systemSymbolName: name, accessibilityDescription: description)
-        guard let tint = iconTint else { return image }
-        return image?.withSymbolConfiguration(NSImage.SymbolConfiguration(paletteColors: [tint]))
-    }
-}
-
 @MainActor
 final class SegmentedLevelView: NSView {
+    
     var value: Double = 0 {
         didSet {
             let filled = filledSegments
