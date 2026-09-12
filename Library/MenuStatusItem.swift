@@ -362,6 +362,24 @@ final class AppMenuController: NSObject {
     @objc private func toggleKeyboardBacklightKeys(sender: NSMenuItem) {
         preferences.usesKeyboardBacklightKeys.toggle()
         sender.state = preferences.usesKeyboardBacklightKeys ? .on : .off
+        
+        let backlight = KeyboardBacklight.shared
+        
+        if preferences.usesKeyboardBacklightKeys {
+            // Включаем функционал - сохраняем и отключаем автояркость
+            let currentAutoState = backlight.isAutoBrightnessEnabled
+            backlight.setSavedAutoBrightnessState(currentAutoState)
+            
+            if currentAutoState {
+                backlight.setAutoBrightnessEnabled(false)
+            }
+        } else {
+            // Выключаем функционал - восстанавливаем предыдущее состояние автояркости
+            if let savedState = backlight.savedAutoBrightnessState {
+                backlight.setAutoBrightnessEnabled(savedState)
+                backlight.setSavedAutoBrightnessState(nil)
+            }
+        }
     }
 
     @objc private func toggleLocalization(sender: NSMenuItem) {
