@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.0
+
+- MacOS 27 support
+- You can use system accent color
+- Switching between desktops using buttons 3 and 4 on Logitech mice
+- Bugfixes
 
 ## 5.5.4
 

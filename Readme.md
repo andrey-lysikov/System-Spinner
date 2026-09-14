@@ -2,13 +2,13 @@
 
 # System Spinner
 
-System Spinner provides macOS system information in status bar. Minimal, small and light!
+System Spinner provides MacOS system information in status bar. Minimal, small and light!
 
 [![Downloads](https://img.shields.io/github/downloads/andrey-lysikov/System-Spinner/total)](https://github.com/andrey-lysikov/System-Spinner/releases/latest)
 [![Release](https://img.shields.io/github/v/release/andrey-lysikov/System-Spinner)](https://github.com/andrey-lysikov/System-Spinner/releases/latest)
 [![Platform](https://img.shields.io/badge/platform-macOS-blue.svg?style=flat)](https://github.com/andrey-lysikov/System-Spinner/releases/latest)
 
-This is the macOS version, if you are looking for Windows go to [System Spinner x64](https://github.com/andrey-lysikov/System-Spinner-x64)
+This is the MacOS version, if you are looking for Windows go to [System Spinner x64](https://github.com/andrey-lysikov/System-Spinner-x64)
 
 ## Features
 
@@ -16,15 +16,16 @@ This is the macOS version, if you are looking for Windows go to [System Spinner 
 - Show the load in the status bar
 - Animated and static spinners, with overlay effects
 - Audio and brightness control for external monitors (over HDMI/DVI/USB-C with the standard media keys)
-- Keyboard backlight control on F5/F6
+- Keyboard backlight control on F5/F6 (disable light sensor wen manual controll enabled)
 - Smooth scrolling for non-Apple mice (a wheel scrolls by whole lines, this glides)
-- Custom OSD for macOS Tahoe for volume and brightness control
-- Custom adjustment steps (more accurate volume and brightness control)
-- Top CPU/MEM processes in popup window
-- Memory statistics with swap
+- Switching between desktops using advenced buttons 3 and 4 on Logitech mice
+- Custom OSD in MacOS for volume and brightness control (with a switch)
+- Custom adjustment steps (more accurate volume and brightness control, also "cmd" activates fine-tuning)
+- Top CPU/MEM processes in popup window, with 10 top processes in detail
+- Memory statistics with swap, and real used memory
 - Network utilisation and external ip address (uses checkip.dyndns.org, you can turn off showing external ip)
-- SMC information for CPU temp and fan
-- Full macOS 26 Tahoe Liquid Glass support
+- SMC information for CPU temp and fan (scanned automatics)
+- Full MacOS Liquid Glass support
 - Localization (English, Arabic, Chinese, French, German, Italian, Japanese, Russian)
 
 *WARNING: The application is not officially signed, you will need to allow it to run in "Settings" -> "Security" when you first launch it.*
@@ -38,7 +39,7 @@ This is the macOS version, if you are looking for Windows go to [System Spinner 
 </p>
 
 ## Tech
-Written in Swift 6, Apple Silicon only, for macOS 26 Tahoe
+Written in Swift 6, Apple Silicon only, for MacOS 26 and newer
 
 ## Troubleshooting
 
