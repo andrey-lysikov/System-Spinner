@@ -80,13 +80,6 @@ final class SMCService {
         return keys
     }
 
-    func readableKeys(among keys: [String]) -> [String] {
-        keys.filter { key in
-            guard let value = optionalValue(forKey: key) else { return false }
-            return value != 0
-        }
-    }
-
     private func call(_ input: inout ParamStruct) throws -> ParamStruct {
         var output = ParamStruct()
         var outputSize = MemoryLayout<ParamStruct>.size

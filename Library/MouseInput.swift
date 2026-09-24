@@ -122,8 +122,6 @@ final class MouseInput {
 
     private init() {}
 
-    var isRunning: Bool { eventTap != nil }
-
     @discardableResult
     func start() -> Bool {
         if eventTap != nil { return true }
