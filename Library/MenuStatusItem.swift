@@ -17,13 +17,32 @@ final class SpinnerAnimator {
     private static let minimumInterval = 1.0 / 120.0
     private static let speedTolerance = 0.15
     private var lastFrameDate = Date.distantPast
-    
+    private(set) var skyState: SkyIcon.State?
+
     func load(style: SpinnerStyle, effect: SpinnerEffect) {
         self.style = style
-        frames = (0 ..< style.frameCount).compactMap { index in
-            guard var image = NSImage(named: style.frameName(at: index)) else { return nil }
+        let height = NSStatusBar.system.thickness - 2
 
-            let height = NSStatusBar.system.thickness - 2
+        if style.isDrawn {
+            let state = SkyWeatherService.shared.sky
+            skyState = state
+            frames = SkyIcon.frames(state, height: height, effect: effect)
+        } else {
+            skyState = nil
+            frames = loadFrames(style: style, effect: effect, height: height)
+        }
+
+        currentFrame = 0
+        currentInterval = -1
+        if let first = frames.first {
+            onFrame?(first)
+        }
+    }
+
+    private func loadFrames(style: SpinnerStyle, effect: SpinnerEffect, height: CGFloat) -> [NSImage] {
+        (0 ..< style.frameCount).compactMap { index in
+            guard var image = NSImage(named: style.frameName(at: index))?.copy() as? NSImage else { return nil }
+
             image.size = NSSize(width: height / image.size.height * image.size.width, height: height)
 
             if style.supportsEffect {
@@ -41,12 +60,6 @@ final class SpinnerAnimator {
                 }
             }
             return image
-        }
-
-        currentFrame = 0
-        currentInterval = -1
-        if let first = frames.first {
-            onFrame?(first)
         }
     }
 
@@ -319,9 +332,7 @@ final class AppMenuController: NSObject {
             let item = NSMenuItem(title: style.name, action: #selector(changeSpinner(sender:)), keyEquivalent: "")
             item.target = self
             item.state = style.name == preferences.spinnerName ? .on : .off
-            let imageName = (style.frameCount == 1) ? (style.name) : (style.name + " 1")
-            if let image = NSImage(named: imageName) {
-                image.size = NSSize(width: 19 / image.size.height * image.size.width, height: 19)
+            if let image = previewImage(for: style) {
                 item.image = image
                 if #available(macOS 27.0, *) {
                     item.preferredImageVisibility = .visible
@@ -331,6 +342,18 @@ final class AppMenuController: NSObject {
             submenu.addItem(item)
         }
         return submenu
+    }
+
+    private func previewImage(for style: SpinnerStyle) -> NSImage? {
+        let height: CGFloat = 19
+        if style.isDrawn {
+            return SkyIcon.frames(SkyWeatherService.shared.sky, height: height, effect: .original).first
+        }
+
+        let imageName = (style.frameCount == 1) ? (style.name) : (style.name + " 1")
+        guard let image = NSImage(named: imageName)?.copy() as? NSImage else { return nil }
+        image.size = NSSize(width: height / image.size.height * image.size.width, height: height)
+        return image
     }
 
     private func selectExclusively(_ sender: NSMenuItem) {
@@ -494,12 +517,13 @@ final class StatusItemController: NSObject {
     private let menuController = AppMenuController()
     private let metrics = MetricsService.shared
     private let preferences = Preferences.shared
-
     private let usageController = UsageViewController.freshController()
-
     private var metricsObserver: UUID?
     private var lastUsage: Double = 0
     private var clickMonitors: [Any] = []
+    private var skyTimer: Timer?
+    private let weather = SkyWeatherService.shared
+    private static let skyRefreshInterval: TimeInterval = 60
 
     func start() {
         if let button = statusItem.button {
@@ -526,16 +550,42 @@ final class StatusItemController: NSObject {
 
         observeWorkspace()
 
-        reloadSpinner()
+        weather.onChange = { [weak self] in self?.refreshSky() }
         resume()
     }
 
     func stop() {
         pause()
         stopClickMonitoring()
+        weather.cancel()
+    }
+
+    private func startSkyTimer() {
+        guard skyTimer == nil else { return }
+        let timer = Timer(timeInterval: Self.skyRefreshInterval, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.refreshSky() }
+        }
+        timer.tolerance = 5
+        RunLoop.main.add(timer, forMode: .common)
+        skyTimer = timer
+    }
+
+    private func stopSkyTimer() {
+        skyTimer?.invalidate()
+        skyTimer = nil
+    }
+
+    private func refreshSky() {
+        guard let shown = animator.skyState else { return }
+        weather.refreshIfNeeded()
+        if weather.sky != shown {
+            reloadSpinner()
+        }
     }
 
     @objc private func resume() {
+        reloadSpinner()
+
         let interval = preferences.updateInterval
         var newToken: UUID?
         if metricsObserver == nil {
@@ -561,6 +611,7 @@ final class StatusItemController: NSObject {
     @objc private func pause() {
         closePopover()
         animator.stop()
+        stopSkyTimer()
         Task { await metrics.stop() }
     }
 
@@ -581,6 +632,14 @@ final class StatusItemController: NSObject {
         let effect = SpinnerEffect(rawValue: preferences.spinnerEffect) ?? .original
         animator.load(style: style, effect: effect)
         animator.updateSpeed(usage: lastUsage)
+
+        if style.isDrawn {
+            weather.refreshIfNeeded()
+            startSkyTimer()
+        } else {
+            weather.cancel()
+            stopSkyTimer()
+        }
     }
 
     @objc private func handleClick() {
