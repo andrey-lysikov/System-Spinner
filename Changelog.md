@@ -1,5 +1,10 @@
 # Changelog
 
+## 6.1
+
+- New spinners: Football, Wheel, Sun & Moon (uses real latitude and forecast)
+- Bugfixes
+
 ## 6.0
 
 - MacOS 27 support
