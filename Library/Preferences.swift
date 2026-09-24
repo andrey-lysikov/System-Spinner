@@ -50,6 +50,15 @@ struct SpinnerStyle {
     let frameCount: Int
     let supportsEffect: Bool
     let speedCoefficient: Int
+    let isDrawn: Bool
+
+    init(name: String, frameCount: Int, supportsEffect: Bool = true, speedCoefficient: Int = 1, isDrawn: Bool = false) {
+        self.name = name
+        self.frameCount = frameCount
+        self.supportsEffect = supportsEffect
+        self.speedCoefficient = speedCoefficient
+        self.isDrawn = isDrawn
+    }
 
     func frameName(at index: Int) -> String {
         frameCount == 1 ? name : "\(name) \(index)"
@@ -74,24 +83,26 @@ enum SpinnerEffect: Int, CaseIterable {
 
 enum SpinnerCatalog {
     static let all: [SpinnerStyle] = [
-        SpinnerStyle(name: "Blue Ball", frameCount: 19, supportsEffect: true, speedCoefficient: 1),
-        SpinnerStyle(name: "Cat", frameCount: 5, supportsEffect: true, speedCoefficient: 2),
-        SpinnerStyle(name: "Circles Two", frameCount: 9, supportsEffect: true, speedCoefficient: 1),
-        SpinnerStyle(name: "Cirrcles", frameCount: 8, supportsEffect: false, speedCoefficient: 1),
-        SpinnerStyle(name: "Color Balls", frameCount: 17, supportsEffect: true, speedCoefficient: 1),
-        SpinnerStyle(name: "Color Well", frameCount: 20, supportsEffect: false, speedCoefficient: 1),
-        SpinnerStyle(name: "Delay", frameCount: 17, supportsEffect: true, speedCoefficient: 1),
-        SpinnerStyle(name: "Dots", frameCount: 12, supportsEffect: false, speedCoefficient: 1),
-        SpinnerStyle(name: "Grey Loader", frameCount: 18, supportsEffect: false, speedCoefficient: 1),
-        SpinnerStyle(name: "Loader", frameCount: 8, supportsEffect: false, speedCoefficient: 1),
-        SpinnerStyle(name: "Pie", frameCount: 6, supportsEffect: false, speedCoefficient: 1),
-        SpinnerStyle(name: "Pikachu", frameCount: 4, supportsEffect: true, speedCoefficient: 2),
-        SpinnerStyle(name: "Rainbow Pie", frameCount: 15, supportsEffect: false, speedCoefficient: 1),
-        SpinnerStyle(name: "Recharges", frameCount: 8, supportsEffect: true, speedCoefficient: 1),
+        SpinnerStyle(name: "Blue Ball", frameCount: 19),
+        SpinnerStyle(name: "Cat", frameCount: 5, speedCoefficient: 2),
+        SpinnerStyle(name: "Circles Two", frameCount: 9),
+        SpinnerStyle(name: "Cirrcles", frameCount: 8, supportsEffect: false),
+        SpinnerStyle(name: "Color Balls", frameCount: 17),
+        SpinnerStyle(name: "Color Well", frameCount: 20, supportsEffect: false),
+        SpinnerStyle(name: "Delay", frameCount: 17),
+        SpinnerStyle(name: "Dots", frameCount: 12, supportsEffect: false),
+        SpinnerStyle(name: "Football", frameCount: 24, supportsEffect: false),
+        SpinnerStyle(name: "Grey Loader", frameCount: 18, supportsEffect: false),
+        SpinnerStyle(name: "Loader", frameCount: 8, supportsEffect: false),
+        SpinnerStyle(name: "Pie", frameCount: 6, supportsEffect: false),
+        SpinnerStyle(name: "Pikachu", frameCount: 4, speedCoefficient: 2),
+        SpinnerStyle(name: "Rainbow Pie", frameCount: 15, supportsEffect: false),
+        SpinnerStyle(name: "Recharges", frameCount: 8),
         SpinnerStyle(name: "Rotation Color Well", frameCount: 24, supportsEffect: false, speedCoefficient: 2),
-        SpinnerStyle(name: "Sun", frameCount: 24, supportsEffect: true, speedCoefficient: 1),
-        SpinnerStyle(name: "Waves", frameCount: 17, supportsEffect: true, speedCoefficient: 1),
-        SpinnerStyle(name: "App Icon", frameCount: 1, supportsEffect: true, speedCoefficient: 1),
+        SpinnerStyle(name: "Sun & Moon", frameCount: 24, isDrawn: true),
+        SpinnerStyle(name: "Waves", frameCount: 17),
+        SpinnerStyle(name: "Wheel", frameCount: 24),
+        SpinnerStyle(name: "App Icon", frameCount: 1),
     ]
 
     static let fallback = all.first { $0.name == "Loader" } ?? all[0]

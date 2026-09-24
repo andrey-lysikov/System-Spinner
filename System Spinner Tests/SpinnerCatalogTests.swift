@@ -59,7 +59,7 @@ struct SpinnerCatalogTests {
     @Test("Every declared frame has an image")
     @MainActor
     func everyFrameResolves() {
-        for style in SpinnerCatalog.all {
+        for style in SpinnerCatalog.all where !style.isDrawn {
             for index in 0 ..< style.frameCount {
                 let name = style.frameName(at: index)
                 #expect(NSImage(named: name) != nil, "\(name) is missing from the asset catalog")
