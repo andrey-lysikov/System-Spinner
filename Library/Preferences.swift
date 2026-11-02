@@ -116,6 +116,43 @@ enum SpinnerCatalog {
     }
 }
 
+/// Adjustment levels from 0 to 100. With `reducesLastStep` the step between 0 and the
+/// first division gets extra ticks (8 → 4, 16 → 2, 24 → 1, 32 → none),
+/// so the quietest/dimmest non-zero level is not a big jump from zero.
+struct AdjustmentScale: Equatable {
+    let steps: Int
+    let lastStepDivisions: Int
+
+    init(steps: Int, reducesLastStep: Bool = false) {
+        self.steps = max(steps, 1)
+        lastStepDivisions = reducesLastStep ? Self.lastStepDivisions(steps: self.steps) : 1
+    }
+
+    /// Number of parts the first step is split into: extra ticks + 1.
+    static func lastStepDivisions(steps: Int) -> Int {
+        switch steps {
+        case ...8: return 5
+        case ...16: return 3
+        case ..<Preferences.fineAdjustmentSteps: return 2
+        default: return 1
+        }
+    }
+
+    var levels: [Float] {
+        let step = 100 / Float(steps)
+        let first = (0 ..< lastStepDivisions).map { Float($0) * step / Float(lastStepDivisions) }
+        let regular = (1 ... steps).map { Float($0) * step }
+        return first + regular
+    }
+
+    func next(from value: Float, isUp: Bool) -> Float {
+        let levels = levels
+        let nearest = levels.indices.min { abs(levels[$0] - value) < abs(levels[$1] - value) } ?? 0
+        let index = min(max(nearest + (isUp ? 1 : -1), 0), levels.count - 1)
+        return min(max(levels[index], 0), 100)
+    }
+}
+
 final class Preferences: @unchecked Sendable {
     static let shared = Preferences()
 
@@ -160,6 +197,13 @@ final class Preferences: @unchecked Sendable {
 
     func adjustmentSteps(fine: Bool) -> Int {
         Self.adjustmentSteps(base: adjustmentSteps, fine: fine)
+    }
+
+    @Stored("adjReduceLastStep", false)
+    var reducesLastStep: Bool
+
+    func adjustmentScale(fine: Bool = false) -> AdjustmentScale {
+        AdjustmentScale(steps: adjustmentSteps(fine: fine), reducesLastStep: reducesLastStep)
     }
 
     @Stored("usePopUpAnimation", true)

@@ -190,6 +190,13 @@ final class AppMenuController: NSObject {
         let steps = item(localizedString("Adjustment steps"), symbol: "display.and.screwdriver", action: nil)
         steps.submenu = submenu(Preferences.adjustmentStepChoices.map { (String($0), $0 == preferences.adjustmentSteps) },
                                 action: #selector(changeAdjustmentSteps(sender:)))
+        steps.submenu?.addItem(.separator())
+        let reduceLastStep = NSMenuItem(title: localizedString("Reduce last step"),
+                                        action: #selector(toggleReduceLastStep(sender:)),
+                                        keyEquivalent: "")
+        reduceLastStep.target = self
+        reduceLastStep.state = preferences.reducesLastStep ? .on : .off
+        steps.submenu?.addItem(reduceLastStep)
         menu.addItem(steps)
 
         menu.addItem(item(localizedString("Always use custom OSD"),
@@ -357,7 +364,7 @@ final class AppMenuController: NSObject {
     }
 
     private func selectExclusively(_ sender: NSMenuItem) {
-        sender.menu?.items.forEach { $0.state = .off }
+        sender.menu?.items.filter { $0.action == sender.action }.forEach { $0.state = .off }
         sender.state = .on
     }
 
@@ -448,6 +455,11 @@ final class AppMenuController: NSObject {
     @objc private func changeAdjustmentSteps(sender: NSMenuItem) {
         selectExclusively(sender)
         preferences.adjustmentSteps = Int(sender.title) ?? preferences.adjustmentSteps
+    }
+
+    @objc private func toggleReduceLastStep(sender: NSMenuItem) {
+        preferences.reducesLastStep.toggle()
+        sender.state = preferences.reducesLastStep ? .on : .off
     }
 
     @objc private func changeUpdateInterval(sender: NSMenuItem) {

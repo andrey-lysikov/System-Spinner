@@ -136,19 +136,12 @@ final class KeyboardBacklight {
     public func adjust(isUp: Bool, fine: Bool = false) -> MediaKeyHandlingResult {
         guard isAvailable else { return .passThrough }
 
-        let steps = preferences.adjustmentSteps(fine: fine)
-        let step = 100 / Float(steps)
-        var value = (brightness / step).rounded() * step + (isUp ? step : -step)
-
-        if value < 0 {
-            value = 0
-        } else if value > 100 {
-            value = 100
-        }
+        let scale = preferences.adjustmentScale(fine: fine)
+        let value = scale.next(from: brightness, isUp: isUp)
 
         guard setBrightness(value) else { return .passThrough }
 
-        osd.show(value: value, kind: .keyboardBacklight, separators: steps)
+        osd.show(value: value, kind: .keyboardBacklight, scale: scale)
         return .consumed
     }
 

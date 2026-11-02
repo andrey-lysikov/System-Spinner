@@ -15,15 +15,25 @@ struct OSDValue: Equatable {
     var value: Float
     var kind: Kind
     var separatorSteps: Int
+    var lastStepDivisions: Int
 
-    init(value: Float = 0.0, kind: Kind = .volume, separatorSteps: Int = 16) {
+    init(value: Float = 0.0, kind: Kind = .volume, separatorSteps: Int = 16, lastStepDivisions: Int = 1) {
         self.value = max(0.0, min(100.0, value))
         self.kind = kind
         self.separatorSteps = separatorSteps
+        self.lastStepDivisions = max(lastStepDivisions, 1)
+    }
+
+    init(value: Float, kind: Kind, scale: AdjustmentScale) {
+        self.init(value: value, kind: kind, separatorSteps: scale.steps, lastStepDivisions: scale.lastStepDivisions)
     }
 
     static func volume(_ level: Float, isMuted: Bool, separators: Int = 16) -> OSDValue {
         OSDValue(value: isMuted ? 0 : level, kind: .volume, separatorSteps: separators)
+    }
+
+    static func volume(_ level: Float, isMuted: Bool, scale: AdjustmentScale) -> OSDValue {
+        OSDValue(value: isMuted ? 0 : level, kind: .volume, scale: scale)
     }
 
     var iconName: String {
@@ -57,6 +67,10 @@ final class OSDController {
 
     func show(value: Float, kind: OSDValue.Kind, separators: Int = 16) {
         show(OSDValue(value: value, kind: kind, separatorSteps: separators))
+    }
+
+    func show(value: Float, kind: OSDValue.Kind, scale: AdjustmentScale) {
+        show(OSDValue(value: value, kind: kind, scale: scale))
     }
 
     func show(_ value: OSDValue) {
@@ -292,20 +306,29 @@ struct OSDIndicatorView: View {
     private var scale: some View {
         GeometryReader { geometry in
             let steps = max(value.separatorSteps, 1)
-            let spacing = max((geometry.size.width - CGFloat(steps + 1)) / CGFloat(steps), 0)
+            let divisions = value.lastStepDivisions
+            let stepWidth = max(geometry.size.width - 1, 0) / CGFloat(steps)
+            let extraTicks = divisions > 1 ? Array(1 ..< divisions) : []
 
-            HStack(spacing: spacing) {
+            ZStack(alignment: .leading) {
                 ForEach(0 ... steps, id: \.self) { index in
-                    VStack {
-                        Spacer()
-                        Rectangle()
-                            .fill(foregroundTint.opacity(0.8))
-                            .frame(width: 1, height: index % 4 == 0 ? 6 : 3)
-                    }
+                    tick(height: index % 4 == 0 ? 6 : 3)
+                        .offset(x: CGFloat(index) * stepWidth)
+                }
+                ForEach(extraTicks, id: \.self) { index in
+                    tick(height: 2)
+                        .offset(x: CGFloat(index) / CGFloat(divisions) * stepWidth)
                 }
             }
+            .frame(width: geometry.size.width, height: geometry.size.height, alignment: .leading)
         }
         .frame(height: 2)
+    }
+
+    private func tick(height: CGFloat) -> some View {
+        Rectangle()
+            .fill(foregroundTint.opacity(0.8))
+            .frame(width: 1, height: height)
     }
 }
 
