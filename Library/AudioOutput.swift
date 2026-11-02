@@ -4,14 +4,36 @@
 import AudioToolbox
 
 enum AudioOutput {
+    private static let defaultDeviceAddress = AudioObjectPropertyAddress(
+        mSelector: AudioObjectPropertySelector(kAudioHardwarePropertyDefaultOutputDevice),
+        mScope: AudioObjectPropertyScope(kAudioObjectPropertyScopeGlobal),
+        mElement: AudioObjectPropertyElement(kAudioObjectPropertyElementMain))
+
+    @MainActor private static var defaultDeviceListener: AudioObjectPropertyListenerBlock?
+
+    @MainActor
+    static func observeDefaultDeviceChanges(_ handler: @escaping @MainActor () -> Void) {
+        let systemObject = AudioObjectID(kAudioObjectSystemObject)
+        var address = defaultDeviceAddress
+
+        if let previous = defaultDeviceListener {
+            AudioObjectRemovePropertyListenerBlock(systemObject, &address, .main, previous)
+        }
+
+        let listener: AudioObjectPropertyListenerBlock = { _, _ in
+            MainActor.assumeIsolated { handler() }
+        }
+        guard AudioObjectAddPropertyListenerBlock(systemObject, &address, .main, listener) == noErr else {
+            defaultDeviceListener = nil
+            return
+        }
+        defaultDeviceListener = listener
+    }
+
     static var defaultDeviceID: AudioDeviceID {
         var propertySize = UInt32(MemoryLayout<AudioDeviceID>.size)
         var deviceID = kAudioDeviceUnknown
-
-        var address = AudioObjectPropertyAddress(
-            mSelector: AudioObjectPropertySelector(kAudioHardwarePropertyDefaultOutputDevice),
-            mScope: AudioObjectPropertyScope(kAudioObjectPropertyScopeGlobal),
-            mElement: AudioObjectPropertyElement(kAudioObjectPropertyElementMain))
+        var address = defaultDeviceAddress
 
         AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &propertySize, &deviceID)
         return deviceID

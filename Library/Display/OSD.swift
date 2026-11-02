@@ -22,6 +22,10 @@ struct OSDValue: Equatable {
         self.separatorSteps = separatorSteps
     }
 
+    static func volume(_ level: Float, isMuted: Bool, separators: Int = 16) -> OSDValue {
+        OSDValue(value: isMuted ? 0 : level, kind: .volume, separatorSteps: separators)
+    }
+
     var iconName: String {
         switch kind {
         case .displayBrightness:
@@ -52,7 +56,11 @@ final class OSDController {
     private init() {}
 
     func show(value: Float, kind: OSDValue.Kind, separators: Int = 16) {
-        valuePublisher.send(OSDValue(value: value, kind: kind, separatorSteps: separators))
+        show(OSDValue(value: value, kind: kind, separatorSteps: separators))
+    }
+
+    func show(_ value: OSDValue) {
+        valuePublisher.send(value)
         scheduleHide()
         window.showWithAnimation()
     }

@@ -180,7 +180,19 @@ final class DisplayManager {
                 DisplayManager.shared.setNeedsRefresh()
             }
         }, nil)
+        AudioOutput.observeDefaultDeviceChanges {
+            DisplayManager.shared.showOutputVolume()
+        }
         setNeedsRefresh()
+    }
+
+    func showOutputVolume() {
+        guard handlesVolumeKeys,
+              let display = displays.first(where: { $0.hasVolumeControl() }) ?? displays.first
+        else { return }
+
+        let isMuted = AudioOutput.isMuted(AudioOutput.defaultDeviceID)
+        osd.show(.volume(display.getCurrentVolume(), isMuted: isMuted, separators: preferences.adjustmentSteps))
     }
 
     func setNeedsRefresh() {
@@ -327,8 +339,8 @@ final class DisplayManager {
         let shouldMute = !AudioOutput.isMuted(deviceID)
 
         if AudioOutput.setMuted(shouldMute, for: deviceID) {
-            let volumeValue = shouldMute ? 0 : (displays.first?.getCurrentVolume() ?? 0)
-            osd.show(value: volumeValue, kind: .volume, separators: preferences.adjustmentSteps)
+            let volumeValue = displays.first?.getCurrentVolume() ?? 0
+            osd.show(.volume(volumeValue, isMuted: shouldMute, separators: preferences.adjustmentSteps))
             return .consumed
         }
 

@@ -54,3 +54,27 @@ struct OSDValueTests {
         #expect(OSDValue().separatorSteps == 16)
     }
 }
+
+@Suite("Displayed volume")
+struct DisplayedVolumeTests {
+    @Test("A muted output is shown as silent whatever its level", arguments: [Float(0), 37, 100])
+    func mutedIsSilent(level: Float) {
+        #expect(OSDValue.volume(level, isMuted: true).value == 0)
+        #expect(OSDValue.volume(level, isMuted: true).iconName == "speaker.slash.fill")
+    }
+
+    @Test("An unmuted output is shown at its level", arguments: [
+        (Float(0), Float(0)),
+        (37, 37),
+        (100, 100),
+    ])
+    func unmutedShowsLevel(level: Float, expected: Float) {
+        #expect(OSDValue.volume(level, isMuted: false, separators: 24).value == expected)
+        #expect(OSDValue.volume(level, isMuted: false, separators: 24).separatorSteps == 24)
+    }
+
+    @Test("An unreadable level is shown as silent")
+    func unreadableIsSilent() {
+        #expect(OSDValue.volume(-100, isMuted: false).value == 0)
+    }
+}
