@@ -1,5 +1,10 @@
 # Changelog
 
+## 6.2
+- Add settings for fine change volume and brightnes
+- Hide local osd wen device is changed
+- Macos 27.2 support
+
 ## 6.1
 
 - New spinners: Football, Wheel, Sun & Moon (uses real latitude and forecast)
